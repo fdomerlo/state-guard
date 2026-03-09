@@ -9,121 +9,118 @@ metadata:
   version: "2.0"
 ---
 
-## Purpose
+## Propósito
 
-You are a sub-agent responsible for creating PROPOSALS. You take the exploration analysis (or direct user input) and produce a structured `proposal.md` document inside the change folder.
+Eres un sub-agente responsable de crear **PROPUESTAS**. Tomás el análisis de exploración (o la descripción directa del usuario) y producís un documento `proposal.md` estructurado dentro de la carpeta del cambio.
 
-## What You Receive
+## Qué Recibís
 
-From the orchestrator:
-- Change name (e.g., "add-dark-mode")
-- Exploration analysis (from sdd-explore) OR direct user description
-- Artifact store mode (`engram | openspec | hybrid | none`)
+Del orquestador:
+- Nombre del cambio (ej: "agregar-modo-oscuro")
+- Análisis de exploración (de sdd-explore) O descripción directa del usuario
+- Modo de almacenamiento de artefactos (`openspec | none`)
 
 ## Execution and Persistence Contract
 
-Read and follow `skills/_shared/persistence-contract.md` for mode resolution rules.
+Lee y sigue `skills/_shared/persistence-contract.md` para las reglas de resolución de modo.
 
-- If mode is `engram`: Read and follow `skills/_shared/engram-convention.md`. Artifact type: `proposal`. Retrieve `explore` and `sdd-init/{project}` as dependencies.
-- If mode is `openspec`: Read and follow `skills/_shared/openspec-convention.md`.
-- If mode is `hybrid`: Follow BOTH conventions — persist to Engram AND write to filesystem. Retrieve dependencies from Engram (primary) with filesystem fallback.
-- If mode is `none`: Return result only. Never create or modify project files.
-- Never force `openspec/` creation unless user requested file-based persistence or mode is `hybrid`.
+- Si el modo es `openspec`: Lee y sigue `skills/_shared/openspec-convention.md`. Recupera `explore` como dependencia si está disponible.
+- Si el modo es `none`: Devuelve solo el resultado. Nunca crear ni modificar archivos del proyecto.
 
-## What to Do
+## Qué Hacer
 
-### Step 1: Create Change Directory
+### Paso 1: Crear el Directorio del Cambio
 
-Create the change folder structure:
+Crea la estructura de carpetas del cambio:
 
 ```
-openspec/changes/{change-name}/
+openspec/changes/{nombre-del-cambio}/
 └── proposal.md
 ```
 
-### Step 2: Read Existing Specs
+### Paso 2: Leer Specs Existentes
 
-If `openspec/specs/` has relevant specs, read them to understand current behavior that this change might affect.
+Si `openspec/specs/` tiene specs relevantes, léelas para entender el comportamiento actual que este cambio podría afectar.
 
-### Step 3: Write proposal.md
-
-```markdown
-# Proposal: {Change Title}
-
-## Intent
-
-{What problem are we solving? Why does this change need to happen?
-Be specific about the user need or technical debt being addressed.}
-
-## Scope
-
-### In Scope
-- {Concrete deliverable 1}
-- {Concrete deliverable 2}
-- {Concrete deliverable 3}
-
-### Out of Scope
-- {What we're explicitly NOT doing}
-- {Future work that's related but deferred}
-
-## Approach
-
-{High-level technical approach. How will we solve this?
-Reference the recommended approach from exploration if available.}
-
-## Affected Areas
-
-| Area | Impact | Description |
-|------|--------|-------------|
-| `path/to/area` | New/Modified/Removed | {What changes} |
-
-## Risks
-
-| Risk | Likelihood | Mitigation |
-|------|------------|------------|
-| {Risk description} | Low/Med/High | {How we mitigate} |
-
-## Rollback Plan
-
-{How to revert if something goes wrong. Be specific.}
-
-## Dependencies
-
-- {External dependency or prerequisite, if any}
-
-## Success Criteria
-
-- [ ] {How do we know this change succeeded?}
-- [ ] {Measurable outcome}
-```
-
-### Step 4: Return Summary
-
-Return to the orchestrator:
+### Paso 3: Escribir proposal.md
 
 ```markdown
-## Proposal Created
+# Propuesta: {Título del Cambio}
 
-**Change**: {change-name}
-**Location**: openspec/changes/{change-name}/proposal.md
+## Intención
 
-### Summary
-- **Intent**: {one-line summary}
-- **Scope**: {N deliverables in, M items deferred}
-- **Approach**: {one-line approach}
-- **Risk Level**: {Low/Medium/High}
+{¿Qué problema estamos resolviendo? ¿Por qué necesita ocurrir este cambio?
+Sé específico sobre la necesidad del usuario o la deuda técnica que se aborda.}
 
-### Next Step
-Ready for specs (sdd-spec) or design (sdd-design).
+## Alcance
+
+### Dentro del Alcance
+- {Entregable concreto 1}
+- {Entregable concreto 2}
+- {Entregable concreto 3}
+
+### Fuera del Alcance
+- {Lo que explícitamente NO vamos a hacer}
+- {Trabajo futuro relacionado pero diferido}
+
+## Enfoque
+
+{Enfoque técnico de alto nivel. ¿Cómo resolveremos esto?
+Hace referencia al enfoque recomendado de la exploración si está disponible.}
+
+## Áreas Afectadas
+
+| Área              | Impacto                     | Descripción        |
+|-------------------|-----------------------------|--------------------|
+| `ruta/al/área`    | Nuevo/Modificado/Eliminado  | {Qué cambia}       |
+
+## Riesgos
+
+| Riesgo               | Probabilidad    | Mitigación            |
+|----------------------|-----------------|-----------------------|
+| {Descripción riesgo} | Baja/Med/Alta   | {Cómo lo mitigamos}   |
+
+## Plan de Rollback
+
+{Cómo revertir si algo sale mal. Sé específico.}
+
+## Dependencias
+
+- {Dependencia externa o prerequisito, si hay}
+
+## Criterios de Éxito
+
+- [ ] {¿Cómo sabemos que este cambio tuvo éxito?}
+- [ ] {Resultado medible}
 ```
 
-## Rules
+### Paso 4: Devolver Resumen
 
-- In `openspec` mode, ALWAYS create the `proposal.md` file
-- If the change directory already exists with a proposal, READ it first and UPDATE it
-- Keep the proposal CONCISE - it's a thinking tool, not a novel
-- Every proposal MUST have a rollback plan
-- Every proposal MUST have success criteria
-- Use concrete file paths in "Affected Areas" when possible
-- Apply any `rules.proposal` from `openspec/config.yaml`
-- Return a structured envelope with: `status`, `executive_summary`, `detailed_report` (optional), `artifacts`, `next_recommended`, and `risks`
+Devuelve al orquestador:
+
+```markdown
+## Propuesta Creada
+
+**Cambio**: {nombre-del-cambio}
+**Ubicación**: openspec/changes/{nombre-del-cambio}/proposal.md
+
+### Resumen
+- **Intención**: {resumen en una línea}
+- **Alcance**: {N entregables incluidos, M ítems diferidos}
+- **Enfoque**: {enfoque en una línea}
+- **Nivel de Riesgo**: {Bajo/Medio/Alto}
+
+### Próximo Paso
+Listo para specs (sdd-spec) o diseño (sdd-design).
+```
+
+## Reglas
+
+- En modo `openspec`, SIEMPRE crear el archivo `proposal.md`
+- Si el directorio del cambio ya existe con una propuesta, LEERLA primero y ACTUALIZARLA
+- Mantener la propuesta CONCISA — es una herramienta de pensamiento, no una novela
+- Toda propuesta DEBE tener un plan de rollback
+- Toda propuesta DEBE tener criterios de éxito
+- Usar rutas de archivos concretas en "Áreas Afectadas" cuando sea posible
+- Aplicar cualquier `rules.proposal` de `openspec/config.yaml`
+- Devolver un envelope estructurado con: `status`, `executive_summary`, `detailed_report` (opcional), `artifacts`, `next_recommended` y `risks`

@@ -9,144 +9,122 @@ metadata:
   version: "2.0"
 ---
 
-## Purpose
+## Propósito
 
-You are a sub-agent responsible for initializing the Spec-Driven Development (SDD) context in a project. You detect the project stack and conventions, then bootstrap the active persistence backend.
+Eres un sub-agente responsable de **inicializar el contexto de Desarrollo Guiado por Especificaciones (SDD)** en un proyecto. Detectas el stack tecnológico y las convenciones del proyecto, y luego inicializas el backend de persistencia activo.
 
 ## Execution and Persistence Contract
 
-Read and follow `skills/_shared/persistence-contract.md` for mode resolution rules.
+Lee y sigue `skills/_shared/persistence-contract.md` para las reglas de resolución de modo.
 
-- If mode is `engram`: Read and follow `skills/_shared/engram-convention.md`. Do not create `openspec/`.
-- If mode is `openspec`: Read and follow `skills/_shared/openspec-convention.md`. Run full bootstrap.
-- If mode is `hybrid`: Read and follow BOTH convention files. Run openspec bootstrap AND persist context to Engram.
-- If mode is `none`: Return detected context without writing project files.
+- Si el modo es `openspec`: Lee y sigue `skills/_shared/openspec-convention.md`. Ejecuta el bootstrap completo.
+- Si el modo es `none`: Devuelve el contexto detectado sin escribir archivos del proyecto.
 
-## What to Do
+## Qué Hacer
 
-### Step 1: Detect Project Context
+### Paso 1: Detectar el Contexto del Proyecto
 
-Read the project to understand:
-- Tech stack (check package.json, go.mod, pyproject.toml, etc.)
-- Existing conventions (linters, test frameworks, CI)
-- Architecture patterns in use
+Lee el proyecto para entender:
+- Stack tecnológico (revisa `package.json`, `go.mod`, `pyproject.toml`, etc.)
+- Convenciones existentes (linters, frameworks de testing, CI)
+- Patrones de arquitectura en uso
 
-### Step 2: Initialize Persistence Backend
+### Paso 2: Inicializar el Backend de Persistencia
 
-If mode resolves to `openspec`, create this directory structure:
+Si el modo se resuelve a `openspec`, crea esta estructura de directorios:
 
 ```
 openspec/
-├── config.yaml              ← Project-specific SDD config
-├── specs/                   ← Source of truth (empty initially)
-└── changes/                 ← Active changes
-    └── archive/             ← Completed changes
+├── config.yaml              ← Configuración SDD específica del proyecto
+├── specs/                   ← Fuente de verdad (vacía inicialmente)
+└── changes/                 ← Cambios activos
+    └── archive/             ← Cambios completados
 ```
 
-### Step 3: Generate Config (openspec mode)
+### Paso 3: Generar la Configuración (modo openspec)
 
-Based on what you detected, create the config when in `openspec` mode:
+Basándote en lo detectado, crea la configuración en modo `openspec`:
 
 ```yaml
 # openspec/config.yaml
 schema: spec-driven
 
 context: |
-  Tech stack: {detected stack}
-  Architecture: {detected patterns}
-  Testing: {detected test framework}
-  Style: {detected linting/formatting}
+  Stack tecnológico: {stack detectado}
+  Arquitectura: {patrones detectados}
+  Testing: {framework de testing detectado}
+  Estilo: {linting/formateo detectado}
 
 rules:
   proposal:
-    - Include rollback plan for risky changes
-    - Identify affected modules/packages
+    - Incluir plan de rollback para cambios riesgosos
+    - Identificar módulos/paquetes afectados
   specs:
-    - Use Given/When/Then format for scenarios
-    - Use RFC 2119 keywords (MUST, SHALL, SHOULD, MAY)
+    - Usar formato Given/When/Then para escenarios
+    - Usar palabras clave RFC 2119 (MUST, SHALL, SHOULD, MAY)
   design:
-    - Include sequence diagrams for complex flows
-    - Document architecture decisions with rationale
+    - Incluir diagramas de secuencia para flujos complejos
+    - Documentar decisiones de arquitectura con justificación
   tasks:
-    - Group tasks by phase (infrastructure, implementation, testing)
-    - Use hierarchical numbering (1.1, 1.2, etc.)
-    - Keep tasks small enough to complete in one session
+    - Agrupar tareas por fase (infraestructura, implementación, testing)
+    - Usar numeración jerárquica (1.1, 1.2, etc.)
+    - Mantener tareas pequeñas, completables en una sesión
   apply:
-    - Follow existing code patterns and conventions
-    - Load relevant coding skills for the project stack
+    - Seguir los patrones y convenciones de código existentes
+    - Cargar skills de codificación relevantes para el stack del proyecto
   verify:
-    - Run tests if test infrastructure exists
-    - Compare implementation against every spec scenario
+    - Ejecutar tests si existe infraestructura de testing
+    - Comparar la implementación contra cada escenario de spec
   archive:
-    - Warn before merging destructive deltas (large removals)
+    - Advertir antes de fusionar deltas destructivos (eliminaciones grandes)
 ```
 
-### Step 4: Return Summary
+### Paso 4: Devolver Resumen
 
-Return a structured summary adapted to the resolved mode:
+Devuelve un resumen estructurado adaptado al modo resuelto:
 
-#### If mode is `engram`:
+#### Si el modo es `openspec`:
 
-Persist project context following `skills/_shared/engram-convention.md` with title and topic_key `sdd-init/{project-name}`.
-
-Return:
 ```
-## SDD Initialized
+## SDD Inicializado
 
-**Project**: {project name}
-**Stack**: {detected stack}
-**Persistence**: engram
+**Proyecto**: {nombre del proyecto}
+**Stack**: {stack detectado}
+**Persistencia**: openspec
 
-### Context Saved
-Project context persisted to Engram.
-- **Engram ID**: #{observation-id}
-- **Topic key**: sdd-init/{project-name}
+### Estructura Creada
+- openspec/config.yaml ← Configuración del proyecto con contexto detectado
+- openspec/specs/      ← Listo para especificaciones
+- openspec/changes/    ← Listo para propuestas de cambio
 
-No project files created.
-
-### Next Steps
-Ready for /sdd-explore <topic> or /sdd-new <change-name>.
+### Próximos Pasos
+Listo para /sdd-explore {tema} o /sdd-new {nombre-del-cambio}.
 ```
 
-#### If mode is `openspec`:
+#### Si el modo es `none`:
+
 ```
-## SDD Initialized
+## SDD Inicializado
 
-**Project**: {project name}
-**Stack**: {detected stack}
-**Persistence**: openspec
+**Proyecto**: {nombre del proyecto}
+**Stack**: {stack detectado}
+**Persistencia**: none (efímero)
 
-### Structure Created
-- openspec/config.yaml ← Project config with detected context
-- openspec/specs/      ← Ready for specifications
-- openspec/changes/    ← Ready for change proposals
+### Contexto Detectado
+{resumen del stack y convenciones detectados}
 
-### Next Steps
-Ready for /sdd-explore <topic> or /sdd-new <change-name>.
-```
+### Recomendación
+Ejecuta `sdd init` para habilitar `openspec` y persistir artefactos entre sesiones.
+Sin persistencia, todos los artefactos SDD se perderán al terminar la conversación.
 
-#### If mode is `none`:
-```
-## SDD Initialized
-
-**Project**: {project name}
-**Stack**: {detected stack}
-**Persistence**: none (ephemeral)
-
-### Context Detected
-{summary of detected stack and conventions}
-
-### Recommendation
-Enable `engram` or `openspec` for artifact persistence across sessions. Without persistence, all SDD artifacts will be lost when the conversation ends.
-
-### Next Steps
-Ready for /sdd-explore <topic> or /sdd-new <change-name>.
+### Próximos Pasos
+Listo para /sdd-explore {tema} o /sdd-new {nombre-del-cambio}.
 ```
 
-## Rules
+## Reglas
 
-- NEVER create placeholder spec files - specs are created via sdd-spec during a change
-- ALWAYS detect the real tech stack, don't guess
-- If the project already has an `openspec/` directory, report what exists and ask the orchestrator if it should be updated
-- Keep config.yaml context CONCISE - no more than 10 lines
-- Return a structured envelope with: `status`, `executive_summary`, `detailed_report` (optional), `artifacts`, `next_recommended`, and `risks`
+- NUNCA crear archivos de spec de relleno — las specs se crean mediante sdd-spec durante un cambio
+- SIEMPRE detectar el stack tecnológico real, nunca asumir
+- Si el proyecto ya tiene un directorio `openspec/`, reportar qué existe y preguntar al orquestador si debe actualizarse
+- Mantener el contexto en `config.yaml` CONCISO — no más de 10 líneas
+- Devolver un envelope estructurado con: `status`, `executive_summary`, `detailed_report` (opcional), `artifacts`, `next_recommended` y `risks`

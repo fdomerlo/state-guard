@@ -2,7 +2,7 @@
 
 <#
 .SYNOPSIS
-    Agent Teams Lite installer for Windows
+    SDD Core (Español) installer for Windows
 .DESCRIPTION
     Copies SDD skills to your AI coding assistant's skill directory.
 .PARAMETER Agent
@@ -58,7 +58,7 @@ $ToolPaths = @{
 function Write-Header {
     Write-Host ''
     Write-Host ([char]0x2554 + ([string][char]0x2550 * 42) + [char]0x2557) -ForegroundColor Cyan
-    Write-Host ([char]0x2551 + '      Agent Teams Lite - Installer        ' + [char]0x2551) -ForegroundColor Cyan
+    Write-Host ([char]0x2551 + '     SDD Core (Español) - Installer       ' + [char]0x2551) -ForegroundColor Cyan
     Write-Host ([char]0x2551 + '   Spec-Driven Development for AI Agents  ' + [char]0x2551) -ForegroundColor Cyan
     Write-Host ([char]0x255A + ([string][char]0x2550 * 42) + [char]0x255D) -ForegroundColor Cyan
     Write-Host ''
@@ -99,20 +99,6 @@ function Write-NextStep {
     Write-Host $ExampleFile -ForegroundColor Cyan
 }
 
-function Write-EngramNote {
-    Write-Host ''
-    Write-Host 'Recommended persistence backend: ' -ForegroundColor Yellow -NoNewline
-    Write-Host 'Engram' -ForegroundColor White
-    Write-Host '  https://github.com/gentleman-programming/engram' -ForegroundColor Cyan
-    Write-Host '  If Engram is available, it will be used automatically (recommended)'
-    Write-Host '  If not, falls back to ' -NoNewline
-    Write-Host 'none' -ForegroundColor White -NoNewline
-    Write-Host ' - enable ' -NoNewline
-    Write-Host 'engram' -ForegroundColor White -NoNewline
-    Write-Host ' or ' -NoNewline
-    Write-Host 'openspec' -ForegroundColor White -NoNewline
-    Write-Host ' for better results'
-}
 
 function Show-Usage {
     Write-Host 'Usage: .\install.ps1 [OPTIONS]'
@@ -146,7 +132,7 @@ function Test-SourceTree {
     if ($missing -gt 0) {
         Write-Host ''
         Write-Host 'Source validation failed. Is this a complete clone of the repository?' -ForegroundColor Red
-        Write-Host "  Try: git clone https://github.com/Gentleman-Programming/agent-teams-lite.git" -ForegroundColor Cyan
+        Write-Host "  Try: git clone https://github.com/TU-USUARIO/sdd-core.git" -ForegroundColor Cyan
         Write-Host ''
         exit 1
     }
@@ -401,7 +387,6 @@ try {
     Write-Host '/sdd-init' -ForegroundColor Cyan -NoNewline
     Write-Host ' in your project'
 
-    Write-EngramNote
     Write-Host ''
 }
 catch {

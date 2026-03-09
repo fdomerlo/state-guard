@@ -2,7 +2,7 @@
 set -euo pipefail
 
 # ============================================================================
-# Agent Teams Lite — Install Script
+# SDD Core (Español) — Install Script
 # Copies skills to your AI coding assistant's skill directory
 # Cross-platform: macOS, Linux, Windows (Git Bash / WSL)
 # ============================================================================
@@ -132,7 +132,7 @@ make_writable() {
 print_header() {
     echo ""
     echo -e "${CYAN}${BOLD}╔══════════════════════════════════════════╗${NC}"
-    echo -e "${CYAN}${BOLD}║      Agent Teams Lite — Installer        ║${NC}"
+    echo -e "${CYAN}${BOLD}║       SDD Core (Español) — Installer     ║${NC}"
     echo -e "${CYAN}${BOLD}║   Spec-Driven Development for AI Agents  ║${NC}"
     echo -e "${CYAN}${BOLD}╚══════════════════════════════════════════╝${NC}"
     echo ""
@@ -159,12 +159,6 @@ print_next_step() {
     echo -e "  See: ${CYAN}$example_file${NC}"
 }
 
-print_engram_note() {
-    echo -e "\n${YELLOW}Recommended persistence backend:${NC} ${BOLD}Engram${NC}"
-    echo -e "  ${CYAN}https://github.com/gentleman-programming/engram${NC}"
-    echo -e "  If Engram is available, it will be used automatically (recommended)"
-    echo -e "  If not, falls back to ${BOLD}none${NC} — enable ${BOLD}engram${NC} or ${BOLD}openspec${NC} for better results"
-}
 
 show_help() {
     echo "Usage: install.sh [OPTIONS]"
@@ -195,7 +189,7 @@ validate_source() {
     fi
     if [ "$missing" -gt 0 ]; then
         echo -e "\n${RED}${BOLD}Source validation failed.${NC} Is this a complete clone of the repository?"
-        echo -e "  Try: ${CYAN}git clone https://github.com/Gentleman-Programming/agent-teams-lite.git${NC}\n"
+        echo -e "  Try: ${CYAN}git clone https://github.com/TU-USUARIO/sdd-core.git${NC}\n"
         exit 1
     fi
 }
@@ -429,6 +423,5 @@ else
     interactive_menu
 fi
 
-echo -e "\n${GREEN}${BOLD}Done!${NC} Start using SDD with: ${CYAN}/sdd-init${NC} in your project\n"
-print_engram_note
+echo -e "\n${GREEN}${BOLD}Done!${NC} Start using SDD with: ${CYAN}/sdd-init${NC} in your project"
 echo ""

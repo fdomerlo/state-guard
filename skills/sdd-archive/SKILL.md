@@ -9,114 +9,112 @@ metadata:
   version: "2.0"
 ---
 
-## Purpose
+## Propósito
 
-You are a sub-agent responsible for ARCHIVING. You merge delta specs into the main specs (source of truth), then move the change folder to the archive. You complete the SDD cycle.
+Eres un sub-agente responsable del **ARCHIVADO**. Fusionás las specs delta en las specs principales (fuente de verdad), y luego movés la carpeta del cambio al archivo. Completás el ciclo SDD.
 
-## What You Receive
+## Qué Recibís
 
-From the orchestrator:
-- Change name
-- Artifact store mode (`engram | openspec | hybrid | none`)
+Del orquestador:
+- Nombre del cambio
+- Modo de almacenamiento de artefactos (`openspec | none`)
 
 ## Execution and Persistence Contract
 
-Read and follow `skills/_shared/persistence-contract.md` for mode resolution rules.
+Lee y sigue `skills/_shared/persistence-contract.md` para las reglas de resolución de modo.
 
-- If mode is `engram`: Read and follow `skills/_shared/engram-convention.md`. Artifact type: `archive-report`. Retrieve `verify-report`, `proposal`, `spec`, `design`, and `tasks` as dependencies. Include all artifact observation IDs in the archive report for full traceability.
-- If mode is `openspec`: Read and follow `skills/_shared/openspec-convention.md`. Perform merge and archive folder moves.
-- If mode is `hybrid`: Follow BOTH conventions — persist archive report to Engram (with observation IDs) AND perform filesystem merge + archive folder moves.
-- If mode is `none`: Return closure summary only. Do not perform archive file operations.
+- Si el modo es `openspec`: Lee y sigue `skills/_shared/openspec-convention.md`. Recupera `verify-report`, `proposal`, `spec`, `design` y `tasks` como dependencias. Realiza la fusión de specs y movimiento de carpetas al archivo.
+- Si el modo es `none`: Devuelve solo el resumen de cierre. No realizar operaciones de archivado de archivos.
 
-## What to Do
+## Qué Hacer
 
-### Step 1: Sync Delta Specs to Main Specs
+### Paso 1: Sincronizar Specs Delta con Specs Principales
 
-For each delta spec in `openspec/changes/{change-name}/specs/`:
+Para cada spec delta en `openspec/changes/{nombre-del-cambio}/specs/`:
 
-#### If Main Spec Exists (`openspec/specs/{domain}/spec.md`)
+#### Si Existe la Spec Principal (`openspec/specs/{dominio}/spec.md`)
 
-Read the existing main spec and apply the delta:
+Lee la spec principal existente y aplica el delta:
 
 ```
-FOR EACH SECTION in delta spec:
-├── ADDED Requirements → Append to main spec's Requirements section
-├── MODIFIED Requirements → Replace the matching requirement in main spec
-└── REMOVED Requirements → Delete the matching requirement from main spec
+PARA CADA SECCIÓN en spec delta:
+├── Requisitos AGREGADOS → Agregar a la sección de Requisitos de la spec principal
+├── Requisitos MODIFICADOS → Reemplazar el requisito coincidente en la spec principal
+└── Requisitos ELIMINADOS → Eliminar el requisito coincidente de la spec principal
 ```
 
-**Merge carefully:**
-- Match requirements by name (e.g., "### Requirement: Session Expiration")
-- Preserve all OTHER requirements that aren't in the delta
-- Maintain proper Markdown formatting and heading hierarchy
+**Fusionar con cuidado:**
+- Hacer coincidir requisitos por nombre (ej: "### Requisito: Expiración de Sesión")
+- Preservar TODOS LOS OTROS requisitos que no están en el delta
+- Mantener el formato Markdown y la jerarquía de encabezados correctos
 
-#### If Main Spec Does NOT Exist
+#### Si NO Existe la Spec Principal
 
-The delta spec IS a full spec (not a delta). Copy it directly:
+La spec delta ES una spec completa (no un delta). Copiarla directamente:
 
 ```bash
-# Copy new spec to main specs
-openspec/changes/{change-name}/specs/{domain}/spec.md
-  → openspec/specs/{domain}/spec.md
+# Copiar nueva spec a las specs principales
+openspec/changes/{nombre-del-cambio}/specs/{dominio}/spec.md
+  → openspec/specs/{dominio}/spec.md
 ```
 
-### Step 2: Move to Archive
+### Paso 2: Mover al Archivo
 
-Move the entire change folder to archive with date prefix:
+Mover toda la carpeta del cambio al archivo con prefijo de fecha:
 
 ```
-openspec/changes/{change-name}/
-  → openspec/changes/archive/YYYY-MM-DD-{change-name}/
+openspec/changes/{nombre-del-cambio}/
+  → openspec/changes/archive/YYYY-MM-DD-{nombre-del-cambio}/
 ```
 
-Use today's date in ISO format (e.g., `2026-02-16`).
+Usar la fecha de hoy en formato ISO (ej: `2026-02-16`).
 
-### Step 3: Verify Archive
+### Paso 3: Verificar el Archivado
 
-Confirm:
-- [ ] Main specs updated correctly
-- [ ] Change folder moved to archive
-- [ ] Archive contains all artifacts (proposal, specs, design, tasks)
-- [ ] Active changes directory no longer has this change
+Confirmar:
+- [ ] Specs principales actualizadas correctamente
+- [ ] Carpeta del cambio movida al archivo
+- [ ] El archivo contiene todos los artefactos (proposal, specs, design, tasks)
+- [ ] El directorio de cambios activos ya no tiene este cambio
 
-### Step 4: Return Summary
+### Paso 4: Devolver Resumen
 
-Return to the orchestrator:
+Devuelve al orquestador:
 
 ```markdown
-## Change Archived
+## Cambio Archivado
 
-**Change**: {change-name}
-**Archived to**: openspec/changes/archive/{YYYY-MM-DD}-{change-name}/
+**Cambio**: {nombre-del-cambio}
+**Archivado en**: openspec/changes/archive/{YYYY-MM-DD}-{nombre-del-cambio}/
 
-### Specs Synced
-| Domain | Action | Details |
-|--------|--------|---------|
-| {domain} | Created/Updated | {N added, M modified, K removed requirements} |
+### Specs Sincronizadas
+| Dominio    | Acción             | Detalles                                         |
+|------------|--------------------|--------------------------------------------------|
+| {dominio}  | Creado/Actualizado | {N agregados, M modificados, K eliminados}       |
 
-### Archive Contents
+### Contenido del Archivo
 - proposal.md ✅
 - specs/ ✅
 - design.md ✅
-- tasks.md ✅ ({N}/{N} tasks complete)
+- tasks.md ✅ ({N}/{N} tareas completas)
 
-### Source of Truth Updated
-The following specs now reflect the new behavior:
-- `openspec/specs/{domain}/spec.md`
+### Fuente de Verdad Actualizada
+Las siguientes specs ahora reflejan el nuevo comportamiento:
+- `openspec/specs/{dominio}/spec.md`
 
-### SDD Cycle Complete
-The change has been fully planned, implemented, verified, and archived.
-Ready for the next change.
+### Ciclo SDD Completo
+El cambio ha sido planificado, implementado, verificado y archivado completamente.
+Listo para el siguiente cambio.
 ```
 
-## Rules
+## Reglas
 
-- NEVER archive a change that has CRITICAL issues in its verification report
-- ALWAYS sync delta specs BEFORE moving to archive
-- When merging into existing specs, PRESERVE requirements not mentioned in the delta
-- Use ISO date format (YYYY-MM-DD) for archive folder prefix
-- If the merge would be destructive (removing large sections), WARN the orchestrator and ask for confirmation
-- The archive is an AUDIT TRAIL — never delete or modify archived changes
-- If `openspec/changes/archive/` doesn't exist, create it
-- Apply any `rules.archive` from `openspec/config.yaml`
-- Return a structured envelope with: `status`, `executive_summary`, `detailed_report` (optional), `artifacts`, `next_recommended`, and `risks`
+- NUNCA archivar un cambio que tenga issues CRITICAL en su reporte de verificación
+- SIEMPRE sincronizar las specs delta ANTES de mover al archivo
+- Al fusionar en specs existentes, PRESERVAR los requisitos que no están mencionados en el delta
+- Usar formato de fecha ISO (YYYY-MM-DD) como prefijo de la carpeta de archivo
+- Si la fusión sería destructiva (eliminando secciones grandes), ADVERTIR al orquestador y pedir confirmación
+- El archivo es un RASTRO DE AUDITORÍA — nunca eliminar ni modificar cambios archivados
+- Si `openspec/changes/archive/` no existe, crearlo
+- Aplicar cualquier `rules.archive` de `openspec/config.yaml`
+- Devolver un envelope estructurado con: `status`, `executive_summary`, `detailed_report` (opcional), `artifacts`, `next_recommended` y `risks`

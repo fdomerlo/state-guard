@@ -2,7 +2,7 @@
 set -euo pipefail
 
 # ============================================================================
-# Agent Teams Lite — Install Script Tests
+# SDD Core — Install Script Tests
 # Run: bash scripts/install_test.sh
 # ============================================================================
 
@@ -507,14 +507,6 @@ test_output_shows_next_step() {
     }
 }
 
-test_output_shows_engram_note() {
-    local output
-    output=$(bash "$INSTALL_SCRIPT" --agent claude-code 2>&1)
-    echo "$output" | grep -q "Engram" || {
-        echo "Output missing Engram recommendation"
-        return 1
-    }
-}
 
 # ============================================================================
 # Tests — OS detection (limited — we can only test the current OS)
@@ -580,7 +572,7 @@ test_nested_custom_path() {
 
 echo ""
 echo -e "${CYAN}${BOLD}╔══════════════════════════════════════════╗${NC}"
-echo -e "${CYAN}${BOLD}║    Agent Teams Lite — Install Tests      ║${NC}"
+echo -e "${CYAN}${BOLD}║    SDD Core — Install Script Tests        ║${NC}"
 echo -e "${CYAN}${BOLD}╚══════════════════════════════════════════╝${NC}"
 echo ""
 
@@ -660,7 +652,6 @@ run_test "Output lists all skill names" test_output_shows_skill_names
 run_test "Output shows Done! message" test_output_shows_done_message
 run_test "Output shows install count" test_output_shows_install_count
 run_test "Output shows next-step guidance" test_output_shows_next_step
-run_test "Output recommends Engram" test_output_shows_engram_note
 echo ""
 
 echo -e "${BOLD}OS detection${NC}"
