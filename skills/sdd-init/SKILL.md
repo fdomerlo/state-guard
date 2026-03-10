@@ -25,6 +25,7 @@ Lee y sigue `skills/_shared/persistence-contract.md` para las reglas de resoluci
 ### Paso 1: Detectar el Contexto del Proyecto
 
 Lee el proyecto para entender:
+
 - Stack tecnológico (revisa `package.json`, `go.mod`, `pyproject.toml`, etc.)
 - Convenciones existentes (linters, frameworks de testing, CI)
 - Patrones de arquitectura en uso
@@ -83,7 +84,7 @@ rules:
 
 Devuelve un resumen estructurado adaptado al modo resuelto:
 
-#### Si el modo es `openspec`:
+#### Si el modo es `openspec`
 
 ```
 ## SDD Inicializado
@@ -101,7 +102,7 @@ Devuelve un resumen estructurado adaptado al modo resuelto:
 Listo para /sdd-explore {tema} o /sdd-new {nombre-del-cambio}.
 ```
 
-#### Si el modo es `none`:
+#### Si el modo es `none`
 
 ```
 ## SDD Inicializado

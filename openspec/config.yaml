@@ -1,20 +1,18 @@
 schema: spec-driven
 
 context: |
-  Stack tecnológico: Markdown (skills), Bash/PowerShell (scripts)
-  Arquitectura: Orquestación de Agentes, Spec-Driven Development (SDD)
-  Testing: Bash scripts (install_test.sh)
-  Estilo: Localización en Español, Markdown puro
+  Stack tecnológico: Documentación en Markdown puro, scripts Bash y PowerShell para utilidades
+  Arquitectura: Colección de prompts y skills modulares con convenciones compartidas (OpenSpec)
+  Testing: Scripts bash (e.g., install_test.sh)
+  Estilo: Markdown estructurado y localización forzada en Español (Castellano)
 
 rules:
   proposal:
     - Incluir plan de rollback para cambios riesgosos
     - Identificar módulos/paquetes afectados
-    - Verificar compatibilidad de la skill con el orquestador core
   specs:
     - Usar formato Given/When/Then para escenarios
     - Usar palabras clave RFC 2119 (MUST, SHALL, SHOULD, MAY)
-    - Toda la documentación DEBE estar en Español
   design:
     - Incluir diagramas de secuencia para flujos complejos
     - Documentar decisiones de arquitectura con justificación
@@ -24,7 +22,7 @@ rules:
     - Mantener tareas pequeñas, completables en una sesión
   apply:
     - Seguir los patrones y convenciones de código existentes
-    - Validar que los prompts sigan el tono y estilo de sdd-core
+    - Cargar skills de codificación relevantes para el stack del proyecto
   verify:
     - Ejecutar tests si existe infraestructura de testing
     - Comparar la implementación contra cada escenario de spec

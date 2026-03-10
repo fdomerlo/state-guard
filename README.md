@@ -6,6 +6,8 @@
     <em>Un orquestador + sub-agentes especializados para el desarrollo estructurado de software.</em>
     <br />
     <em>Cero dependencias. Markdown puro. Funciona en cualquier entorno.</em>
+    <br />
+    <em>based on [v3.2.0](https://github.com/Gentleman-Programming/agent-teams-lite)</em>
   </p>
 </p>
 
