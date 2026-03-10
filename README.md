@@ -1,5 +1,5 @@
 <p align="center">
-  <h1 align="center">sdd-core</h1>
+  <h1 align="center">Specs Driven Development Core</h1>
   <p align="center">
     <strong>Orquestación de Equipos de Agentes con Sub-Agentes de IA</strong>
     <br />
