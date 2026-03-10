@@ -1,8 +1,8 @@
 ---
 name: sdd-tasks
 description: >
-  Break down a change into an implementation task checklist.
-  Trigger: When the orchestrator launches you to create or update the task breakdown for a change.
+  Desglosa un cambio en una lista de tareas de implementación.
+  Disparador: Cuando el orquestador te lanza para crear o actualizar el desglose de tareas de un cambio.
 license: MIT
 metadata:
   author: gentleman-programming

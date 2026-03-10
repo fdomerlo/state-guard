@@ -1,8 +1,8 @@
 ---
 name: sdd-verify
 description: >
-  Validate that implementation matches specs, design, and tasks.
-  Trigger: When the orchestrator launches you to verify a completed (or partially completed) change.
+  Valida que la implementación coincida con las especificaciones, el diseño y las tareas.
+  Disparador: Cuando el orquestador te lanza para verificar un cambio completado (o parcialmente completado).
 license: MIT
 metadata:
   author: gentleman-programming

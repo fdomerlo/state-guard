@@ -1,8 +1,8 @@
 ---
 name: sdd-archive
 description: >
-  Sync delta specs to main specs and archive a completed change.
-  Trigger: When the orchestrator launches you to archive a change after implementation and verification.
+  Sincroniza especificaciones delta con las especificaciones principales y archiva un cambio completado.
+  Disparador: Cuando el orquestador te lanza para archivar un cambio después de la implementación y verificación.
 license: MIT
 metadata:
   author: gentleman-programming

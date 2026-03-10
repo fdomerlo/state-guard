@@ -1,8 +1,8 @@
 ---
 name: sdd-design
 description: >
-  Create technical design document with architecture decisions and approach.
-  Trigger: When the orchestrator launches you to write or update the technical design for a change.
+  Crea el documento de diseño técnico con decisiones de arquitectura y enfoque.
+  Disparador: Cuando el orquestador te lanza para escribir o actualizar el diseño técnico de un cambio.
 license: MIT
 metadata:
   author: gentleman-programming

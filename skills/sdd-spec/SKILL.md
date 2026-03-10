@@ -1,8 +1,8 @@
 ---
 name: sdd-spec
 description: >
-  Write specifications with requirements and scenarios (delta specs for changes).
-  Trigger: When the orchestrator launches you to write or update specs for a change.
+  Escribe especificaciones con requisitos y escenarios (especificaciones delta para cambios).
+  Disparador: Cuando el orquestador te lanza para escribir o actualizar especificaciones de un cambio.
 license: MIT
 metadata:
   author: gentleman-programming

@@ -1,8 +1,8 @@
 ---
 name: sdd-propose
 description: >
-  Create a change proposal with intent, scope, and approach.
-  Trigger: When the orchestrator launches you to create or update a proposal for a change.
+  Crea una propuesta de cambio con intención, alcance y enfoque.
+  Disparador: Cuando el orquestador te lanza para crear o actualizar una propuesta de cambio.
 license: MIT
 metadata:
   author: gentleman-programming

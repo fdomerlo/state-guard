@@ -1,8 +1,8 @@
 ---
 name: sdd-init
 description: >
-  Initialize Spec-Driven Development context in any project. Detects stack, conventions, and bootstraps the active persistence backend.
-  Trigger: When user wants to initialize SDD in a project, or says "sdd init", "iniciar sdd", "openspec init".
+  Inicializa el contexto de Desarrollo Guiado por Especificaciones (SDD) en cualquier proyecto. Detecta el stack, las convenciones e inicializa el backend de persistencia activo.
+  Disparador: Cuando el usuario quiere inicializar SDD en un proyecto, o dice "sdd init", "iniciar sdd", "openspec init".
 license: MIT
 metadata:
   author: gentleman-programming

@@ -1,8 +1,8 @@
 ---
 name: sdd-explore
 description: >
-  Explore and investigate ideas before committing to a change.
-  Trigger: When the orchestrator launches you to think through a feature, investigate the codebase, or clarify requirements.
+  Explora e investiga ideas antes de comprometerse con un cambio.
+  Disparador: Cuando el orquestador te lanza para reflexionar sobre una funcionalidad, investigar el código base o aclarar requisitos.
 license: MIT
 metadata:
   author: gentleman-programming

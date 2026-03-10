@@ -1,8 +1,8 @@
 ---
 name: sdd-apply
 description: >
-  Implement tasks from the change, writing actual code following the specs and design.
-  Trigger: When the orchestrator launches you to implement one or more tasks from a change.
+  Implementa tareas de un cambio, escribiendo código real siguiendo las especificaciones y el diseño.
+  Disparador: Cuando el orquestador te lanza para implementar una o más tareas de un cambio.
 license: MIT
 metadata:
   author: gentleman-programming
