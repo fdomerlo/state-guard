@@ -53,17 +53,22 @@ ORQUESTADOR (delegate-only, contexto mínimo):
 
 ---
 
-> ### 🌐 Skills Localizadas al Español
->
-> Todos los prompts de los sub-agentes (`SKILL.md`) han sido **traducidos íntegramente al español**. Esto fuerza a la IA a pensar, especificar y planificar nativamente en castellano, garantizando que toda la documentación técnica generada — propuestas, specs, diseños y reportes de verificación — sea legible y auditable sin necesidad de traducción.
+## 🏛️ Decisiones Arquitectónicas (Manifiesto Interno)
 
----
+Dado que este es un orquestador adaptado para nuestro desarrollo interno, hemos tomado decisiones arquitectónicas estrictas que divergen del framework genérico original para priorizar la **auditabilidad, la economía de tokens y la mantenibilidad a largo plazo**.
 
-> ### 📁 Persistencia 100% Local (OpenSpec)
->
-> `sdd-core` utiliza **exclusivamente `openspec`** como backend de persistencia. Todos los artefactos son archivos Markdown que viven **directamente en el repositorio del usuario**, bajo el directorio `openspec/`. No hay servidores externos, no hay dependencias MCP, no hay cuentas que configurar.
->
-> El modo `none` (efímero) está disponible como fallback, pero se recomienda siempre inicializar con `/sdd-init` para activar la persistencia local.
+### 1. Por qué forzamos el Español (Localización Estricta)
+
+Aunque los Modelos de Lenguaje (LLMs) operan fluidamente en inglés, la revisión de especificaciones es una actividad humana.
+- **Auditabilidad sin fricción:** Los documentos generados (propuestas, diseños, tareas) son el *contrato* del proyecto. Al forzar que los 9 sub-agentes piensen, planifique y documenten nativamente en castellano, eliminamos la carga cognitiva de traducir mentalmente durante las revisiones.
+- **Consistencia:** Evitamos el "Spanglish" técnico. Los Requerimientos Funcionales y Reglas de Negocio se redactan y auditan en el mismo idioma en el que el equipo debate el producto en la vida real.
+
+### 2. Por qué OpenSpec puro (Y la eliminación de Engram/Modo Híbrido)
+
+El framework original promueve el uso de **Engram** (una base de datos vectorial/SQLite local vía protocolo MCP) para mantener el repositorio "limpio". Nosotros **descartamos por completo ese enfoque** por dos motivos críticos:
+
+- **Visibilidad y Control de Versiones (Git):** Si las especificaciones y decisiones arquitectónicas viven atrapadas en una base de datos local o en el servidor MCP de un agente, son invisibles para el resto del equipo. Al usar exclusivamente **OpenSpec**, forzamos a que todos los artefactos sean archivos Markdown (`.md`) físicos en la carpeta `openspec/`. Así, el "por qué" de una decisión técnica viaja junto con el código fuente, se versiona en Git y se puede revisar fácilmente en la web de GitHub o en un Pull Request.
+- **Economía de Tokens y Ventana de Contexto:** El modo *híbrido* (que guardaba en archivos y en Engram simultáneamente) es ineficiente. Obligaba al LLM a procesar la información dos veces por fase: debía generar el texto Markdown para el archivo **y además** generar las llamadas a herramientas JSON (`mem_save`, `mem_search`) para comunicarse con el servidor MCP. Esto duplica el consumo de tokens de entrada/salida, satura la ventana de contexto del modelo con protocolos redundantes, encarece la operación y aumenta el riesgo de alucinaciones. **OpenSpec mantiene la comunicación directa, limpia y económica.**
 
 ---
 
