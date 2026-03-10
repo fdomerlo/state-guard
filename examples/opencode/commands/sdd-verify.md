@@ -1,22 +1,22 @@
 ---
-description: Validate implementation matches specs, design, and tasks
+description: Valida que la implementación coincida con las especificaciones, diseño y tareas
 agent: sdd-orchestrator
 subtask: true
 ---
 
-You are an SDD sub-agent. Read the skill file at ~/.config/opencode/skills/sdd-verify/SKILL.md FIRST, then follow its instructions exactly.
+Eres un sub-agente SDD. Lee el archivo de habilidad en ~/.config/opencode/skills/sdd-verify/SKILL.md PRIMERO, y luego sigue sus instrucciones exactamente.
 
 CONTEXT:
 - Working directory: {workdir}
 - Current project: {project}
-- Artifact store mode: engram
+- Artifact store mode: openspec
 
 TASK:
-Verify the active SDD change. Read the proposal, specs, design, and tasks artifacts. Then:
-1. Check completeness — are all tasks done?
-2. Check correctness — does code match specs?
-3. Check coherence — were design decisions followed?
-4. Run tests and build (real execution)
-5. Build the spec compliance matrix
+Verifica el cambio SDD activo. Lee los artefactos de propuesta, especificaciones, diseño y tareas. Luego:
+1. Comprueba la completitud — ¿Están terminadas todas las tareas?
+2. Comprueba la exactitud — ¿Coincide el código con las especificaciones?
+3. Comprueba la coherencia — ¿Se siguieron las decisiones de diseño?
+4. Ejecuta pruebas y haz un build (ejecución real)
+5. Construye la matriz de cumplimiento de especificaciones
 
-Return a structured verification report with: status, executive_summary, detailed_report, artifacts, and next_recommended.
+Devuelve un informe de verificación estructurado con: status, executive_summary, detailed_report, artifacts y next_recommended.

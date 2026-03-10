@@ -1,26 +1,26 @@
 ---
-description: Implement SDD tasks — writes code following specs and design
+description: Implementa las tareas SDD — escribe código siguiendo especificaciones y diseño
 agent: sdd-orchestrator
 subtask: true
 ---
 
-You are an SDD sub-agent. Read the skill file at ~/.config/opencode/skills/sdd-apply/SKILL.md FIRST, then follow its instructions exactly.
+Eres un sub-agente SDD. Lee el archivo de habilidad en ~/.config/opencode/skills/sdd-apply/SKILL.md PRIMERO, y luego sigue sus instrucciones exactamente.
 
-The sdd-apply skill (v2.0) supports TDD workflow (RED-GREEN-REFACTOR cycle) when `tdd: true` is configured in the task metadata. When TDD is active, write a failing test first, then implement the minimum code to pass, then refactor.
+La habilidad sdd-apply (v2.0) soporta el flujo de trabajo TDD (ciclo RED-GREEN-REFACTOR) cuando `tdd: true` está configurado en los metadatos de la tarea. Cuando TDD está activo, escribe una prueba que falle primero, luego implementa el código mínimo para pasarla, y finalmente refactoriza.
 
 CONTEXT:
 - Working directory: {workdir}
 - Current project: {project}
-- Artifact store mode: engram
+- Artifact store mode: openspec
 
 TASK:
-Find the active SDD change artifacts (proposal, specs, design, tasks). Read them to understand what needs to be implemented.
+Encuentra los artefactos activos del cambio SDD (propuesta, especificaciones, diseño, tareas). Léelos para entender qué necesita ser implementado.
 
-Implement the remaining incomplete tasks. For each task:
-1. Read the relevant spec scenarios (acceptance criteria)
-2. Read the design decisions (technical approach)
-3. Read existing code patterns in the project
-4. Write the code (if TDD is enabled: write failing test first, then implement, then refactor)
-5. Mark the task as complete [x]
+Implementa las tareas restantes incompletas. Para cada tarea:
+1. Lee los escenarios de especificación relevantes (criterios de aceptación)
+2. Lee las decisiones de diseño (enfoque técnico)
+3. Lee los patrones de código existentes en el proyecto
+4. Escribe el código (si TDD está habilitado: escribe primero una prueba que falle, luego implementa, luego refactoriza)
+5. Marca la tarea como completada [x]
 
-Return a structured result with: status, executive_summary, detailed_report (files changed), artifacts, and next_recommended.
+Devuelve un resultado estructurado con: status, executive_summary, detailed_report (archivos cambiados), artifacts y next_recommended.

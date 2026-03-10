@@ -1,20 +1,20 @@
 ---
-description: Start a new SDD change — runs exploration then creates a proposal
+description: Inicia un nuevo cambio SDD — ejecuta la exploración y luego crea una propuesta
 agent: sdd-orchestrator
 ---
 
-Follow the SDD orchestrator workflow for starting a new change named "{argument}".
+Sigue el flujo de trabajo del orquestador SDD para iniciar un nuevo cambio llamado "{argument}".
 
 WORKFLOW:
-1. Launch sdd-explore sub-agent to investigate the codebase for this change
-2. Present the exploration summary to the user
-3. Launch sdd-propose sub-agent to create a proposal based on the exploration
-4. Present the proposal summary and ask the user if they want to continue with specs and design
+1. Lanza el sub-agente sdd-explore para investigar el código base para este cambio
+2. Presenta el resumen de la exploración al usuario
+3. Lanza el sub-agente sdd-propose para crear una propuesta basada en la exploración
+4. Presenta el resumen de la propuesta y pregunta al usuario si desea continuar con las especificaciones y el diseño
 
 CONTEXT:
 - Working directory: {workdir}
 - Current project: {project}
 - Change name: {argument}
-- Artifact store mode: engram
+- Artifact store mode: openspec
 
-Read the orchestrator instructions to coordinate this workflow. Do NOT execute phase work inline — delegate to sub-agents.
+Lee las instrucciones del orquestador para coordinar este flujo de trabajo. NO ejecutes el trabajo de las fases directamente (inline) — delégalo a sub-agentes.

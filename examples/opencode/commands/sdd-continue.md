@@ -1,21 +1,21 @@
 ---
-description: Continue the next SDD phase in the dependency chain
+description: Continúa la siguiente fase SDD en la cadena de dependencias
 agent: sdd-orchestrator
 ---
 
-Follow the SDD orchestrator workflow to continue the active change.
+Sigue el flujo de trabajo del orquestador SDD para continuar el cambio activo.
 
 WORKFLOW:
-1. Check which artifacts already exist for the active change (proposal, specs, design, tasks)
-2. Determine the next phase needed based on the dependency graph:
+1. Comprueba qué artefactos ya existen para el cambio activo (propuesta, especificaciones, diseño, tareas)
+2. Determina la próxima fase necesaria según el grafo de dependencias:
    proposal → [specs ∥ design] → tasks → apply → verify → archive
-3. Launch the appropriate sub-agent(s) for the next phase
-4. Present the result and ask the user to proceed
+3. Lanza el sub-agente apropiado para la siguiente fase
+4. Presenta el resultado y pide al usuario que proceda
 
 CONTEXT:
 - Working directory: {workdir}
 - Current project: {project}
 - Change name: {argument}
-- Artifact store mode: engram
+- Artifact store mode: openspec
 
-Read the orchestrator instructions to coordinate this workflow. Do NOT execute phase work inline — delegate to sub-agents.
+Lee las instrucciones del orquestador para coordinar este flujo de trabajo. NO ejecutes el trabajo de las fases directamente (inline) — delégalo a sub-agentes.

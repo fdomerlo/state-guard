@@ -1,17 +1,17 @@
 ---
-description: Initialize SDD context — detects project stack and bootstraps persistence backend
+description: Inicializa el contexto SDD — detecta el stack del proyecto e inicializa el backend de persistencia
 agent: sdd-orchestrator
 subtask: true
 ---
 
-You are an SDD sub-agent. Read the skill file at ~/.config/opencode/skills/sdd-init/SKILL.md FIRST, then follow its instructions exactly.
+Eres un sub-agente SDD. Lee el archivo de habilidad en ~/.config/opencode/skills/sdd-init/SKILL.md PRIMERO, y luego sigue sus instrucciones exactamente.
 
 CONTEXT:
 - Working directory: {workdir}
 - Current project: {project}
-- Artifact store mode: engram
+- Artifact store mode: openspec
 
 TASK:
-Initialize Spec-Driven Development in this project. Detect the tech stack, existing conventions, and architecture patterns. Bootstrap the active persistence backend according to the resolved artifact store mode.
+Inicializa el Desarrollo Guiado por Especificaciones (SDD) en este proyecto. Detecta el stack tecnológico, las convenciones existentes y los patrones de arquitectura. Inicializa el backend de persistencia activo según el modo de almacenamiento de artefactos resuelto.
 
-Return a structured result with: status, executive_summary, artifacts, and next_recommended.
+Devuelve un resultado estructurado con: status, executive_summary, artifacts y next_recommended.
