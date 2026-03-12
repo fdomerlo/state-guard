@@ -1,5 +1,5 @@
 <p align="center">
-  <h1 align="center">SDD Core</h1>
+  <h1 align="center">Agentify: SDD Orchestrator</h1>
   <p align="center">
     <strong>Orquestación de Equipos de Agentes con Sub-Agentes de IA</strong>
     <br />
