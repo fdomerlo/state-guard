@@ -33,7 +33,7 @@ Los asistentes de IA para código son poderosos, pero tienen dificultades con fu
 
 ## La Solución
 
-**sdd-core** es un patrón de orquestación de equipos de agentes donde un coordinador liviano delega todo el trabajo real a sub-agentes especializados. Cada sub-agente comienza con contexto fresco, ejecuta una tarea enfocada y devuelve un resultado estructurado.
+**agentify-sdd** es un patrón de orquestación de equipos de agentes donde un coordinador liviano delega todo el trabajo real a sub-agentes especializados. Cada sub-agente comienza con contexto fresco, ejecuta una tarea enfocada y devuelve un resultado estructurado.
 
 ```
 VOS: "Quiero agregar exportación CSV a la aplicación"
@@ -62,6 +62,7 @@ Dado que este es un orquestador adaptado para nuestro desarrollo interno, hemos 
 ### 1. Por qué forzamos el Español (Localización Estricta)
 
 Aunque los Modelos de Lenguaje (LLMs) operan fluidamente en inglés, la revisión de especificaciones es una actividad humana.
+
 - **Auditabilidad sin fricción:** Los documentos generados (propuestas, diseños, tareas) son el *contrato* del proyecto. Al forzar que los 9 sub-agentes piensen, planifique y documenten nativamente en castellano, eliminamos la carga cognitiva de traducir mentalmente durante las revisiones.
 - **Consistencia:** Evitamos el "Spanglish" técnico. Los Requerimientos Funcionales y Reglas de Negocio se redactan y auditan en el mismo idioma en el que el equipo debate el producto en la vida real.
 
@@ -191,8 +192,8 @@ openspec/
 ### 1. Instalar las skills
 
 ```bash
-git clone https://github.com/TU-USUARIO/sdd-core.git
-cd sdd-core
+git clone https://github.com/TU-USUARIO/agentify-sdd.git
+cd agentify-sdd
 ./scripts/install.sh
 ```
 
@@ -494,7 +495,7 @@ Las skills son Markdown puro. Cualquier asistente de IA que pueda leer archivos 
 ## Estructura del Proyecto
 
 ```
-sdd-core/
+agentify-sdd/
 ├── README.md                          ← Estás aquí
 ├── LICENSE
 ├── skills/                            ← Las 9 skills de sub-agentes + convenciones compartidas

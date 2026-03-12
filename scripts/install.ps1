@@ -132,7 +132,7 @@ function Test-SourceTree {
     if ($missing -gt 0) {
         Write-Host ''
         Write-Host 'Source validation failed. Is this a complete clone of the repository?' -ForegroundColor Red
-        Write-Host "  Try: git clone https://github.com/TU-USUARIO/sdd-core.git" -ForegroundColor Cyan
+        Write-Host "  Try: git clone https://github.com/TU-USUARIO/agentify-sdd.git" -ForegroundColor Cyan
         Write-Host ''
         exit 1
     }
