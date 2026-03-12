@@ -2,7 +2,7 @@
 set -euo pipefail
 
 # ============================================================================
-# SDD Core (Español) — Install Script
+# Agentify: SDD Orchestrator— Install Script
 # Copies skills to your AI coding assistant's skill directory
 # Cross-platform: macOS, Linux, Windows (Git Bash / WSL)
 # ============================================================================
@@ -132,7 +132,7 @@ make_writable() {
 print_header() {
     echo ""
     echo -e "${CYAN}${BOLD}╔══════════════════════════════════════════╗${NC}"
-    echo -e "${CYAN}${BOLD}║       SDD Core (Español) — Installer     ║${NC}"
+    echo -e "${CYAN}${BOLD}║       Agentify: SDD Orchestrator— Installer     ║${NC}"
     echo -e "${CYAN}${BOLD}║   Spec-Driven Development for AI Agents  ║${NC}"
     echo -e "${CYAN}${BOLD}╚══════════════════════════════════════════╝${NC}"
     echo ""
@@ -169,6 +169,81 @@ show_help() {
     echo "  -h, --help      Show this help"
     echo ""
     echo "Agents: claude-code, opencode, gemini-cli, codex, vscode, antigravity, cursor, project-local, all-global"
+}
+
+# ============================================================================
+# Config Injection Helpers
+# ============================================================================
+
+append_markdown_config() {
+    local target_file="$1"
+    local source_file="$2"
+    local marker_begin="### BEGIN SDD ORCHESTRATOR ###"
+    local marker_end="### END SDD ORCHESTRATOR ###"
+
+    mkdir -p "$(dirname "$target_file")" 2>/dev/null || true
+
+    # Si el archivo existe y tiene nuestro bloque, lo purgamos de forma segura
+    if [ -f "$target_file" ] && grep -q "$marker_begin" "$target_file"; then
+        # Usamos awk para eliminar las líneas entre los marcadores (incluyéndolos)
+        awk "/$marker_begin/{flag=1} /$marker_end/{flag=0; next} !flag" "$target_file" > "${target_file}.tmp"
+        mv "${target_file}.tmp" "$target_file"
+        print_skill "Bloque anterior del orquestador purgado en $(basename "$target_file")"
+    fi
+
+    # Anexamos el nuevo bloque con los delimitadores
+    echo "" >> "$target_file"
+    echo "$marker_begin" >> "$target_file"
+    cat "$source_file" >> "$target_file"
+    echo "" >> "$target_file"
+    echo "$marker_end" >> "$target_file"
+    
+    print_skill "Orquestador inyectado/actualizado exitosamente en $(basename "$target_file")"
+}
+
+merge_opencode_config() {
+    local config_dir
+    if [[ "$OS" == "windows" ]]; then
+        config_dir="$USERPROFILE/.config/opencode"
+    elif [[ "$OS" == "macos" ]]; then
+        config_dir="$HOME/.config/opencode"
+    else
+        config_dir="$HOME/.config/opencode"
+    fi
+    local target_config="$config_dir/opencode.json"
+    local source_config="$REPO_DIR/examples/opencode/opencode.json"
+
+    # Si no existe, simplemente lo copiamos
+    if [ ! -f "$target_config" ]; then
+        mkdir -p "$config_dir"
+        cp "$source_config" "$target_config"
+        print_skill "opencode.json creado con el orquestador"
+        return 0
+    fi
+
+    # Usamos Python para hacer un merge seguro del JSON
+    if command -v python3 >/dev/null 2>&1; then
+        python3 -c '
+import json, sys
+try:
+    with open(sys.argv[1], "r", encoding="utf-8") as f: target = json.load(f)
+    with open(sys.argv[2], "r", encoding="utf-8") as f: source = json.load(f)
+    if "agent" not in target: target["agent"] = {}
+    target["agent"]["sdd-orchestrator"] = source["agent"]["sdd-orchestrator"]
+    with open(sys.argv[1], "w", encoding="utf-8") as f: json.dump(target, f, indent=2, ensure_ascii=False)
+    sys.exit(0)
+except Exception as e:
+    sys.exit(1)
+' "$target_config" "$source_config"
+        
+        if [ $? -eq 0 ]; then
+            print_skill "sdd-orchestrator inyectado automáticamente en opencode.json"
+        else
+            print_warn "No se pudo inyectar automáticamente. Copia opencode.json manualmente."
+        fi
+    else
+        print_warn "No se detectó Python3. Copia el orquestador a opencode.json manualmente."
+    fi
 }
 
 # ============================================================================
@@ -280,44 +355,43 @@ install_for_agent() {
     case "$agent" in
         claude-code)
             install_skills "$(get_tool_path claude-code)" "Claude Code"
-            print_next_step "~/.claude/CLAUDE.md" "examples/claude-code/CLAUDE.md"
+            local config_target="${USERPROFILE:-$HOME}/.claude/CLAUDE.md"
+            append_markdown_config "$config_target" "$REPO_DIR/examples/claude-code/CLAUDE.md"
             ;;
         opencode)
             install_skills "$(get_tool_path opencode)" "OpenCode"
             install_opencode_commands
-            echo ""
-            echo -e "${YELLOW}${BOLD}╔══════════════════════════════════════════════════════════════╗${NC}"
-            echo -e "${YELLOW}${BOLD}║  ACTION REQUIRED: Add the sdd-orchestrator agent config     ║${NC}"
-            echo -e "${YELLOW}${BOLD}║                                                              ║${NC}"
-            echo -e "${YELLOW}${BOLD}║  Copy the agent block from:                                  ║${NC}"
-            echo -e "${YELLOW}${BOLD}║    examples/opencode/opencode.json                           ║${NC}"
-            echo -e "${YELLOW}${BOLD}║  Into your:                                                  ║${NC}"
-            echo -e "${YELLOW}${BOLD}║    ~/.config/opencode/opencode.json                          ║${NC}"
-            echo -e "${YELLOW}${BOLD}║                                                              ║${NC}"
-            echo -e "${YELLOW}${BOLD}║  Without this, /sdd-* commands will not find the agent.      ║${NC}"
-            echo -e "${YELLOW}${BOLD}╚══════════════════════════════════════════════════════════════╝${NC}"
+            merge_opencode_config
             ;;
         gemini-cli)
             install_skills "$(get_tool_path gemini-cli)" "Gemini CLI"
-            print_next_step "~/.gemini/GEMINI.md" "examples/gemini-cli/GEMINI.md"
+            local config_target="${USERPROFILE:-$HOME}/.gemini/GEMINI.md"
+            append_markdown_config "$config_target" "$REPO_DIR/examples/gemini-cli/GEMINI.md"
             ;;
         codex)
             install_skills "$(get_tool_path codex)" "Codex"
+            # Codex no tiene ruta global fija, depende del proyecto. Mantenemos el aviso.
             print_next_step "Codex instructions file" "examples/codex/agents.md"
             ;;
         vscode)
             install_skills "$(get_tool_path vscode)" "VS Code (Copilot)"
-            print_next_step ".github/copilot-instructions.md" "examples/vscode/copilot-instructions.md"
+            local config_target="./.github/copilot-instructions.md"
+            append_markdown_config "$config_target" "$REPO_DIR/examples/vscode/copilot-instructions.md"
             echo -e "  ${YELLOW}Note:${NC} Skills installed in current project (.vscode/skills/)"
             ;;
         antigravity)
             target="$(get_tool_path antigravity)"
             install_skills "$target" "Antigravity"
-            print_next_step "~/.gemini/GEMINI.md or .agent/rules/" "examples/antigravity/sdd-orchestrator.md"
+            # Antigravity usa un archivo dedicado en .agent/rules/
+            local config_target="./.agent/rules/sdd-orchestrator.md"
+            mkdir -p "./.agent/rules" 2>/dev/null || true
+            cp "$REPO_DIR/examples/antigravity/sdd-orchestrator.md" "$config_target"
+            print_skill "Reglas de orquestador copiadas a $config_target"
             ;;
         cursor)
             install_skills "$(get_tool_path cursor)" "Cursor"
-            print_next_step ".cursorrules" "examples/cursor/.cursorrules"
+            local config_target="./.cursorrules"
+            append_markdown_config "$config_target" "$REPO_DIR/examples/cursor/.cursorrules"
             ;;
         project-local)
             install_skills "$(get_tool_path project-local)" "Project-local"
@@ -325,18 +399,20 @@ install_for_agent() {
             ;;
         all-global)
             install_skills "$(get_tool_path claude-code)" "Claude Code"
+            append_markdown_config "${USERPROFILE:-$HOME}/.claude/CLAUDE.md" "$REPO_DIR/examples/claude-code/CLAUDE.md"
+            
             install_skills "$(get_tool_path opencode)" "OpenCode"
             install_opencode_commands
+            merge_opencode_config
+            
             install_skills "$(get_tool_path gemini-cli)" "Gemini CLI"
+            append_markdown_config "${USERPROFILE:-$HOME}/.gemini/GEMINI.md" "$REPO_DIR/examples/gemini-cli/GEMINI.md"
+            
             install_skills "$(get_tool_path codex)" "Codex"
             install_skills "$(get_tool_path cursor)" "Cursor"
-            echo -e "\n${YELLOW}Next steps:${NC}"
-            echo -e "  1. Add orchestrator to ${BOLD}~/.claude/CLAUDE.md${NC}"
-            echo -e "  2. ${YELLOW}${BOLD}[REQUIRED]${NC} Add orchestrator agent to ${BOLD}~/.config/opencode/opencode.json${NC}"
-            echo -e "     ${YELLOW}See: examples/opencode/opencode.json — without this, /sdd-* commands won't work${NC}"
-            echo -e "  3. Add orchestrator to ${BOLD}~/.gemini/GEMINI.md${NC}"
-            echo -e "  4. Add orchestrator to ${BOLD}Codex instructions file${NC}"
-            echo -e "  5. Add SDD rules to ${BOLD}.cursorrules${NC}"
+            append_markdown_config "./.cursorrules" "$REPO_DIR/examples/cursor/.cursorrules"
+            
+            echo -e "\n${GREEN}${BOLD}¡Todos los orquestadores globales configurados automáticamente!${NC}"
             ;;
         custom)
             if [[ -z "${CUSTOM_PATH:-}" ]]; then

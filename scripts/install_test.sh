@@ -2,7 +2,7 @@
 set -euo pipefail
 
 # ============================================================================
-# SDD Core — Install Script Tests
+# Agentify: SDD Orchestrator — Install Script Tests
 # Run: bash scripts/install_test.sh
 # ============================================================================
 
@@ -498,11 +498,11 @@ test_output_shows_install_count() {
     }
 }
 
-test_output_shows_next_step() {
+test_output_shows_injection_success() {
     local output
     output=$(bash "$INSTALL_SCRIPT" --agent claude-code 2>&1)
-    echo "$output" | grep -q "Next step" || {
-        echo "Output missing 'Next step' guidance"
+    echo "$output" | grep -q "inyectado" || {
+        echo "Output missing injection success message"
         return 1
     }
 }
@@ -572,7 +572,7 @@ test_nested_custom_path() {
 
 echo ""
 echo -e "${CYAN}${BOLD}╔══════════════════════════════════════════╗${NC}"
-echo -e "${CYAN}${BOLD}║    SDD Core — Install Script Tests        ║${NC}"
+echo -e "${CYAN}${BOLD}║    Agentify: SDD Orchestrator — Install Script Tests        ║${NC}"
 echo -e "${CYAN}${BOLD}╚══════════════════════════════════════════╝${NC}"
 echo ""
 
@@ -651,7 +651,7 @@ echo -e "${BOLD}Output verification${NC}"
 run_test "Output lists all skill names" test_output_shows_skill_names
 run_test "Output shows Done! message" test_output_shows_done_message
 run_test "Output shows install count" test_output_shows_install_count
-run_test "Output shows next-step guidance" test_output_shows_next_step
+run_test "Output shows next-step guidance" test_output_shows_injection_success
 echo ""
 
 echo -e "${BOLD}OS detection${NC}"

@@ -66,10 +66,12 @@ rules:
   design:
     - Incluir diagramas de secuencia para flujos complejos
     - Documentar decisiones de arquitectura con justificación
+    - "[!] Si proposal.md marca el riesgo como Medio/Alto, DEBES incluir una Estrategia de Testing rigurosa."
   tasks:
     - Agrupar tareas por fase (infraestructura, implementación, testing)
     - Usar numeración jerárquica (1.1, 1.2, etc.)
     - Mantener tareas pequeñas, completables en una sesión
+    - "[!] Si design.md incluye una Estrategia de Testing, DEBES generar tareas explícitas para escribir esos tests."
   apply:
     - Seguir los patrones y convenciones de código existentes
     - Cargar skills de codificación relevantes para el stack del proyecto

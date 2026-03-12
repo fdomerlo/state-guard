@@ -51,6 +51,62 @@ ORQUESTADOR (delegate-only, contexto mínimo):
   → lanza sub-agente ARCHIVADOR     → devuelve: cambio cerrado
 ```
 
+```mermaid
+graph TB
+    subgraph "Nivel 1 — Sub-agentes Básicos"
+        L1_Lead["Agente Principal"]
+        L1_Sub1["Sub-agente 1"]
+        L1_Sub2["Sub-agente 2"]
+        L1_Lead -->|"lanzar y olvidar"| L1_Sub1
+        L1_Lead -->|"lanzar y olvidar"| L1_Sub2
+    end
+
+    subgraph "Nivel 2 — Equipos de Agentes SDD"
+        L2_Orch["Orquestador<br/>(solo delega)"]
+        L2_Explore["Explorador"]
+        L2_Propose["Proponente"]
+        L2_Spec["Especificador"]
+        L2_Design["Diseñador"]
+        L2_Tasks["Planificador"]
+        L2_Apply["Implementador"]
+        L2_Verify["Verificador"]
+        L2_Archive["Archivador"]
+
+        L2_Orch -->|"fase DAG"| L2_Explore
+        L2_Orch -->|"fase DAG"| L2_Propose
+        L2_Orch -->|"paralelo"| L2_Spec
+        L2_Orch -->|"paralelo"| L2_Design
+        L2_Orch -->|"fase DAG"| L2_Tasks
+        L2_Orch -->|"en lotes"| L2_Apply
+        L2_Orch -->|"fase DAG"| L2_Verify
+        L2_Orch -->|"fase DAG"| L2_Archive
+
+        L2_Store[("Almacenamiento<br/>(Exclusivo OpenSpec)")]
+        L2_Registry[("Registro de Skills<br/>+ convenciones de proyecto")]
+        L2_Spec -.->|"persistir"| L2_Store
+        L2_Design -.->|"persistir"| L2_Store
+        L2_Apply -.->|"persistir"| L2_Store
+        L2_Explore -.->|"Paso 1: cargar"| L2_Registry
+        L2_Apply -.->|"Paso 1: cargar"| L2_Registry
+        L2_Verify -.->|"Paso 1: cargar"| L2_Registry
+    end
+
+    subgraph "Nivel 3 — Equipos de Agentes Completos"
+        L3_Orch["Orquestador"]
+        L3_A1["Agente A"]
+        L3_A2["Agente B"]
+        L3_A3["Agente C"]
+        L3_Queue[("Cola de Tareas Compartida<br/>reclamo / latido")]
+
+        L3_Orch -->|"administrar"| L3_Queue
+        L3_A1 <-->|"reclamar y reportar"| L3_Queue
+        L3_A2 <-->|"reclamar y reportar"| L3_Queue
+        L3_A3 <-->|"reclamar y reportar"| L3_Queue
+        L3_A1 <-.->|"com. entre pares"| L3_A2
+        L3_A2 <-.->|"com. entre pares"| L3_A3
+    end
+```
+
 **La idea clave**: el orquestador NUNCA realiza el trabajo de fase directamente. Solo coordina sub-agentes, rastrea el estado y sintetiza resúmenes. Esto mantiene el hilo principal pequeño y estable.
 
 ---
