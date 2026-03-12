@@ -295,11 +295,6 @@ Las 9 skills referencian dos archivos de convención en `skills/_shared/`:
 | `persistence-contract.md` | Reglas de resolución de modo — cómo se comportan `openspec` y `none`, qué lee/escribe cada modo y la política de fallback |
 | `openspec-convention.md` | Rutas del filesystem para cada artefacto, estructura de directorios, referencia de `config.yaml` y layout del archivo |
 
-### Mejoras de Skills v2.0
-
-- **sdd-apply v2.0** — Soporte de flujo TDD. Cuando está habilitado (vía `openspec/config.yaml`), el implementador sigue un ciclo RED-GREEN-REFACTOR: escribir primero un test fallido, implementar hasta que pase, luego refactorizar.
-- **sdd-verify v2.0** — Realiza ejecución real de tests en lugar de solo análisis estático. Ejecuta la suite de tests y los comandos de build del proyecto, produce una matriz de cumplimiento de specs mapeando cada requisito a PASS/FAIL/SKIP, y reporta issues en niveles CRITICAL/WARNING/SUGGESTION.
-
 ---
 
 ## Instalación
