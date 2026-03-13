@@ -13,6 +13,7 @@
 
 <p align="center">
   <a href="#inicio-rápido">Inicio Rápido</a> &bull;
+  <a href="MANUAL.md">Manual de Uso</a> &bull;
   <a href="#cómo-funciona">Cómo Funciona</a> &bull;
   <a href="#comandos">Comandos</a> &bull;
   <a href="#instalación">Instalación</a> &bull;
@@ -21,6 +22,10 @@
 </p>
 
 ---
+
+## 📚 Recursos para el Equipo
+
+- **[Manual de Uso y Buenas Prácticas](MANUAL.md)**: Una guía rápida en 3 lecciones para aprender a trabajar con agentes y SDD. Recomendado para nuevos integrantes.
 
 ## El Problema
 
