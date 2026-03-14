@@ -1,105 +1,147 @@
-# OpenSpec File Convention (shared across all SDD skills)
+# OpenSpec File Convention (compartido entre todas las skills SDD)
 
-## Directory Structure
+## Estructura de Directorios
 
 ```
 openspec/
-├── config.yaml              <- Project-specific SDD config
-├── specs/                   <- Source of truth (main specs)
-│   └── {domain}/
+├── config.yaml              ← Configuración SDD específica del proyecto
+├── specs/                   ← Fuente de verdad (specs actuales del sistema)
+│   └── {dominio}/
 │       └── spec.md
-└── changes/                 <- Active changes
-    ├── archive/             <- Completed changes (YYYY-MM-DD-{change-name}/)
-    └── {change-name}/       <- Active change folder
-        ├── state.yaml       <- DAG state (orchestrator, survives compaction)
-        ├── exploration.md   <- (optional) from sdd-explore
-        ├── proposal.md      <- from sdd-propose
-        ├── specs/           <- from sdd-spec
-        │   └── {domain}/
-        │       └── spec.md  <- Delta spec
-        ├── design.md        <- from sdd-design
-        ├── tasks.md         <- from sdd-tasks (updated by sdd-apply)
-        └── verify-report.md <- from sdd-verify
+└── changes/                 ← Cambios activos
+    ├── archive/             ← Cambios completados (YYYY-MM-DD-{change-name}/)
+    └── {change-name}/       ← Carpeta de cambio activo
+        ├── state.yaml       ← Estado del DAG (orquestador — sobrevive a compactación)
+        ├── exploration.md   ← (opcional) de sdd-explore
+        ├── proposal.md      ← de sdd-propose
+        ├── specs/           ← de sdd-spec (specs delta)
+        │   └── {dominio}/
+        │       └── spec.md
+        ├── design.md        ← de sdd-design
+        ├── tasks.md         ← de sdd-tasks (actualizado por sdd-apply)
+        └── verify-report.md ← de sdd-verify
 ```
 
-## Artifact File Paths
+## Rutas de Artefactos por Skill
 
-| Skill | Creates / Reads | Path |
-|-------|----------------|------|
-| orchestrator | Creates/Updates | `openspec/changes/{change-name}/state.yaml` (DAG state for compaction recovery) |
-| sdd-init | Creates | `openspec/config.yaml`, `openspec/specs/`, `openspec/changes/`, `openspec/changes/archive/` |
-| sdd-explore | Creates (optional) | `openspec/changes/{change-name}/exploration.md` |
-| sdd-propose | Creates | `openspec/changes/{change-name}/proposal.md` |
-| sdd-spec | Creates | `openspec/changes/{change-name}/specs/{domain}/spec.md` |
-| sdd-design | Creates | `openspec/changes/{change-name}/design.md` |
-| sdd-tasks | Creates | `openspec/changes/{change-name}/tasks.md` |
-| sdd-apply | Updates | `openspec/changes/{change-name}/tasks.md` (marks `[x]`) |
-| sdd-verify | Creates | `openspec/changes/{change-name}/verify-report.md` |
-| sdd-archive | Moves | `openspec/changes/{change-name}/` → `openspec/changes/archive/YYYY-MM-DD-{change-name}/` |
-| sdd-archive | Updates | `openspec/specs/{domain}/spec.md` (merges deltas into main specs) |
+| Skill | Crea / Lee | Ruta |
+|-------|-----------|------|
+| orquestador | Crea/Actualiza | `openspec/changes/{change-name}/state.yaml` |
+| sdd-init | Crea | `openspec/config.yaml`, `openspec/specs/`, `openspec/changes/`, `openspec/changes/archive/` |
+| sdd-explore | Crea (opcional) | `openspec/changes/{change-name}/exploration.md` |
+| sdd-propose | Crea | `openspec/changes/{change-name}/proposal.md` |
+| sdd-spec | Crea | `openspec/changes/{change-name}/specs/{dominio}/spec.md` |
+| sdd-design | Crea | `openspec/changes/{change-name}/design.md` |
+| sdd-tasks | Crea | `openspec/changes/{change-name}/tasks.md` |
+| sdd-apply | Actualiza | `openspec/changes/{change-name}/tasks.md` (marca `[x]`) |
+| sdd-verify | Crea | `openspec/changes/{change-name}/verify-report.md` |
+| sdd-archive | Mueve | `openspec/changes/{change-name}/` → `openspec/changes/archive/YYYY-MM-DD-{change-name}/` |
+| sdd-archive | Actualiza | `openspec/specs/{dominio}/spec.md` (fusiona deltas en specs principales) |
 
-## Reading Artifacts
+## Schema de state.yaml
 
-Each skill reads its dependencies from the filesystem:
+El orquestador es el **único responsable** de escribir y mantener `state.yaml`.
+Las skills de sub-agentes **nunca** escriben ni leen este archivo directamente.
+
+```yaml
+# openspec/changes/{change-name}/state.yaml
+
+change: {nombre-del-cambio}
+started_at: "YYYY-MM-DDTHH:MM:SS"   # ISO 8601 — se establece al crear, nunca se modifica
+last_updated: "YYYY-MM-DDTHH:MM:SS" # actualizar en cada transición de fase
+current_phase: {fase-actual}         # última fase completada exitosamente
+completed_phases:                    # lista ordenada, solo fases con status: ok
+  - explore    # incluir solo si sdd-explore fue ejecutado
+  - propose
+  # agregar fases a medida que se completan
+pending_phases:                      # fases que aún no se ejecutaron
+  - tasks
+  - apply
+  - verify
+  - archive
+blocked: false                       # true si verify reporta CRITICAL sin resolver
+blocked_reason: null                 # descripción del bloqueo, o null si blocked: false
+```
+
+**Valores válidos para `current_phase` y elementos de listas:**
+`explore | propose | spec | design | tasks | apply | verify | archive`
+
+**Notas de transición:**
+
+- `spec` y `design` pueden aparecer en cualquier orden en `completed_phases` (se ejecutan en paralelo).
+- `current_phase` refleja la **última** de las dos en completarse cuando corren en paralelo.
+- Un cambio recién creado (solo `propose` completo) tiene `current_phase: propose`.
+- Al archivar exitosamente, el archivo se mueve — no hace falta actualizar `state.yaml`.
+
+## Lectura de Artefactos
+
+Cada skill lee sus dependencias desde el filesystem:
 
 ```
-Proposal:  openspec/changes/{change-name}/proposal.md
-Specs:     openspec/changes/{change-name}/specs/  (all domain subdirectories)
-Design:    openspec/changes/{change-name}/design.md
-Tasks:     openspec/changes/{change-name}/tasks.md
-Verify:    openspec/changes/{change-name}/verify-report.md
-Config:    openspec/config.yaml
-Main specs: openspec/specs/{domain}/spec.md
+Propuesta:      openspec/changes/{change-name}/proposal.md
+Specs delta:    openspec/changes/{change-name}/specs/  (todos los subdirectorios de dominio)
+Diseño:         openspec/changes/{change-name}/design.md
+Tareas:         openspec/changes/{change-name}/tasks.md
+Verificación:   openspec/changes/{change-name}/verify-report.md
+Configuración:  openspec/config.yaml
+Specs actuales: openspec/specs/{dominio}/spec.md
 ```
 
-## Writing Rules
+## Reglas de Escritura
 
-- ALWAYS create the change directory (`openspec/changes/{change-name}/`) before writing artifacts
-- If a file already exists, READ it first and UPDATE it (don't overwrite blindly)
-- If the change directory already exists with artifacts, the change is being CONTINUED
-- Use the `openspec/config.yaml` `rules` section to apply project-specific constraints per phase
+- SIEMPRE crear el directorio del cambio antes de escribir artefactos.
+- Si un archivo ya existe, LEERLO primero y ACTUALIZARLO (no sobreescribir ciegamente).
+- Si el directorio del cambio ya existe con artefactos, el cambio está siendo CONTINUADO.
+- Usar la sección `rules` de `openspec/config.yaml` para aplicar restricciones del proyecto por fase.
 
-## Config File Reference
+## Referencia del config.yaml
 
 ```yaml
 # openspec/config.yaml
 schema: spec-driven
 
 context: |
-  Tech stack: {detected}
-  Architecture: {detected}
-  Testing: {detected}
-  Style: {detected}
+  Stack tecnológico: {detectado}
+  Arquitectura: {detectado}
+  Testing: {detectado}
+  Estilo: {detectado}
+
+# Glosario de dominio (opcional — recomendado para proyectos con terminología específica)
+# Los sub-agentes cargan este glosario y usan los términos de forma consistente en todos los artefactos.
+glossary:
+  {término}: >
+    {Definición canónica del concepto en el dominio del proyecto.}
 
 rules:
   proposal:
-    - Include rollback plan for risky changes
+    - Incluir plan de rollback para cambios riesgosos
   specs:
-    - Use Given/When/Then for scenarios
-    - Use RFC 2119 keywords (MUST, SHALL, SHOULD, MAY)
+    - Usar Given/When/Then para escenarios
+    - Usar palabras clave RFC 2119 (MUST, SHALL, SHOULD, MAY)
   design:
-    - Include sequence diagrams for complex flows
-    - Document architecture decisions with rationale
+    - Incluir diagramas de secuencia para flujos complejos
+    - Documentar decisiones de arquitectura con justificación
   tasks:
-    - Group by phase, use hierarchical numbering
-    - Keep tasks completable in one session
+    - Agrupar por fase, usar numeración jerárquica
+    - Mantener tareas completables en una sesión
   apply:
-    - Follow existing code patterns
-    tdd: false           # Set to true to enable RED-GREEN-REFACTOR
-    test_command: ""     # e.g., "npm test", "pytest"
+    - Seguir los patrones y convenciones de código existentes
+    tdd: false
+    test_command: ""
   verify:
-    test_command: ""     # Override for verification
-    build_command: ""    # Override for build check
-    coverage_threshold: 0  # Set > 0 to enable coverage check
+    test_command: ""
+    build_command: ""
+    coverage_threshold: 0
   archive:
-    - Warn before merging destructive deltas
+    - Advertir antes de fusionar deltas destructivos
 ```
 
-## Archive Structure
+## Estructura del Archivo Histórico
 
-When archiving, the change folder moves to:
+Al archivar, la carpeta del cambio se mueve a:
+
 ```
 openspec/changes/archive/YYYY-MM-DD-{change-name}/
 ```
 
-Use today's date in ISO format. The archive is an AUDIT TRAIL — never delete or modify archived changes.
+Usar fecha ISO de hoy. El archivo es un **RASTRO DE AUDITORÍA** — nunca eliminar ni modificar.
