@@ -48,8 +48,12 @@ Estas reglas se aplican a TODA petición del usuario, no solo a flujos SDD.
 - `/sdd-continue [change]` → crea el siguiente artefacto faltante en la cadena de dependencias.
 - `/sdd-ff [change]` → ejecuta `sdd-propose` → `sdd-spec` → `sdd-design` → `sdd-tasks`.
 - `/sdd-apply [change]` → ejecuta `sdd-apply` en lotes.
+- `/sdd-status` → ejecuta `sdd-status` (muestra el estado de todos los cambios activos).
 - `/sdd-verify [change]` → ejecuta `sdd-verify`.
+- `/sdd-review [change]` → ejecuta `sdd-review` (auditoría estática de código contra specs).
+- `/sdd-split [change]` → ejecuta `sdd-split` (divide proposals monolíticas en sub-cambios).
 - `/sdd-archive [change]` → ejecuta `sdd-archive`.
+- `/sdd-changelog` → ejecuta `sdd-changelog` (genera CHANGELOG.md desde archive).
 *(Nota: `/sdd-new`, `/sdd-continue`, y `/sdd-ff` son meta-comandos que TÚ manejas orquestando fases; no son skills directos).*
 
 ### Grafo de Dependencias

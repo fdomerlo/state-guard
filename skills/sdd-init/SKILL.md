@@ -57,6 +57,7 @@ context: |
   Estilo: {linting/formateo detectado}
 
 rules:
+  change_naming: kebab-case
   proposal:
     - Incluir plan de rollback para cambios riesgosos
     - Identificar módulos/paquetes afectados
@@ -80,6 +81,19 @@ rules:
     - Comparar la implementación contra cada escenario de spec
   archive:
     - Advertir antes de fusionar deltas destructivos (eliminaciones grandes)
+
+# Glosario de términos del dominio (opcional)
+# glossary:
+#   terms:
+#     - term: "Artefacto"
+#       definition: "Archivo generado por una fase SDD (proposal, spec, design, tasks)"
+#     - term: "Cambio"
+#       definition: "Una unidad de trabajo en el DAG de SDD"
+#     - term: "Estado"
+#       definition: "Condición actual de un cambio en el DAG de SDD"
+#       aliases: ["phase"]
+#     - term: "Fase"
+#       definition: "Etapa del flujo SDD (explore, propose, spec, design, tasks, apply, verify, archive)"
 ```
 
 ### Paso 4: Devolver Resumen

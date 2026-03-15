@@ -28,7 +28,66 @@ Lee y sigue `skills/_shared/persistence-contract.md` para las reglas de resoluci
 
 ## Qué Hacer
 
-### Paso 1: Sincronizar Specs Delta con Specs Principales
+### Paso 1.5: Verificar Estado Git Antes de Archivar
+
+Antes de sincronizar specs y mover al archivo, verificá el estado del repositorio git:
+
+```bash
+# Función para verificar estado git antes de archivar
+verify_git_clean_for_change() {
+    local change_dir="$1"
+    local repo_root="${2:-.}"
+
+    # Verificar si es un repositorio git
+    if [ ! -d "$repo_root/.git" ]; then
+        echo "INFO: No git repository detected, skipping verification"
+        return 0
+    fi
+
+    # Verificar si git está disponible
+    if ! command -v git &> /dev/null; then
+        echo "WARN: git not available, skipping verification"
+        return 0
+    fi
+
+    # Obtener cambios sin commitear (formato porcelain)
+    local status
+    status=$(cd "$repo_root" && git status --porcelain 2>/dev/null || echo "")
+
+    if [ -z "$status" ]; then
+        # No hay cambios, todo limpio
+        return 0
+    fi
+
+    # Filtrar solo archivos del directorio del cambio
+    local changed_files
+    changed_files=$(echo "$status" | grep "$change_dir" || true)
+
+    if [ -n "$changed_files" ]; then
+        echo "ERROR: Uncommitted changes detected in $change_dir:"
+        echo "$changed_files"
+        echo ""
+        echo "Please commit your changes before archiving."
+        return 1
+    fi
+
+    # Hay cambios pero no en el directorio del cambio - continuar
+    return 0
+}
+```
+
+**Uso en el flujo:**
+- Llamá a `verify_git_clean_for_change "$change_name" "$repo_root"` antes de proceder con la sincronización de specs
+- Si retorna 1 (error), BLOQUEÁ el archivado y mostrá el mensaje de error
+- Si retorna 0, continuá normalmente
+
+**Casos manejados:**
+- Repositorio sin git (no existe `.git/`) → continúa sin verificación
+- Git no disponible en PATH → continúa con warning
+- Cambios sin commitear en el directorio del cambio → BLOQUEA
+- Cambios sin commitear en otros directorios → continúa normalmente
+
+### Paso 2: Sincronizar Specs Delta con Specs Principales
 
 Para cada spec delta en `openspec/changes/{nombre-del-cambio}/specs/`:
 
@@ -110,6 +169,8 @@ Listo para el siguiente cambio.
 ## Reglas
 
 - NUNCA archivar un cambio que tenga issues CRITICAL en su reporte de verificación
+- SIEMPRE verificar el estado git ANTES de sincronizar specs (ver Paso 1.5)
+- Si la verificación git detecta cambios sin commitear en el directorio del cambio, BLOQUEAR el archivado
 - SIEMPRE sincronizar las specs delta ANTES de mover al archivo
 - Al fusionar en specs existentes, PRESERVAR los requisitos que no están mencionados en el delta
 - Usar formato de fecha ISO (YYYY-MM-DD) como prefijo de la carpeta de archivo

@@ -75,3 +75,24 @@ Después de completar tu trabajo, persistí tu artefacto siguiendo openspec-conv
 
 El orquestador puede pasar `detail_level`: `concise | standard | deep`.
 Esto controla la verbosidad de la salida en el chat, pero NO afecta lo que se guarda en disco — siempre se persiste el artefacto completo.
+
+## Carga de Glosario (para sub-agentes)
+
+Al inicio de cada skill, después de determinar el modo de persistencia:
+
+1. Buscar archivo `openspec/config.yaml`
+2. Si existe y contiene clave `glossary`, cargar los términos
+3. Usar los términos definidos para mantener consistencia en el output
+4. Si no existe el glosario, continuar normalmente (es opcional)
+
+Los términos del glosario deben respetarse al generar artefactos:
+- Usar la terminología definida en lugar de sinónimos
+- Mantener consistencia semántica en proposal.md, specs/, design.md, etc.
+
+### Graceful Degradation
+
+- Si `openspec/config.yaml` NO existe → continuar sin glosario
+- Si el archivo existe pero NO tiene sección `glossary:` → continuar sin glosario
+- Si la sección `glossary:` existe pero está vacía o malformada → continuar sin glosario, sin lanzar error
+
+Esta estrategia permite que proyectos existentes (sin glosario) funcionen correctamente mientras nuevos proyectos pueden adoptar el glosario cuando lo necesiten.

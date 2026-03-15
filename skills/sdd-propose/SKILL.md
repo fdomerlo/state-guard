@@ -123,4 +123,25 @@ Listo para specs (sdd-spec) o diseño (sdd-design).
 - Toda propuesta DEBE tener criterios de éxito
 - Usar rutas de archivos concretas en "Áreas Afectadas" cuando sea posible
 - Aplicar cualquier `rules.proposal` de `openspec/config.yaml`
+- **VALIDAR el nombre del cambio contra la regla `change_naming` (kebab-case)** si está configurada en config.yaml
 - Devolver un envelope estructurado con: `status`, `executive_summary`, `detailed_report` (opcional), `artifacts`, `next_recommended` y `risks`
+
+## Errores Comunes
+
+Al crear propuestas de cambio, evitá estos errores frecuentes:
+
+### 1. Alucinaciones de contexto
+**Problema**: Inventar información no proporcionada por el usuario o asumir requisitos sin verificar.
+**Solución**: Siempre verificá con el usuario antes de asumir funcionalidades o requisitos no explícitos.
+
+### 2. Olvidar el plan de rollback
+**Problema**: No incluir un plan de rollback para cambios riesgosos.
+**Solución**: Toda propuesta de riesgo Medio/Alto DEBE incluir un plan de rollback específico.
+
+### 3. Scope creep (Expansion del alcance)
+**Problema**: Agregar features o tareas fuera del alcance original del cambio.
+**Solución**: Mantené el alcance enfocado. Los cambios adicionales se proponen como cambios separados.
+
+### 4. No seguir la regla de nomenclatura
+**Problema**: Usar camelCase, PascalCase, snake_case o espacios en el nombre del cambio.
+**Solución**: Usá siempre kebab-case (ej: `mi-feature`, `fix-bug-123`). Validá con regex: `^[a-z0-9]+(-[a-z0-9]+)*$`

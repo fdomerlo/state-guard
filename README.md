@@ -1,669 +1,139 @@
-<p align="center">
-  <h1 align="center">Agentify: SDD Orchestrator</h1>
-  <p align="center">
-    <strong>Orquestación de Equipos de Agentes con Sub-Agentes de IA</strong>
-    <br />
-    <em>Un orquestador + sub-agentes especializados para el desarrollo estructurado de software.</em>
-    <br />
-    <em>Cero dependencias. Markdown puro. Funciona en cualquier entorno.</em>
-    <br />
-    <em>based on [v3.2.0](https://github.com/Gentleman-Programming/agent-teams-lite)</em>
-  </p>
-</p>
+# Agentify SDD — Orquestador de Desarrollo Guiado por Especificaciones
 
-<p align="center">
-  <a href="#inicio-rápido">Inicio Rápido</a> &bull;
-  <a href="MANUAL.md">Manual de Uso</a> &bull;
-  <a href="#cómo-funciona">Cómo Funciona</a> &bull;
-  <a href="#comandos">Comandos</a> &bull;
-  <a href="#instalación">Instalación</a> &bull;
-  <a href="#estructura-del-proyecto">Estructura</a> &bull;
-  <a href="#herramientas-compatibles">Herramientas</a>
-</p>
-
----
-
-## 📚 Recursos para el Equipo
-
-- **[Manual de Uso y Buenas Prácticas](MANUAL.md)**: Una guía rápida en 3 lecciones para aprender a trabajar con agentes y SDD. Recomendado para nuevos integrantes.
-
-## El Problema
-
-Los asistentes de IA para código son poderosos, pero tienen dificultades con funcionalidades complejas:
-
-- **Sobrecarga de contexto** — Las conversaciones largas llevan a compresión, pérdida de detalles y alucinaciones
-- **Sin estructura** — "Construime el modo oscuro" produce resultados impredecibles
-- **Sin revisión** — El código se escribe antes de que alguien acuerde qué construir
-- **Sin memoria** — Las especificaciones viven en el historial de chat que desaparece
-
-## La Solución
-
-**agentify-sdd** es un patrón de orquestación de equipos de agentes donde un coordinador liviano delega todo el trabajo real a sub-agentes especializados. Cada sub-agente comienza con contexto fresco, ejecuta una tarea enfocada y devuelve un resultado estructurado.
-
-```
-VOS: "Quiero agregar exportación CSV a la aplicación"
-
-ORQUESTADOR (delegate-only, contexto mínimo):
-  → lanza sub-agente EXPLORADOR     → devuelve: análisis del código base
-  → muestra resumen, vos aprobás
-  → lanza sub-agente PROPONENTE     → devuelve: artefacto de propuesta
-  → lanza sub-agente ESPECIFICADOR  → devuelve: artefacto de spec
-  → lanza sub-agente DISEÑADOR      → devuelve: artefacto de diseño
-  → lanza sub-agente PLANIFICADOR   → devuelve: artefacto de tareas
-  → muestra todo, vos aprobás
-  → lanza sub-agente IMPLEMENTADOR  → devuelve: código escrito, tareas tachadas
-  → lanza sub-agente VERIFICADOR    → devuelve: artefacto de verificación
-  → lanza sub-agente ARCHIVADOR     → devuelve: cambio cerrado
-```
-
-```mermaid
-graph TB
-    subgraph "Nivel 1 — Sub-agentes Básicos"
-        L1_Lead["Agente Principal"]
-        L1_Sub1["Sub-agente 1"]
-        L1_Sub2["Sub-agente 2"]
-        L1_Lead -->|"lanzar y olvidar"| L1_Sub1
-        L1_Lead -->|"lanzar y olvidar"| L1_Sub2
-    end
-
-    subgraph "Nivel 2 — Equipos de Agentes SDD"
-        L2_Orch["Orquestador<br/>(solo delega)"]
-        L2_Explore["Explorador"]
-        L2_Propose["Proponente"]
-        L2_Spec["Especificador"]
-        L2_Design["Diseñador"]
-        L2_Tasks["Planificador"]
-        L2_Apply["Implementador"]
-        L2_Verify["Verificador"]
-        L2_Archive["Archivador"]
-
-        L2_Orch -->|"fase DAG"| L2_Explore
-        L2_Orch -->|"fase DAG"| L2_Propose
-        L2_Orch -->|"paralelo"| L2_Spec
-        L2_Orch -->|"paralelo"| L2_Design
-        L2_Orch -->|"fase DAG"| L2_Tasks
-        L2_Orch -->|"en lotes"| L2_Apply
-        L2_Orch -->|"fase DAG"| L2_Verify
-        L2_Orch -->|"fase DAG"| L2_Archive
-
-        L2_Store[("Almacenamiento<br/>(Exclusivo OpenSpec)")]
-        L2_Registry[("Registro de Skills<br/>+ convenciones de proyecto")]
-        L2_Spec -.->|"persistir"| L2_Store
-        L2_Design -.->|"persistir"| L2_Store
-        L2_Apply -.->|"persistir"| L2_Store
-        L2_Explore -.->|"Paso 1: cargar"| L2_Registry
-        L2_Apply -.->|"Paso 1: cargar"| L2_Registry
-        L2_Verify -.->|"Paso 1: cargar"| L2_Registry
-    end
-
-    subgraph "Nivel 3 — Equipos de Agentes Completos"
-        L3_Orch["Orquestador"]
-        L3_A1["Agente A"]
-        L3_A2["Agente B"]
-        L3_A3["Agente C"]
-        L3_Queue[("Cola de Tareas Compartida<br/>reclamo / latido")]
-
-        L3_Orch -->|"administrar"| L3_Queue
-        L3_A1 <-->|"reclamar y reportar"| L3_Queue
-        L3_A2 <-->|"reclamar y reportar"| L3_Queue
-        L3_A3 <-->|"reclamar y reportar"| L3_Queue
-        L3_A1 <-.->|"com. entre pares"| L3_A2
-        L3_A2 <-.->|"com. entre pares"| L3_A3
-    end
-```
-
-**La idea clave**: el orquestador NUNCA realiza el trabajo de fase directamente. Solo coordina sub-agentes, rastrea el estado y sintetiza resúmenes. Esto mantiene el hilo principal pequeño y estable.
-
----
-
-## 🏛️ Decisiones Arquitectónicas (Manifiesto Interno)
-
-Dado que este es un orquestador adaptado para nuestro desarrollo interno, hemos tomado decisiones arquitectónicas estrictas que divergen del framework genérico original para priorizar la **auditabilidad, la economía de tokens y la mantenibilidad a largo plazo**.
-
-### 1. Por qué forzamos el Español (Localización Estricta)
-
-Aunque los Modelos de Lenguaje (LLMs) operan fluidamente en inglés, la revisión de especificaciones es una actividad humana.
-
-- **Auditabilidad sin fricción:** Los documentos generados (propuestas, diseños, tareas) son el *contrato* del proyecto. Al forzar que los 9 sub-agentes piensen, planifique y documenten nativamente en castellano, eliminamos la carga cognitiva de traducir mentalmente durante las revisiones.
-- **Consistencia:** Evitamos el "Spanglish" técnico. Los Requerimientos Funcionales y Reglas de Negocio se redactan y auditan en el mismo idioma en el que el equipo debate el producto en la vida real.
-
-### 2. Por qué OpenSpec puro (Y la eliminación de Engram/Modo Híbrido)
-
-El framework original promueve el uso de **Engram** (una base de datos vectorial/SQLite local vía protocolo MCP) para mantener el repositorio "limpio". Nosotros **descartamos por completo ese enfoque** por dos motivos críticos:
-
-- **Visibilidad y Control de Versiones (Git):** Si las especificaciones y decisiones arquitectónicas viven atrapadas en una base de datos local o en el servidor MCP de un agente, son invisibles para el resto del equipo. Al usar exclusivamente **OpenSpec**, forzamos a que todos los artefactos sean archivos Markdown (`.md`) físicos en la carpeta `openspec/`. Así, el "por qué" de una decisión técnica viaja junto con el código fuente, se versiona en Git y se puede revisar fácilmente en la web de GitHub o en un Pull Request.
-- **Economía de Tokens y Ventana de Contexto:** El modo *híbrido* (que guardaba en archivos y en Engram simultáneamente) es ineficiente. Obligaba al LLM a procesar la información dos veces por fase: debía generar el texto Markdown para el archivo **y además** generar las llamadas a herramientas JSON (`mem_save`, `mem_search`) para comunicarse con el servidor MCP. Esto duplica el consumo de tokens de entrada/salida, satura la ventana de contexto del modelo con protocolos redundantes, encarece la operación y aumenta el riesgo de alucinaciones. **OpenSpec mantiene la comunicación directa, limpia y económica.**
-
----
-
-## Cómo Funciona
-
-### El Grafo de Dependencias
-
-Las fases del flujo SDD están organizadas como un DAG (Grafo Acíclico Dirigido):
-
-```
-                    propuesta
-                   (nodo raíz)
-                       │
-         ┌─────────────┴─────────────┐
-         │                           │
-         ▼                           ▼
-      specs                       diseño
-   (requisitos               (enfoque técnico
-    + escenarios)              + decisiones)
-         │                           │
-         └─────────────┬─────────────┘
-                       │
-                       ▼
-                     tareas
-                (checklist de
-                implementación)
-                       │
-                       ▼
-                    aplicar
-                (escribir código)
-                       │
-                       ▼
-                   verificar
-               (puerta de calidad)
-                       │
-                       ▼
-                   archivar
-              (fusionar specs,
-               cerrar cambio)
-```
-
-### Arquitectura
-
-```
-┌──────────────────────────────────────────────────────────┐
-│  ORQUESTADOR (tu agente principal)                        │
-│                                                           │
-│  Responsabilidades:                                       │
-│  • Detectar cuándo se necesita SDD                        │
-│  • Lanzar sub-agentes via Task tool                       │
-│  • Mostrar resúmenes al usuario                           │
-│  • Pedir aprobación entre fases                           │
-│  • Rastrear estado: qué artefactos existen, qué sigue     │
-│                                                           │
-│  Uso de contexto: MÍNIMO (solo estado + resúmenes)        │
-└──────────────┬───────────────────────────────────────────┘
-               │
-               │ Task(subagent_type: 'general', prompt: 'Lee skill...')
-               │
-    ┌──────────┴──────────────────────────────────────────┐
-    │                                                      │
-    ▼          ▼          ▼         ▼         ▼           ▼
-┌────────┐┌────────┐┌────────┐┌────────┐┌────────┐┌────────┐
-│EXPLORAR││PROPONER││ SPECS  ││DISEÑAR ││ TAREAS ││APLICAR │ ...
-│        ││        ││        ││        ││        ││        │
-│Contexto││Contexto││Contexto││Contexto││Contexto││Contexto│
-│ fresco ││ fresco ││ fresco ││ fresco ││ fresco ││ fresco │
-└────────┘└────────┘└────────┘└────────┘└────────┘└────────┘
-```
-
-### Contrato de Resultado del Sub-Agente
-
-Cada sub-agente devuelve un payload estructurado:
-
-```json
-{
-  "status": "ok | warning | blocked | failed",
-  "executive_summary": "resumen corto para tomar decisiones",
-  "detailed_report": "análisis detallado opcional para trabajo complejo",
-  "artifacts": [
-    {
-      "name": "design",
-      "store": "openspec | none",
-      "ref": "ruta-al-archivo | null"
-    }
-  ],
-  "next_recommended": ["tasks"],
-  "risks": ["lista de riesgos opcional"]
-}
-```
-
-### Estructura de Artefactos (OpenSpec)
-
-En modo `openspec`, cada cambio genera una carpeta autocontenida en el repositorio:
-
-```
-openspec/
-├── config.yaml                        ← Contexto del proyecto (stack, convenciones)
-├── specs/                             ← Fuente de verdad: cómo funciona el sistema HOY
-│   ├── auth/spec.md
-│   ├── exportar/spec.md
-│   └── ui/spec.md
-└── changes/
-    ├── agregar-exportacion-csv/       ← Cambio activo
-    │   ├── proposal.md                ← POR QUÉ + ALCANCE + ENFOQUE
-    │   ├── specs/                     ← Specs delta (AGREGADOS/MODIFICADOS/ELIMINADOS)
-    │   │   └── exportar/spec.md
-    │   ├── design.md                  ← CÓMO (decisiones de arquitectura)
-    │   └── tasks.md                   ← QUÉ (checklist de implementación)
-    └── archive/                       ← Cambios completados (rastro de auditoría)
-        └── 2026-02-16-fix-auth/
-```
-
----
-
-## Inicio Rápido
-
-### 1. Instalar las skills
-
-```bash
-git clone https://github.com/TU-USUARIO/agentify-sdd.git
-cd agentify-sdd
-./scripts/install.sh
-```
-
-El instalador pregunta qué herramienta usás y copia las skills al lugar correcto.
-
-### 2. Agregar el orquestador a tu agente
-
-Consultá la sección [Instalación](#instalación) para tu herramienta específica.
-
-### 3. Usarlo
-
-Abrí tu asistente de IA en cualquier proyecto y escribí:
-
-```
-/sdd-init
-```
-
-Luego empezá a construir:
-
-```
-/sdd-new agregar-exportacion-csv
-```
-
-O dejá que lo detecte automáticamente — describí una funcionalidad importante y el orquestador sugerirá usar SDD.
-
----
-
-## Comandos
-
-| Comando | Qué Hace |
-|---------|----------|
-| `/sdd-init` | Inicializa el contexto SDD. Detecta el stack y crea la estructura `openspec/`. |
-| `/sdd-explore <tema>` | Investiga una idea. Lee el código base, compara enfoques. No crea archivos. |
-| `/sdd-new <nombre>` | Inicia un nuevo cambio delegando exploración + propuesta a sub-agentes. |
-| `/sdd-continue` | Ejecuta la siguiente fase lista en el grafo de dependencias. |
-| `/sdd-ff <nombre>` | Fast-forward de planificación con sub-agentes (propuesta → specs → diseño → tareas). |
-| `/sdd-apply` | Implementa tareas en lotes. Marca ítems como completos sobre la marcha. |
-| `/sdd-verify` | Valida la implementación contra las specs. Reporta CRITICAL / WARNING / SUGGESTION. |
-| `/sdd-archive` | Cierra un cambio, fusiona las specs delta en las specs principales y archiva. |
-
-### Ejemplo de Flujo
-
-```
-Vos: /sdd-new agregar-modo-oscuro
-
-IA:  Lanzando sub-agente explorador...
-     ✓ Código base analizado. React + Tailwind detectados.
-     ✓ Tema actual: modo claro hardcodeado en globals.css
-
-     Lanzando sub-agente proponente...
-     ✓ proposal.md creado
-       Intención: Agregar toggle de modo oscuro con detección de preferencia del sistema
-       Alcance: Contexto de tema, componente toggle, variables CSS
-
-     ¿Continúo con specs y diseño? (o revisá la propuesta primero)
-
-Vos: Adelante
-
-IA:  ✓ specs/ui/spec.md — 3 requisitos, 7 escenarios
-     ✓ design.md — Variables CSS, React Context, localStorage
-     ✓ tasks.md — 3 fases, 8 tareas
-
-     Listo para implementar. Ejecutá /sdd-apply para comenzar.
-
-Vos: /sdd-apply
-
-IA:  Implementando Fase 1 (Fundación)...
-     ✓ 1.1 Creado ThemeContext
-     ✓ 1.2 Agregadas propiedades CSS personalizadas
-     ✓ 1.3 Agregada persistencia en localStorage
-
-     3/8 tareas completas. ¿Continúo con Fase 2?
-```
-
----
-
-## Los Sub-Agentes
-
-Cada sub-agente es un archivo `SKILL.md` — instrucciones en Markdown puro que cualquier asistente de IA puede seguir. **Todos los prompts están íntegramente en español.**
-
-| Sub-Agente | Archivo de Skill | Qué Hace |
-|------------|-----------------|----------|
-| **Init** | `sdd-init/SKILL.md` | Detecta el stack del proyecto, crea la estructura `openspec/` |
-| **Explorador** | `sdd-explore/SKILL.md` | Lee el código base, compara enfoques, identifica riesgos |
-| **Proponente** | `sdd-propose/SKILL.md` | Crea `proposal.md` con intención, alcance y plan de rollback |
-| **Especificador** | `sdd-spec/SKILL.md` | Escribe specs delta (AGREGADOS/MODIFICADOS/ELIMINADOS) con Given/When/Then |
-| **Diseñador** | `sdd-design/SKILL.md` | Crea `design.md` con decisiones de arquitectura y justificación |
-| **Planificador** | `sdd-tasks/SKILL.md` | Desglosa en checklist de tareas numeradas por fase |
-| **Implementador** | `sdd-apply/SKILL.md` | Escribe código siguiendo specs y diseño, marca tareas completas. Soporta flujo TDD. |
-| **Verificador** | `sdd-verify/SKILL.md` | Valida la implementación contra specs con ejecución real de tests. Matriz de cumplimiento. |
-| **Archivador** | `sdd-archive/SKILL.md` | Fusiona specs delta en las specs principales, mueve al archivo |
-
-### Convenciones Compartidas
-
-Las 9 skills referencian dos archivos de convención en `skills/_shared/`:
-
-| Archivo | Propósito |
-|---------|-----------|
-| `persistence-contract.md` | Reglas de resolución de modo — cómo se comportan `openspec` y `none`, qué lee/escribe cada modo y la política de fallback |
-| `openspec-convention.md` | Rutas del filesystem para cada artefacto, estructura de directorios, referencia de `config.yaml` y layout del archivo |
+Agentify SDD es un marco de orquestación de agentes de IA que estructura el desarrollo de software en fases definidas: explorar, proponer, especificar, diseñar, planificar, implementar, verificar y archivar. Para equipos que necesitan código auditable, mantenible y construido sobre especificaciones claras.
 
 ---
 
 ## Instalación
 
-Guías de configuración para todas las herramientas soportadas:
-
-- [Claude Code](#claude-code) — Soporte completo de sub-agentes via Task tool
-- [OpenCode](#opencode) — Soporte completo de sub-agentes via Task tool
-- [Gemini CLI](#gemini-cli) — Ejecución inline de skills
-- [Codex](#codex) — Ejecución inline de skills
-- [VS Code (Copilot)](#vs-code-copilot) — Modo agente con archivos de contexto
-- [Antigravity](#antigravity) — Soporte nativo de skills con rutas `~/.gemini/antigravity/skills/` y `.agent/`
-- [Cursor](#cursor) — Ejecución inline de skills
-
-### Claude Code
-
-**1. Copiar skills:**
+### Unix / Linux / macOS
 
 ```bash
-# Usando el script de instalación
-./scripts/install.sh  # Elegir opción 1: Claude Code
-
-# O manualmente
-cp -r skills/_shared skills/sdd-* ~/.claude/skills/
+bash scripts/install.sh
 ```
 
-**2. Agregar el orquestador a `~/.claude/CLAUDE.md`:**
+### Windows
 
-Agregá el contenido de [`examples/claude-code/CLAUDE.md`](examples/claude-code/CLAUDE.md) a tu `CLAUDE.md` existente.
-
-El ejemplo es intencionalmente liviano para evitar sobrecarga de tokens en los prompts de sistema. Las reglas de persistencia y artefactos viven en `~/.claude/skills/_shared/*.md`.
-
-**3. Verificar:**
-
-Abrí Claude Code y escribí `/sdd-init` — debería reconocer el comando.
+```powershell
+powershell .\scripts\install.ps1
+```
 
 ---
 
-### OpenCode
+## Comandos
 
-**1. Copiar skills y comandos:**
+| Comando | Descripción |
+|---------|-------------|
+| `/sdd-init` | Inicializa el contexto SDD en el proyecto. Detecta el stack y crea la estructura `openspec/`. |
+| `/sdd-explore <tema>` | Investiga una idea antes de comprometerse. Lee el código base, compara enfoques e identifica riesgos. |
+| `/sdd-new <nombre>` | Inicia un nuevo cambio. Delega exploración y propuesta a sub-agentes especializados. |
+| `/sdd-continue` | Ejecuta la siguiente fase pendiente en el grafo de dependencias. |
+| `/sdd-ff` | Fast-forward de planificación: ejecuta propuesta → specs → diseño → tareas sin intervención. |
+| `/sdd-apply` | Implementa las tareas de un cambio. Escribe código siguiendo specs y diseño, marca tareas completadas. |
+| `/sdd-verify` | Valida la implementación contra las especificaciones. Ejecuta tests y genera reporte de cumplimiento. |
+| `/sdd-archive` | Cierra un cambio: fusiona las specs delta en las specs principales y mueve el cambio al archivo. |
+| `/sdd-status` | Muestra el estado de todos los cambios activos mediante tabla con indicadores visuales. |
+| `/sdd-split` | Divide proposals monolíticas en sub-cambios manejables. Útil para cambios demasiado grandes. |
+| `/sdd-review` | Realiza auditoría estática de código comparando contra las especificaciones. |
+| `/sdd-spec` | Escribe especificaciones delta para un cambio SDD. |
+| `/sdd-design` | Crea el documento de diseño técnico para un cambio. |
+| `/sdd-tasks` | Desglosa un cambio en tareas de implementación. |
+| `/sdd-changelog` | Genera un changelog automático a partir de los cambios archivados. |
+
+---
+
+## Inicio Rápido
+
+### 1. Inicializar el proyecto
 
 ```bash
-# Usando el script de instalación (instala skills + comandos)
-./scripts/install.sh  # Elegir opción 2: OpenCode
-
-# O manualmente
-cp -r skills/_shared skills/sdd-* ~/.config/opencode/skills/
-cp examples/opencode/commands/sdd-*.md ~/.config/opencode/commands/
+/sdd-init
 ```
 
-**2. Agregar el agente orquestador a `~/.config/opencode/opencode.json`:**
-
-Fusioná el bloque `agent` de [`examples/opencode/opencode.json`](examples/opencode/opencode.json) en tu configuración existente.
-
-**3. Verificar:**
-
-Abrí OpenCode, usá el selector de agente (Tab), elegí `sdd-orchestrator` y escribí `/sdd-init`.
-
----
-
-### Gemini CLI
-
-**1. Copiar skills:**
+### 2. Crear un nuevo cambio
 
 ```bash
-./scripts/install.sh  # Elegir opción Gemini CLI
-
-# O manualmente
-cp -r skills/_shared skills/sdd-* ~/.gemini/skills/
+/sdd-new mi-nueva-funcionalidad
 ```
 
-**2. Agregar el orquestador a `~/.gemini/GEMINI.md`:**
-
-Agregá el contenido de [`examples/gemini-cli/GEMINI.md`](examples/gemini-cli/GEMINI.md) al archivo de prompt del sistema de Gemini.
-
-**3. Verificar:**
-
-Abrí Gemini CLI y escribí `/sdd-init`.
-
-> **Nota:** Gemini CLI no tiene una herramienta Task nativa para delegación de sub-agentes. Las skills funcionan como instrucciones inline. Para la mejor experiencia de sub-agentes, usá Claude Code o OpenCode.
-
----
-
-### Codex
-
-**1. Copiar skills:**
+### 3. Continuar con las siguientes fases
 
 ```bash
-./scripts/install.sh  # Elegir opción Codex
-
-# O manualmente
-cp -r skills/_shared skills/sdd-* ~/.codex/skills/
+/sdd-continue
 ```
 
-**2. Agregar instrucciones del orquestador a `~/.codex/agents.md`.**
+El orquestador ejecutará cada fase secuencialmente, mostrando resúmenes y solicitando aprobación entre fases.
 
-**3. Verificar:**
-
-Abrí Codex y escribí `/sdd-init`.
-
-> **Nota:** Al igual que Gemini CLI, Codex ejecuta las skills inline en lugar de como verdaderos sub-agentes.
-
----
-
-### VS Code (Copilot)
-
-**1. Copiar skills al workspace:**
+### 4. Implementar
 
 ```bash
-# Por proyecto (recomendado)
-cp -r skills/_shared skills/sdd-* ./tu-proyecto/.vscode/skills/
-
-# O usando el script
-./scripts/install.sh  # Elegir opción VS Code
+/sdd-apply
 ```
 
-**2. Agregar instrucciones del orquestador:**
-
-Creá un archivo `.instructions.md` en la carpeta de prompts de usuario de VS Code:
-
-- macOS: `~/Library/Application Support/Code/User/prompts/sdd-orchestrator.instructions.md`
-- Linux: `~/.config/Code/User/prompts/sdd-orchestrator.instructions.md`
-- Windows: `%APPDATA%\Code\User\prompts\sdd-orchestrator.instructions.md`
-
-**3. Verificar:**
-
-Abrí VS Code, el panel de Chat (`Ctrl+Cmd+I`) y escribí `/sdd-init`.
-
----
-
-### Antigravity
-
-**1. Copiar skills:**
+### 5. Verificar
 
 ```bash
-# Global (disponible en todos los proyectos)
-./scripts/install.sh  # Elegir opción Antigravity
-
-# O manualmente (global)
-cp -r skills/_shared skills/sdd-* ~/.gemini/antigravity/skills/
-
-# Específico del workspace (por proyecto)
-mkdir -p .agent/skills
-cp -r skills/_shared skills/sdd-* .agent/skills/
+/sdd-verify
 ```
 
-**2. Agregar instrucciones del orquestador:**
-
-Agregá el orquestador SDD como regla global en `~/.gemini/GEMINI.md`, o creá una regla de workspace en `.agent/rules/sdd-orchestrator.md`.
-
-Consultá [`examples/antigravity/sdd-orchestrator.md`](examples/antigravity/sdd-orchestrator.md) para el contenido de la regla.
-
-**3. Verificar:**
-
-Abrí Antigravity y escribí `/sdd-init` en el panel del agente.
-
-> **Nota:** Antigravity usa `.agent/skills/` y `.agent/rules/` para configuración de workspace, y `~/.gemini/antigravity/skills/` para configuración global. **No** usa rutas de `.vscode/`.
-
----
-
-### Cursor
-
-**1. Copiar skills:**
+### 6. Archivar
 
 ```bash
-./scripts/install.sh  # Elegir opción Cursor
-
-# O por proyecto
-cp -r skills/_shared skills/sdd-* ./tu-proyecto/skills/
-```
-
-**2. Agregar el orquestador a `.cursorrules`:**
-
-Agregá el contenido de [`examples/cursor/.cursorrules`](examples/cursor/.cursorrules) a tu archivo `.cursorrules`.
-
-> **Nota:** Cursor no tiene una herramienta Task para verdadera delegación de sub-agentes. Las skills siguen funcionando — Cursor las lee como instrucciones — pero el orquestador corre inline. Para la mejor experiencia, usá Claude Code o OpenCode.
-
----
-
-### Otras Herramientas
-
-Las skills son Markdown puro. Cualquier asistente de IA que pueda leer archivos puede usarlas.
-
-1. **Copiá las skills** a donde tu herramienta lee instrucciones.
-2. **Agregá las instrucciones del orquestador** al prompt de sistema o archivo de reglas de tu herramienta.
-3. **Adaptá el patrón de sub-agentes:**
-   - Si tu herramienta tiene Task/sub-agente → usá el patrón de `examples/claude-code/CLAUDE.md`
-   - Si no → el orquestador lee las skills inline (funciona igual, usa más contexto)
-
----
-
-## Estructura del Proyecto
-
-```
-agentify-sdd/
-├── README.md                          ← Estás aquí
-├── LICENSE
-├── skills/                            ← Las 9 skills de sub-agentes + convenciones compartidas
-│   ├── _shared/                       ← Convenciones compartidas (referenciadas por todas las skills)
-│   │   ├── persistence-contract.md    ← Reglas de resolución de modo (openspec/none)
-│   │   └── openspec-convention.md     ← Rutas de archivos, estructura de directorios, referencia de config
-│   ├── sdd-init/SKILL.md
-│   ├── sdd-explore/SKILL.md
-│   ├── sdd-propose/SKILL.md
-│   ├── sdd-spec/SKILL.md
-│   ├── sdd-design/SKILL.md
-│   ├── sdd-tasks/SKILL.md
-│   ├── sdd-apply/SKILL.md             ← v2.0: Soporte de flujo TDD
-│   ├── sdd-verify/SKILL.md            ← v2.0: Ejecución real de tests + matriz de cumplimiento
-│   └── sdd-archive/SKILL.md
-├── examples/                          ← Ejemplos de configuración por herramienta
-│   ├── claude-code/CLAUDE.md
-│   ├── opencode/
-│   │   ├── opencode.json              ← Config de agente orquestador
-│   │   └── commands/sdd-*.md          ← Slash commands para OpenCode
-│   ├── gemini-cli/GEMINI.md
-│   ├── codex/agents.md
-│   ├── vscode/copilot-instructions.md
-│   ├── antigravity/sdd-orchestrator.md
-│   └── cursor/.cursorrules
-└── scripts/
-    ├── install.sh                     ← Instalador interactivo (Bash)
-    ├── install.ps1                    ← Instalador interactivo (PowerShell)
-    └── install_test.sh                ← Suite de tests del instalador
+/sdd-archive
 ```
 
 ---
 
-## Conceptos
+## Arquitectura
+
+```mermaid
+graph LR
+    subgraph "Fases SDD"
+        E[Explore] --> P[Propose]
+        P --> S[Spec]
+        P --> D[Design]
+        S --> T[Tasks]
+        D --> T
+        T --> A[Apply]
+        A --> V[Verify]
+        V --> R[Archive]
+    end
+    
+    subgraph "Almacenamiento"
+        O[(OpenSpec)]
+    end
+    
+    E -.-> O
+    P -.-> O
+    S -.-> O
+    D -.-> O
+    A -.-> O
+    V -.-> O
+```
+
+**OpenSpec** guarda cada artefacto como archivo Markdown en el repositorio, permitiendo versionado y revisión en Pull Requests.
+
+---
+
+## Conceptos Clave
 
 ### Specs Delta
 
-En lugar de reescribir specs completas, los cambios describen qué es diferente:
+Los cambios describen qué es diferente del estado actual, no reescriben todo. Al archivar, estos deltas se fusionan automáticamente.
 
-```markdown
-## Requisitos AGREGADOS
+### State Machine ACID
 
-### Requisito: Exportación CSV
-El sistema SHALL soportar la exportación de datos a formato CSV.
+El archivo `state.yaml` rastrea el estado de cada cambio, previniendo colisiones en trabajo concurrente.
 
-#### Escenario: Exportar todas las observaciones
-- GIVEN el usuario tiene observaciones almacenadas
-- WHEN el usuario solicita exportación CSV
-- THEN se genera un archivo CSV con todas las observaciones
-- AND los encabezados de columna coinciden con los campos de observación
+### Skills como Código
 
-## Requisitos MODIFICADOS
-
-### Requisito: Exportación de Datos
-El sistema SHALL soportar múltiples formatos de exportación.
-(Anteriormente: El sistema SHALL soportar exportación JSON.)
-```
-
-Cuando se archiva el cambio, estos deltas se fusionan automáticamente en las specs principales.
-
-### Palabras Clave RFC 2119
-
-Las specs usan lenguaje estandarizado para la fuerza de los requisitos:
-
-| Palabra Clave | Significado |
-|---------------|-------------|
-| **MUST / SHALL** | Requisito absoluto |
-| **SHOULD** | Recomendado, pueden existir excepciones |
-| **MAY** | Opcional |
-
-### El Ciclo de Archivo
-
-```
-1. Las specs describen el comportamiento actual
-2. Los cambios proponen modificaciones (como deltas)
-3. La implementación hace reales los cambios
-4. El archivo fusiona los deltas en las specs
-5. Las specs ahora describen el nuevo comportamiento
-6. El próximo cambio construye sobre las specs actualizadas
-```
+Cada sub-agente es un archivo Markdown puro que cualquier asistente de IA puede ejecutar. Sin dependencias externas.
 
 ---
 
-## Herramientas Compatibles
+## Documentación Adicional
 
-| Herramienta | Sub-agentes reales | Skills inline | Comandos slash |
-|-------------|:-----------------:|:-------------:|:--------------:|
-| Claude Code | ✅ | ✅ | — |
-| OpenCode | ✅ | ✅ | ✅ |
-| Antigravity | ✅ | ✅ | — |
-| Gemini CLI | — | ✅ | — |
-| Codex | — | ✅ | — |
-| VS Code | — | ✅ | — |
-| Cursor | — | ✅ | — |
-
----
-
-## Contribuir
-
-Los PRs son bienvenidos. Las skills son Markdown — fáciles de mejorar.
-
-**Para agregar un nuevo sub-agente:**
-
-1. Crear `skills/sdd-{nombre}/SKILL.md` siguiendo el formato existente (en español)
-2. Agregarlo al grafo de dependencias en las instrucciones del orquestador
-3. Actualizar los ejemplos y el README
-
-**Para mejorar un sub-agente existente:**
-
-1. Editar el `SKILL.md` directamente
-2. Probar ejecutando SDD en un proyecto real
-3. Enviar PR con ejemplos del antes/después
+- [MANUAL.md](MANUAL.md) — Guía técnica: arquitectura DRY, State Machine ACID, configuración y flujos avanzados.
 
 ---
 

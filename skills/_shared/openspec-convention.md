@@ -113,6 +113,7 @@ glossary:
     {Definición canónica del concepto en el dominio del proyecto.}
 
 rules:
+  change_naming: kebab-case
   proposal:
     - Incluir plan de rollback para cambios riesgosos
   specs:
@@ -134,6 +135,31 @@ rules:
     coverage_threshold: 0
   archive:
     - Advertir antes de fusionar deltas destructivos
+
+## Regla de Nomenclatura de Cambios
+
+Todos los nombres de cambios SDD DEBEN usar formato **kebab-case** (palabras separadas por guiones, todo en minúsculas).
+
+### Ejemplos válidos:
+- `agregar-modo-oscuro`
+- `fix-auth-bug`
+- `refactor-user-service`
+- `mejora-rendimiento-consultas`
+
+### Ejemplos INVÁLIDOS:
+- `agregarModoOscuro` (camelCase)
+- `AgregarModoOscuro` (PascalCase)
+- `agregar_modo_oscuro` (snake_case)
+- `agregar modo oscuro` (espacios)
+
+### Validación
+
+La regla `change_naming: kebab-case` se aplica en la fase `sdd-propose`. El nombre se valida con la regex:
+```
+^[a-z0-9]+(-[a-z0-9]+)*$
+```
+
+Esta regla está configurada en `openspec/config.yaml` y se aplica automáticamente durante la creación de nuevos cambios.
 ```
 
 ## Estructura del Archivo Histórico

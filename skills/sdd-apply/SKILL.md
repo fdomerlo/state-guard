@@ -181,3 +181,23 @@ Si ninguno, indicar "Ninguno."}
 - Si se detecta modo TDD (Paso 2), SIEMPRE seguir el ciclo RED → GREEN → REFACTOR — nunca omitir RED (escribir el test fallido primero)
 - Al ejecutar tests en TDD, ejecutar SOLO el archivo/suite de tests relevante, no toda la suite (para mayor velocidad)
 - Devolver un envelope estructurado con: `status`, `executive_summary`, `detailed_report` (opcional), `artifacts`, `next_recommended` y `risks`
+
+## Errores Comunes
+
+Al implementar tareas, evitá estos errores frecuentes:
+
+### 1. Modificar specs/design sin actualizar proposal primero
+**Problema**: Cambiar las especificaciones o el diseño sin antes actualizar la propuesta para reflejar esos cambios.
+**Solución**: Siempre actualizá proposal.md primero si hay cambios en el alcance o enfoque técnico.
+
+### 2. Ignorar el checklist de tareas
+**Problema**: No seguir la lista de tareas definida o implementar funcionalidades fuera de las tareas asignadas.
+**Solución**: Implementá solo las tareas asignadas. Si encontrás tareas adicionales necesarias, reportalas al orquestador.
+
+### 3. No seguir los patrones de código existentes
+**Problema**: Implementar código que no sigue las convenciones, estilos o patrones del proyecto.
+**Solución**: Antes de implementar, leé los archivos existentes del proyecto para entender los patrones en uso.
+
+### 4. Dejar tareas incompletas sin documentación
+**Problema**: Marcar tareas como completadas sin haberlas terminado realmente, o sin documentar desviaciones.
+**Solución**: Marcá tareas como completadas SOLO cuando estén 100% hechas. Si hay problemas, documentalos en el resumen.

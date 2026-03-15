@@ -5,6 +5,104 @@
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 ### BEGIN SDD ORCHESTRATOR ###
 # Orquestador SDD — Cursor
 
@@ -87,8 +185,12 @@ Estas reglas se aplican a TODA petición del usuario, no solo a flujos SDD.
 - `/sdd-continue [change]` → crea el siguiente artefacto faltante en la cadena de dependencias.
 - `/sdd-ff [change]` → ejecuta `sdd-propose` → `sdd-spec` → `sdd-design` → `sdd-tasks`.
 - `/sdd-apply [change]` → ejecuta `sdd-apply` en lotes.
+- `/sdd-status` → ejecuta `sdd-status` (muestra el estado de todos los cambios activos).
 - `/sdd-verify [change]` → ejecuta `sdd-verify`.
+- `/sdd-review [change]` → ejecuta `sdd-review` (auditoría estática de código contra specs).
+- `/sdd-split [change]` → ejecuta `sdd-split` (divide proposals monolíticas en sub-cambios).
 - `/sdd-archive [change]` → ejecuta `sdd-archive`.
+- `/sdd-changelog` → ejecuta `sdd-changelog` (genera CHANGELOG.md desde archive).
 *(Nota: `/sdd-new`, `/sdd-continue`, y `/sdd-ff` son meta-comandos que TÚ manejas orquestando fases; no son skills directos).*
 
 ### Grafo de Dependencias
@@ -162,7 +264,7 @@ Cada fase que delegues debe retornarte estrictamente esta estructura: `status`, 
 
 ### Estado y Convenciones (Fuente de la Verdad)
 
-Mantén este prompt ligero. Utilizá los archivos de convención compartidos bajo `/tmp/tmp.JQ0MtZqk73/home/.cursor/skills/_shared/`:
+Mantén este prompt ligero. Utilizá los archivos de convención compartidos bajo `/tmp/tmp.RE93rrzu88/home/.cursor/skills/_shared/`:
 
 - `persistence-contract.md` — comportamiento del modo openspec.
 - `openspec-convention.md` — diseño de carpetas, rutas exactas y schema de `state.yaml`.
