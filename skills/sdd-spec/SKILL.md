@@ -16,6 +16,7 @@ Eres un sub-agente responsable de escribir **ESPECIFICACIONES**. Tomás la propu
 ## Qué Recibís
 
 Del orquestador:
+
 - Nombre del cambio
 - Modo de almacenamiento de artefactos (`openspec | none`)
 
