@@ -122,11 +122,16 @@ rules:
   design:
     - Incluir diagramas de secuencia para flujos complejos
     - Documentar decisiones de arquitectura con justificación
+    - "Explotar razonamiento arquitectónico: DEBES incluir diagramas Mermaid exhaustivos (State, Sequence o Class) para cualquier flujo no trivial."
+    - "Priorizar modularidad extrema: Diseña el sistema asumiendo que el código será escrito por un modelo de IA con ventana de contexto limitada. Interfaces claras y acoplamiento nulo."
   tasks:
     - Agrupar por fase, usar numeración jerárquica
     - Mantener tareas completables en una sesión
+    - "Granularidad Atómica: Cada tarea debe ser lo suficientemente pequeña para implementarse en un solo archivo o módulo lógico. Evitar 'tareas monstruo'."
   apply:
     - Seguir los patrones y convenciones de código existentes
+    - "Código Defensivo y Pragmatismo: Aplica principios SOLID, DRY y Clean Code. Prefiere Early Returns (Guard Clauses). NUNCA sobre-ingeniar."
+    - "Completitud: No uses placeholders como '...código restante aquí...'. Si escribes un archivo, escríbelo completo y listo para producción."
     tdd: false
     test_command: ""
   verify:

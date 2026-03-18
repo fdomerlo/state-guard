@@ -68,14 +68,19 @@ rules:
     - Incluir diagramas de secuencia para flujos complejos
     - Documentar decisiones de arquitectura con justificación
     - "[!] Si proposal.md marca el riesgo como Medio/Alto, DEBES incluir una Estrategia de Testing rigurosa."
+    - "Explotar razonamiento arquitectónico: DEBES incluir diagramas Mermaid exhaustivos (State, Sequence o Class) para cualquier flujo no trivial."
+    - "Priorizar modularidad extrema: Diseña el sistema asumiendo que el código será escrito por un modelo de IA con ventana de contexto limitada. Interfaces claras y acoplamiento nulo."
   tasks:
     - Agrupar tareas por fase (infraestructura, implementación, testing)
     - Usar numeración jerárquica (1.1, 1.2, etc.)
     - Mantener tareas pequeñas, completables en una sesión
     - "[!] Si design.md incluye una Estrategia de Testing, DEBES generar tareas explícitas para escribir esos tests."
+    - "Granularidad Atómica: Cada tarea debe ser lo suficientemente pequeña para implementarse en un solo archivo o módulo lógico. Evitar 'tareas monstruo'."
   apply:
     - Seguir los patrones y convenciones de código existentes
     - Cargar skills de codificación relevantes para el stack del proyecto
+    - "Código Defensivo y Pragmatismo: Aplica principios SOLID, DRY y Clean Code. Prefiere Early Returns (Guard Clauses). NUNCA sobre-ingeniar."
+    - "Completitud: No uses placeholders como '...código restante aquí...'. Si escribes un archivo, escríbelo completo y listo para producción."
   verify:
     - Ejecutar tests si existe infraestructura de testing
     - Comparar la implementación contra cada escenario de spec

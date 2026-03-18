@@ -17,7 +17,6 @@ Orquestador (orquestador-core)
     │
     ├── Carga persistence-contract.md  → Reglas de resolución de modo
     ├── Carga openspec-convention.md   → Convenciones de archivos
-    │
     ├── Carga sdd-init/SKILL.md        → Skill de inicialización
     ├── Carga sdd-explore/SKILL.md     → Skill de exploración
     ├── Carga sdd-propose/SKILL.md     → Skill de propuesta
