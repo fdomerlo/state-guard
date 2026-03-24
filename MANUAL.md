@@ -51,7 +51,7 @@ Cada skill de fase tiene un **presupuesto de tamaño** para proteger la ventana 
 | `sdd-design` | < 800 palabras (usar tablas) |
 | `sdd-tasks` | < 530 palabras |
 
-Estos límites están definidos en la sección "Reglas" de cada skill y aseguran que la salida sea concisa y enfocad
+Estos límites están definidos en la sección "Reglas" de cada skill y aseguran que la salida sea concisa y enfocada
 
 ### Skill Registry Dinámico
 
@@ -71,7 +71,7 @@ El registry escanea el directorio `skills/` ignorando `sdd-*` y `_shared`, extra
 
 El archivo `state.yaml` es el núcleo del sistema de estados. Se encuentra en:
 
-```
+```text
 openspec/changes/{nombre-del-cambio}/state.yaml
 ```
 
@@ -107,6 +107,7 @@ blocked_reason: null                  # null o descripción del bloqueo
 ### Prevención de Colisiones
 
 El orquestador detecta cambios concurrentes mediante:
+
 1. Lectura del `state.yaml` antes de cada transición de fase
 2. Verificación de que la fase anterior está marcada como completada
 3. Bloqueo de fases si `blocked_reason` no es null
@@ -117,7 +118,7 @@ El orquestador detecta cambios concurrentes mediante:
 
 ### Ubicación
 
-```
+```text
 openspec/config.yaml
 ```
 
@@ -162,18 +163,21 @@ Si no se define, la verificación报告ará que los tests no pudieron ejecutarse
 El comando `/sdd-split` analiza una proposal monolítica y la divide en sub-cambios manejables.
 
 **Cuándo usarlo:**
+
 - La proposal abarca múltiples dominios
 - El alcance es demasiado grande para una sola iteración
 - Hay dependencias entre funcionalidades que deberían implementarse por separado
 
 **Cómo funciona:**
+
 1. Lee la proposal original
 2. Analiza los requisitos y alcance
 3. Identifica puntos de división naturales
 4. Genera múltiples proposals más pequeñas
 
 **Ejemplo de uso:**
-```
+
+```text
 /sdd-split mi-cambio-grande
 ```
 
@@ -182,17 +186,20 @@ El comando `/sdd-split` analiza una proposal monolítica y la divide en sub-camb
 El comando `/sdd-review` compara el código implementado contra las especificaciones sin ejecutar tests.
 
 **Cuándo usarlo:**
+
 - Antes de un merge a main
 - Como revisión previa a la verificación completa
 - Para identificar desviaciones de diseño
 
 **Qué analiza:**
+
 - Cumplimiento de requisitos de specs
 - Consistencia con decisiones de diseño
 - Patrones de código aplicados correctamente
 
 **Ejemplo de uso:**
-```
+
+```text
 /sdd-review mi-cambio
 ```
 
@@ -201,13 +208,15 @@ El comando `/sdd-review` compara el código implementado contra las especificaci
 El comando `/sdd-fix` detecta y repara problemas comunes en el proyecto.
 
 **Problemas que detecta:**
+
 - Estado corrupto en `state.yaml`
 - Archivos de spec faltantes
 - Referencias rotas entre artefactos
 - Convenciones violadas
 
 **Ejemplo de uso:**
-```
+
+```text
 /sdd-fix
 ```
 
@@ -215,7 +224,7 @@ El comando `/sdd-fix` detecta y repara problemas comunes en el proyecto.
 
 ## Estructura de Archivos OpenSpec
 
-```
+```text
 openspec/
 ├── config.yaml                    ← Configuración del proyecto
 ├── specs/                         ← Specs actuales (fuente de verdad)
@@ -248,6 +257,7 @@ openspec/
 ### Idioma
 
 Todos los artefactos deben escribirse en **español (castellano)**. Esto incluye:
+
 - Propuestas y especificaciones
 - Diseños y tareas
 - Descripciones de código

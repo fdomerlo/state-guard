@@ -132,6 +132,7 @@ Cada sub-agente es un archivo Markdown puro que cualquier asistente de IA puede 
 ### Modo OpenSpec
 
 El sistema utiliza **OpenSpec** como modo de persistencia:
+
 - Los artefactos se almacenan como archivos Markdown en el repositorio
 - Permite versionado y revisión en Pull Requests
 - Carpeta de archivo: `openspec/changes/archive/YYYY-MM-DD-{change-name}/`
