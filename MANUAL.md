@@ -36,8 +36,32 @@ Las skills comparten convenciones a través de archivos en `skills/_shared/`:
 |---------|-----------|
 | `persistence-contract.md` | Define cómo se comportan los modos `openspec` y `none` |
 | `openspec-convention.md` | Define rutas de archivos, estructura de directorios y schema de `state.yaml` |
+| `sdd-phase-common.md` | Define el contrato del Return Envelope para todas las fases SDD |
 
 Cada skill referencia estos archivos compartidos, evitando duplicación de reglas y asegurando consistencia.
+
+### Presupuestos de Contexto
+
+Cada skill de fase tiene un **presupuesto de tamaño** para proteger la ventana de contexto:
+
+| Skill | Límite |
+|-------|--------|
+| `sdd-propose` | < 400 palabras |
+| `sdd-spec` | < 650 palabras |
+| `sdd-design` | < 800 palabras (usar tablas) |
+| `sdd-tasks` | < 530 palabras |
+
+Estos límites están definidos en la sección "Reglas" de cada skill y aseguran que la salida sea concisa y enfocad
+
+### Skill Registry Dinámico
+
+El sistema incluye un **registry dinámico de skills** que permite el descubrimiento automático de herramientas:
+
+- Script bash POSIX en `skills/skill-registry/scan.sh`
+- Índice generado en `.agentify/skill-registry.md`
+- El orquestador lee este índice al iniciar para conocer las herramientas disponibles
+
+El registry escanea el directorio `skills/` ignorando `sdd-*` y `_shared`, extrayendo nombre, descripción, trigger y ubicación de cada SKILL.md.
 
 ---
 
@@ -127,7 +151,7 @@ rules:
     test_command: "npm test"  # o "pytest", "cargo test", etc.
 ```
 
-Si no se define, la verificación报告会 que los tests no pudieron ejecutarse automáticamente.
+Si no se define, la verificación报告ará que los tests no pudieron ejecutarse automáticamente.
 
 ---
 
@@ -203,12 +227,18 @@ openspec/
     └── {change-name}/
         ├── state.yaml             ← Estado del DAG
         ├── proposal.md            ← Propuesta
+        ├── exploration.md         ← Investigación inicial (opcional)
         ├── specs/                 ← Specs delta
         │   └── {dominio}/
         │       └── spec.md
         ├── design.md              ← Diseño técnico
         ├── tasks.md               ← Checklist de tareas
-        └── verify-report.md       ← Reporte de verificación
+        ├── verify-report.md       ← Reporte de verificación
+        └── (otros artefactos)
+
+.agentify/                         ← Metadatos del agente
+├── skill-registry.md             ← Índice dinámico de skills
+└── (otros archivos de config)
 ```
 
 ---

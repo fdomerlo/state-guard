@@ -119,7 +119,7 @@ graph LR
 
 ### Specs Delta
 
-Los cambios describen qué es diferente del estado actual, no reescriben todo. Al archivar, estos deltas se fusionan automáticamente.
+Los cambios describen qué es diferente del estado actual, no reescriben todo. Al archivar, estos deltas se fusionan automáticamente en `openspec/specs/`.
 
 ### State Machine ACID
 
@@ -128,6 +128,13 @@ El archivo `state.yaml` rastrea el estado de cada cambio, previniendo colisiones
 ### Skills como Código
 
 Cada sub-agente es un archivo Markdown puro que cualquier asistente de IA puede ejecutar. Sin dependencias externas.
+
+### Modo OpenSpec
+
+El sistema utiliza **OpenSpec** como modo de persistencia:
+- Los artefactos se almacenan como archivos Markdown en el repositorio
+- Permite versionado y revisión en Pull Requests
+- Carpeta de archivo: `openspec/changes/archive/YYYY-MM-DD-{change-name}/`
 
 ---
 
