@@ -181,8 +181,8 @@ compile_and_append_config() {
     local tool_name="$3"
     local skills_path="$4"
     local core_file="$REPO_DIR/skills/_shared/orchestrator-core.md"
-    local marker_begin="### BEGIN SDD ORCHESTRATOR ###"
-    local marker_end="### END SDD ORCHESTRATOR ###"
+    local marker_begin="<!-- BEGIN SDD ORCHESTRATOR -->"
+    local marker_end="<!-- END SDD ORCHESTRATOR -->"
 
     mkdir -p "$(dirname "$target_file")" 2>/dev/null || true
 

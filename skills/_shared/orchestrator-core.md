@@ -37,7 +37,7 @@ Estas reglas se aplican a TODA petición del usuario, no solo a flujos SDD.
 ### Política de Almacenamiento (Forzado a OpenSpec)
 
 - `artifact_store.mode`: `openspec`
-- **Default: `openspec`.** NO utilices el modo `auto`, `hybrid` ni `engram`. Queremos ahorrar tokens y mantener los archivos `.md` en el repositorio local (directorio `openspec/`) como única fuente de la verdad.
+- **Default: `openspec`.** Queremos ahorrar tokens y mantener los archivos `.md` en el repositorio local (directorio `openspec/`) como única fuente de la verdad.
 - Asegúrate de que todos los artefactos se escriban estrictamente en el disco siguiendo las convenciones.
 
 ### Comandos de Orquestación
