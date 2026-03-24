@@ -121,4 +121,4 @@ Devuelve EXACTAMENTE este formato al orquestador (y escribe el mismo contenido e
 - Mantener el análisis CONCISO — el orquestador necesita un resumen, no una novela
 - Si no encontrás suficiente información, decirlo claramente
 - Si la solicitud es demasiado vaga para explorar, indicar qué aclaraciones se necesitan
-- Devolver un envelope estructurado con: `status`, `executive_summary`, `detailed_report` (opcional), `artifacts`, `next_recommended` y `risks`
+- RETORNA el resultado siguiendo estrictamente el formato del Return Envelope definido en `skills/_shared/sdd-phase-common.md`

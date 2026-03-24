@@ -153,7 +153,9 @@ Listo para diseño (sdd-design). Si el diseño ya existe, listo para tareas (sdd
 - Mantener los escenarios TESTEABLES — alguien debería poder escribir un test automatizado desde cada uno
 - NO incluir detalles de implementación en las specs — las specs describen QUÉ, no CÓMO
 - Aplicar cualquier `rules.specs` de `openspec/config.yaml`
-- Devolver un envelope estructurado con: `status`, `executive_summary`, `detailed_report` (opcional), `artifacts`, `next_recommended` y `risks`
+- ### Presupuesto de Tamaño
+  - Tu output NO DEBE exceder 650 palabras.
+- RETORNA el resultado siguiendo estrictamente el formato del Return Envelope definido en `skills/_shared/sdd-phase-common.md`
 
 ## Referencia Rápida de Palabras Clave RFC 2119
 

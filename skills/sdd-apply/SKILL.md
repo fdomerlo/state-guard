@@ -180,7 +180,7 @@ Si ninguno, indicar "Ninguno."}
 - Aplicar cualquier `rules.apply` de `openspec/config.yaml`
 - Si se detecta modo TDD (Paso 2), SIEMPRE seguir el ciclo RED → GREEN → REFACTOR — nunca omitir RED (escribir el test fallido primero)
 - Al ejecutar tests en TDD, ejecutar SOLO el archivo/suite de tests relevante, no toda la suite (para mayor velocidad)
-- Devolver un envelope estructurado con: `status`, `executive_summary`, `detailed_report` (opcional), `artifacts`, `next_recommended` y `risks`
+- RETORNA el resultado siguiendo estrictamente el formato del Return Envelope definido en `skills/_shared/sdd-phase-common.md`
 
 ## Errores Comunes
 

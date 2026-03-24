@@ -127,10 +127,13 @@ Cada fase que delegues debe retornarte estrictamente esta estructura: `status`, 
 
 ### Estado y Convenciones (Fuente de la Verdad)
 
-Mantén este prompt ligero. Utilizá los archivos de convención compartidos bajo `{{SKILLS_PATH}}/_shared/`:
+Mantené este prompt ligero. Utilizá los archivos de convención compartidos bajo `{{SKILLS_PATH}}/_shared/`:
 
 - `persistence-contract.md` — comportamiento del modo openspec.
 - `openspec-convention.md` — diseño de carpetas, rutas exactas y schema de `state.yaml`.
+- `skill-registry.md` — índice de skills no-SDD disponibles en el proyecto.
+
+**Al iniciar una tarea**, verificá si existe `./.agentify/skill-registry.md`. Si existe, leelo para descubrir skills adicionales disponibles además de las fases SDD conocidas. El índice contiene nombre, descripción, trigger y ubicación de cada skill descubierta.
 
 ### Regla de Recuperación (Recovery)
 

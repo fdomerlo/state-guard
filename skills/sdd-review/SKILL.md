@@ -153,4 +153,4 @@ Devolver al orquestador el resultado estructurado:
 - Usar las palabras clave RFC 2119 (MUST, SHALL, SHOULD, MAY) para categorizar requisitos
 - Ser objetivo — reportar lo que ES, no lo que debería ser
 - En modo `openspec`, siempre guardar el reporte en `review-report.md`
-- Devolver un envelope estructurado con: `status`, `executive_summary`, `artifacts`, `next_recommended` y `risks`
+- RETORNA el resultado siguiendo estrictamente el formato del Return Envelope definido en `skills/_shared/sdd-phase-common.md`

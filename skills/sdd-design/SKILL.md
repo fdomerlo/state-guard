@@ -145,4 +145,6 @@ Listo para tareas (sdd-tasks).
 - Mantener los diagramas ASCII simples — claridad sobre estética
 - Aplicar cualquier `rules.design` de `openspec/config.yaml`
 - Si tenés preguntas abiertas que BLOQUEAN el diseño, decirlo claramente — no asumir
-- Devolver un envelope estructurado con: `status`, `executive_summary`, `detailed_report` (opcional), `artifacts`, `next_recommended` y `risks`
+- ### Presupuesto de Tamaño
+  - Tu output NO DEBE exceder 800 palabras. Usa tablas para decisiones de arquitectura.
+- RETORNA el resultado siguiendo estrictamente el formato del Return Envelope definido en `skills/_shared/sdd-phase-common.md`

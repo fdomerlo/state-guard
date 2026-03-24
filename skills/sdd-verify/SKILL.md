@@ -275,4 +275,4 @@ Devuelve al orquestador el mismo contenido que escribiste en `verify-report.md`:
 - NO corregir ningún problema — solo reportarlos. El orquestador decide qué hacer.
 - En modo `openspec`, SIEMPRE guardar el reporte en `openspec/changes/{nombre-del-cambio}/verify-report.md` — esto persiste la verificación para sdd-archive y el rastro de auditoría
 - Aplicar cualquier `rules.verify` de `openspec/config.yaml`
-- Devolver un envelope estructurado con: `status`, `executive_summary`, `detailed_report` (opcional), `artifacts`, `next_recommended` y `risks`
+- RETORNA el resultado siguiendo estrictamente el formato del Return Envelope definido en `skills/_shared/sdd-phase-common.md`

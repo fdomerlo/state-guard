@@ -149,4 +149,4 @@ Listo para /sdd-explore {tema} o /sdd-new {nombre-del-cambio}.
 - SIEMPRE detectar el stack tecnológico real, nunca asumir
 - Si el proyecto ya tiene un directorio `openspec/`, reportar qué existe y preguntar al orquestador si debe actualizarse
 - Mantener el contexto en `config.yaml` CONCISO — no más de 10 líneas
-- Devolver un envelope estructurado con: `status`, `executive_summary`, `detailed_report` (opcional), `artifacts`, `next_recommended` y `risks`
+- RETORNA el resultado siguiendo estrictamente el formato del Return Envelope definido en `skills/_shared/sdd-phase-common.md`

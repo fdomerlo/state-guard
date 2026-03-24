@@ -146,4 +146,6 @@ Listo para implementación (sdd-apply).
 - NUNCA incluir tareas vagas como "implementar la funcionalidad" o "agregar tests"
 - Aplicar cualquier `rules.tasks` de `openspec/config.yaml`
 - Si el proyecto usa TDD, integrar tareas test-first: tarea RED (escribir test fallido) → tarea GREEN (hacerlo pasar) → tarea REFACTOR (limpiar)
-- Devolver un envelope estructurado con: `status`, `executive_summary`, `detailed_report` (opcional), `artifacts`, `next_recommended` y `risks`
+- ### Presupuesto de Tamaño
+  - Tu output NO DEBE exceder 530 palabras.
+- RETORNA el resultado siguiendo estrictamente el formato del Return Envelope definido en `skills/_shared/sdd-phase-common.md`

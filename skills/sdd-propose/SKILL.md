@@ -124,7 +124,9 @@ Listo para specs (sdd-spec) o diseño (sdd-design).
 - Usar rutas de archivos concretas en "Áreas Afectadas" cuando sea posible
 - Aplicar cualquier `rules.proposal` de `openspec/config.yaml`
 - **VALIDAR el nombre del cambio contra la regla `change_naming` (kebab-case)** si está configurada en config.yaml
-- Devolver un envelope estructurado con: `status`, `executive_summary`, `detailed_report` (opcional), `artifacts`, `next_recommended` y `risks`
+- ### Presupuesto de Tamaño
+  - Tu output NO DEBE exceder 400 palabras.
+- RETORNA el resultado siguiendo estrictamente el formato del Return Envelope definido en `skills/_shared/sdd-phase-common.md`
 
 ## Errores Comunes
 
