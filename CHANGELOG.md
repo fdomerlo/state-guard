@@ -2,7 +2,34 @@
 
 Todos los cambios completados y archivados en el proyecto.
 
-Generado el: 2026-03-18T18:30:00Z
+Generado el: 2026-03-24T12:00:00Z
+
+---
+
+## [2026-03-24] refactor-instalador-y-contratos-base
+
+**Intención**: Robustecer el script de instalación cambiando los marcadores de inyección por comentarios HTML (para no romper el renderizado Markdown en los IDEs) y purgar los contratos de persistencia compartidos para eliminar cualquier rastro de dependencias externas o bases de datos vectoriales (Engram).
+
+**Alcance**:
+
+- Cambiar marcadores `### BEGIN/END SDD ORCHESTRATOR ###` por `<!-- BEGIN/END SDD ORCHESTRATOR -->` en `scripts/install.sh`
+- Purga de menciones a `engram`, `hybrid` y `auto` en `skills/_shared/orchestrator-core.md`
+- Los contratos `persistence-contract.md` y `openspec-convention.md` ya estaban limpios
+
+---
+
+## [2026-03-24] refactor-contexto-y-skill-registry-local
+
+**Intención**: Centralizar el contrato DRY del Return Envelope en un archivo común, inyectar presupuestos de tamaño en las skills de fase para proteger la ventana de contexto, y habilitar el descubrimiento dinámico de skills mediante un registry generado automáticamente.
+
+**Alcance**:
+
+- Crear `skills/_shared/sdd-phase-common.md` con el contrato del Return Envelope unificado
+- Inyectar presupuestos de tamaño en 4 skills de fase (`sdd-propose` <400 palabras, `sdd-spec` <650 palabras, `sdd-design` <800 palabras, `sdd-tasks` <530 palabras)
+- Eliminar el envelope duplicado de 13 skills, referenciando el archivo común
+- Crear `skills/skill-registry/SKILL.md` con script bash POSIX para descubrimiento dinámico
+- Generar índice en `.agentify/skill-registry.md`
+- Actualizar `orchestrator-core.md` para leer el registry al iniciar tareas
 
 ---
 
