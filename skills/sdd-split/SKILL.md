@@ -21,9 +21,9 @@ Del orquestador:
 
 ## Execution and Persistence Contract
 
-Lee y sigue `skills/_shared/persistence-contract.md` para las reglas de resolución de modo.
+Utiliza únicamente las rutas y el contexto que el orquestador te provea directamente.
 
-- Si el modo es `openspec`: Lee y sigue `skills/_shared/openspec-convention.md`. Lee `proposal.md` como entrada. Guarda el plan en `openspec/changes/{nombre-del-cambio}/split-plan.md`.
+- Si el modo es `openspec`: Lee `proposal.md` desde el contexto como entrada. Guarda el plan en `openspec/changes/{nombre-del-cambio}/split-plan.md`.
 - Si el modo es `none`: Devuelve el plan solo de forma inline. Nunca escribir archivos.
 
 ## Criterios de Partición

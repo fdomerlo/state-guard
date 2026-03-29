@@ -21,9 +21,9 @@ Del orquestador:
 
 ## Execution and Persistence Contract
 
-Lee y sigue `skills/_shared/persistence-contract.md` para las reglas de resolución de modo.
+Utiliza únicamente las rutas y el contexto que el orquestador te provea directamente.
 
-- Si el modo es `openspec`: Lee y sigue `skills/_shared/openspec-convention.md`. Leé los cambios archivados y generá el CHANGELOG.md.
+- Si el modo es `openspec`: Leé los cambios archivados desde el contexto provisto y generá el CHANGELOG.md.
 - Si el modo es `none`: Devuelve solo el resumen sin escribir archivos.
 
 ## Qué Hacer

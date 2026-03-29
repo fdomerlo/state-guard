@@ -336,7 +336,10 @@ sys.exit(0)
 function Test-SourceValid {
     $missing = 0
     
-    foreach ($skillDir in Get-ChildItem -Path $SkillsSrc -Directory -Filter "sdd-*") {
+    foreach ($skillDir in Get-ChildItem -Path $SkillsSrc -Directory) {
+        if ($skillDir.Name -eq "_shared" -or $skillDir.Name -eq "skill-registry") {
+            continue
+        }
         $skillMd = Join-Path $skillDir.FullName "SKILL.md"
         if (-not (Test-Path $skillMd)) {
             Write-Error "Missing: $($skillDir.Name)/SKILL.md"
@@ -390,12 +393,16 @@ function Install-Skills {
     }
     
     $count = 0
-    foreach ($skillDir in Get-ChildItem -Path $SkillsSrc -Directory -Filter "sdd-*") {
+    foreach ($skillDir in Get-ChildItem -Path $SkillsSrc -Directory) {
         $skillName = $skillDir.Name
+        if ($skillName -eq "_shared") {
+            continue
+        }
+        
         $skillMdSrc = Join-Path $skillDir.FullName "SKILL.md"
         
-        # Verify source SKILL.md exists before creating target directory
-        if (-not (Test-Path $skillMdSrc)) {
+        # Verify source SKILL.md exists for sdd skills
+        if ($skillName -like "sdd-*" -and -not (Test-Path $skillMdSrc)) {
             Write-Warn "Skipping $skillName (SKILL.md not found in source)"
             continue
         }
@@ -405,8 +412,7 @@ function Install-Skills {
             New-Item -ItemType Directory -Path $skillDirTarget -Force | Out-Null
         }
         
-        $skillMdTarget = Join-Path $skillDirTarget "SKILL.md"
-        Copy-Item -Path $skillMdSrc -Destination $skillMdTarget -Force
+        Copy-Item -Path "$($skillDir.FullName)\*" -Destination $skillDirTarget -Recurse -Force
         Write-Skill $skillName
         $count++
     }

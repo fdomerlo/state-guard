@@ -12,33 +12,36 @@ El orquestador SDD sigue el principio **DRY (Don't Repeat Yourself)** mediante u
 
 ### Mecanismo de Carga de Skills
 
+El orquestador utiliza **Inyección dinámica de rutas**, lo que centraliza la carga de contratos base y dependencias en el orquestador en lugar de obligar a cada sub-agente a descubrirlas:
+
 ```
 Orquestador (orquestador-core)
     │
-    ├── Carga persistence-contract.md  → Reglas de resolución de modo
-    ├── Carga openspec-convention.md   → Convenciones de archivos
-    ├── Carga sdd-init/SKILL.md        → Skill de inicialización
-    ├── Carga sdd-explore/SKILL.md     → Skill de exploración
-    ├── Carga sdd-propose/SKILL.md     → Skill de propuesta
-    ├── Carga sdd-spec/SKILL.md        → Skill de especificación
-    ├── Carga sdd-design/SKILL.md       → Skill de diseño
-    ├── Carga sdd-tasks/SKILL.md        → Skill de planificación
-    ├── Carga sdd-apply/SKILL.md        → Skill de implementación
-    ├── Carga sdd-verify/SKILL.md       → Skill de verificación
-    └── Carga sdd-archive/SKILL.md      → Skill de archivado
+    ├── Carga persistence-contract.md  → Resuelve el modo
+    ├── Carga openspec-convention.md   → Prepara rutas de contexto
+    │
+    ├── Inyecta contexto y rutas → sdd-init
+    ├── Inyecta contexto y rutas → sdd-explore
+    ├── Inyecta contexto y rutas → sdd-propose
+    ├── Inyecta contexto y rutas → sdd-spec
+    ├── Inyecta contexto y rutas → sdd-design
+    ├── Inyecta contexto y rutas → sdd-tasks
+    ├── Inyecta contexto y rutas → sdd-apply
+    ├── Inyecta contexto y rutas → sdd-verify
+    └── Inyecta contexto y rutas → sdd-archive
 ```
 
-### Herencia de Skills
+### Herencia Inyectada
 
-Las skills comparten convenciones a través de archivos en `skills/_shared/`:
+Las skills reciben sus convenciones dinámicamente desde el orquestador, quienes las lee de `skills/_shared/`:
 
 | Archivo | Propósito |
 |---------|-----------|
-| `persistence-contract.md` | Define cómo se comportan los modos `openspec` y `none` |
-| `openspec-convention.md` | Define rutas de archivos, estructura de directorios y schema de `state.yaml` |
+| `persistence-contract.md` | El orquestador lo lee para decidir el modo (`openspec` o `none`) y se lo instruye al sub-agente |
+| `openspec-convention.md` | El orquestador arma las rutas y el contexto basado en esto y se las inyecta al sub-agente |
 | `sdd-phase-common.md` | Define el contrato del Return Envelope para todas las fases SDD |
 
-Cada skill referencia estos archivos compartidos, evitando duplicación de reglas y asegurando consistencia.
+Puesto que el orquestador se encarga de proveer las rutas exactas, los sub-agentes solo tienen que utilizarlas, optimizando el uso de tokens y la consistencia.
 
 ### Presupuestos de Contexto
 

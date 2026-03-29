@@ -20,9 +20,9 @@ El orquestador te dará:
 
 ## Execution and Persistence Contract
 
-Lee y sigue `skills/_shared/persistence-contract.md` para las reglas de resolución de modo.
+Utiliza únicamente las rutas y el contexto que el orquestador te provea directamente.
 
-- Si el modo es `openspec`: Lee los archivos `state.yaml` y genera la tabla de estado.
+- Si el modo es `openspec`: Lee los archivos `state.yaml` de manera masiva provistos en tu contexto y genera la tabla de estado.
 - Si el modo es `none`: Devuelve solo el resultado en el chat.
 
 ## Qué Hacer

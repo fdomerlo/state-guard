@@ -25,9 +25,9 @@ Del orquestador:
 
 ## Execution and Persistence Contract
 
-Lee y sigue `skills/_shared/persistence-contract.md` para las reglas de resolución de modo.
+Utiliza únicamente las rutas y el contexto que el orquestador te provea directamente.
 
-- Si el modo es `openspec`: Lee y sigue `skills/_shared/openspec-convention.md`. Recupera `proposal`, `spec`, `design` y `tasks` como dependencias. Guarda el reporte en `openspec/changes/{nombre-del-cambio}/review-report.md`.
+- Si el modo es `openspec`: Recupera `proposal`, `spec`, `design` y `tasks` como dependencias desde el contexto provisto. Guarda el reporte en `openspec/changes/{nombre-del-cambio}/review-report.md`.
 - Si el modo es `none`: Devuelve el reporte de auditoría solo de forma inline. Nunca escribir archivos.
 
 ## Qué Hacer

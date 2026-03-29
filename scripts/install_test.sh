@@ -371,7 +371,7 @@ test_all_global() {
 
 test_all_global_total_skill_count() {
     bash "$INSTALL_SCRIPT" --agent all-global > /dev/null 2>&1
-    # 5 targets × 12 skills = 60 SKILL.md files
+    # 5 targets × 13 skills = 65 SKILL.md files
     local total=0
     for dir in \
         "$HOME/.claude/skills" \
@@ -591,49 +591,49 @@ run_test "Unknown option exits non-zero" test_invalid_option
 echo ""
 
 echo -e "${BOLD}Claude Code${NC}"
-run_test "Installs all 12 skills to ~/.claude/skills" test_install_claude_code
-run_test "Exactly 12 SKILL.md files" test_claude_code_skill_count
+run_test "Installs all 13 skills to ~/.claude/skills" test_install_claude_code
+run_test "Exactly 13 SKILL.md files" test_claude_code_skill_count
 echo ""
 
 echo -e "${BOLD}OpenCode${NC}"
-run_test "Installs all 12 skills to ~/.config/opencode/skills" test_install_opencode
-run_test "Exactly 12 SKILL.md files" test_opencode_skill_count
+run_test "Installs all 13 skills to ~/.config/opencode/skills" test_install_opencode
+run_test "Exactly 13 SKILL.md files" test_opencode_skill_count
 run_test "Installs 10 command files" test_opencode_commands
 echo ""
 
 echo -e "${BOLD}Gemini CLI${NC}"
-run_test "Installs all 12 skills to ~/.gemini/skills" test_install_gemini_cli
-run_test "Exactly 12 SKILL.md files" test_gemini_cli_skill_count
+run_test "Installs all 13 skills to ~/.gemini/skills" test_install_gemini_cli
+run_test "Exactly 13 SKILL.md files" test_gemini_cli_skill_count
 echo ""
 
 echo -e "${BOLD}Codex${NC}"
-run_test "Installs all 12 skills to ~/.codex/skills" test_install_codex
-run_test "Exactly 12 SKILL.md files" test_codex_skill_count
+run_test "Installs all 13 skills to ~/.codex/skills" test_install_codex
+run_test "Exactly 13 SKILL.md files" test_codex_skill_count
 echo ""
 
 echo -e "${BOLD}VS Code (project-local)${NC}"
-run_test "Installs all 12 skills to .vscode/skills/" test_install_vscode
-run_test "Exactly 12 SKILL.md files" test_vscode_skill_count
+run_test "Installs all 13 skills to .vscode/skills/" test_install_vscode
+run_test "Exactly 13 SKILL.md files" test_vscode_skill_count
 echo ""
 
 echo -e "${BOLD}Antigravity${NC}"
-run_test "Installs all 12 skills to ~/.gemini/antigravity/skills/" test_install_antigravity
-run_test "Exactly 12 SKILL.md files" test_antigravity_skill_count
+run_test "Installs all 13 skills to ~/.gemini/antigravity/skills/" test_install_antigravity
+run_test "Exactly 13 SKILL.md files" test_antigravity_skill_count
 echo ""
 
 echo -e "${BOLD}Cursor${NC}"
-run_test "Installs all 12 skills to ~/.cursor/skills" test_install_cursor
-run_test "Exactly 12 SKILL.md files" test_cursor_skill_count
+run_test "Installs all 13 skills to ~/.cursor/skills" test_install_cursor
+run_test "Exactly 13 SKILL.md files" test_cursor_skill_count
 echo ""
 
 echo -e "${BOLD}Project-local${NC}"
-run_test "Installs all 12 skills to ./skills/" test_install_project_local
-run_test "Exactly 12 SKILL.md files" test_project_local_skill_count
+run_test "Installs all 13 skills to ./skills/" test_install_project_local
+run_test "Exactly 13 SKILL.md files" test_project_local_skill_count
 echo ""
 
 echo -e "${BOLD}Custom path${NC}"
 run_test "Installs to arbitrary custom path" test_custom_path
-run_test "Exactly 12 SKILL.md files" test_custom_path_skill_count
+run_test "Exactly 13 SKILL.md files" test_custom_path_skill_count
 run_test "Handles deeply nested custom path" test_nested_custom_path
 echo ""
 

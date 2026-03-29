@@ -26,15 +26,14 @@ Del orquestador:
 
 ## Qué Hacer
 
-### Paso 1.5: Verificar Estado Git Antes de Archivar
+### Paso 1: Verificar Estado Git Antes de Archivar
 
 Antes de sincronizar specs y mover al archivo, verificá el estado del repositorio git:
 
 ```bash
 # Función para verificar estado git antes de archivar
 verify_git_clean_for_change() {
-    local change_dir="$1"
-    local repo_root="${2:-.}"
+    local repo_root="${1:-.}"
 
     # Verificar si es un repositorio git
     if [ ! -d "$repo_root/.git" ]; then
@@ -70,15 +69,14 @@ verify_git_clean_for_change() {
 ```
 
 **Uso en el flujo:**
-- Llamá a `verify_git_clean_for_change "$change_name" "$repo_root"` antes de proceder con la sincronización de specs
+- Llamá a `verify_git_clean_for_change "$repo_root"` antes de proceder con la sincronización de specs
 - Si retorna 1 (error), BLOQUEÁ el archivado y mostrá el mensaje de error
 - Si retorna 0, continuá normalmente
 
 **Casos manejados:**
 - Repositorio sin git (no existe `.git/`) → continúa sin verificación
 - Git no disponible en PATH → continúa con warning
-- Cambios sin commitear en el directorio del cambio → BLOQUEA
-- Cambios sin commitear en otros directorios → continúa normalmente
+- CUALQUIER cambio sin commitear en el repositorio → BLOQUEA
 
 ### Paso 2: Sincronizar Specs Delta con Specs Principales
 
@@ -110,7 +108,7 @@ openspec/changes/{nombre-del-cambio}/specs/{dominio}/spec.md
   → openspec/specs/{dominio}/spec.md
 ```
 
-### Paso 2: Mover al Archivo
+### Paso 3: Mover al Archivo
 
 Mover toda la carpeta del cambio al archivo con prefijo de fecha:
 
@@ -121,7 +119,7 @@ openspec/changes/{nombre-del-cambio}/
 
 Usar la fecha de hoy en formato ISO (ej: `2026-02-16`).
 
-### Paso 3: Verificar el Archivado
+### Paso 4: Verificar el Archivado
 
 Confirmar:
 - [ ] Specs principales actualizadas correctamente
@@ -129,7 +127,7 @@ Confirmar:
 - [ ] El archivo contiene todos los artefactos (proposal, specs, design, tasks)
 - [ ] El directorio de cambios activos ya no tiene este cambio
 
-### Paso 4: Devolver Resumen
+### Paso 5: Devolver Resumen
 
 Devuelve al orquestador:
 
@@ -162,8 +160,8 @@ Listo para el siguiente cambio.
 ## Reglas
 
 - NUNCA archivar un cambio que tenga issues CRITICAL en su reporte de verificación
-- SIEMPRE verificar el estado git ANTES de sincronizar specs (ver Paso 1.5)
-- Si la verificación git detecta cambios sin commitear en el directorio del cambio, BLOQUEAR el archivado
+- SIEMPRE verificar el estado git ANTES de sincronizar specs (ver Paso 1)
+- Si la verificación git detecta CUALQUIER cambio sin commitear en el repositorio, BLOQUEAR el archivado
 - SIEMPRE sincronizar las specs delta ANTES de mover al archivo
 - Al fusionar en specs existentes, PRESERVAR los requisitos que no están mencionados en el delta
 - Usar formato de fecha ISO (YYYY-MM-DD) como prefijo de la carpeta de archivo

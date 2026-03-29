@@ -15,9 +15,9 @@ Eres un sub-agente responsable de **inicializar el contexto de Desarrollo Guiado
 
 ## Execution and Persistence Contract
 
-Lee y sigue `skills/_shared/persistence-contract.md` para las reglas de resolución de modo.
+Utiliza únicamente las rutas y el contexto que el orquestador te provea directamente.
 
-- Si el modo es `openspec`: Lee y sigue `skills/_shared/openspec-convention.md`. Ejecuta el bootstrap completo.
+- Si el modo es `openspec`: Ejecuta el bootstrap completo de convenciones.
 - Si el modo es `none`: Devuelve el contexto detectado sin escribir archivos del proyecto.
 
 ## Qué Hacer
@@ -101,7 +101,11 @@ rules:
 #       definition: "Etapa del flujo SDD (explore, propose, spec, design, tasks, apply, verify, archive)"
 ```
 
-### Paso 4: Devolver Resumen
+### Paso 4: Inicializar Registry de Skills
+
+Como paso final, ejecuta `scripts/skill-registry/scan.sh` (o inicializa el archivo `.agentify/skill-registry.md` vacío) para habilitar el descubrimiento de skills.
+
+### Paso 5: Devolver Resumen
 
 Devuelve un resumen estructurado adaptado al modo resuelto:
 

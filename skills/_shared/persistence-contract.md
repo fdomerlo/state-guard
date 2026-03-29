@@ -28,8 +28,8 @@ Ver `orchestrator-core.md` (sección "Gestión de Estado") para el schema comple
 | `openspec` | Escribe `openspec/changes/{change-name}/state.yaml` | Lee `openspec/changes/*/state.yaml` |
 | `none` | Imposible — el estado vive solo en contexto efímero | Imposible — advertir al usuario |
 
-**Responsabilidad exclusiva:** Solo el orquestador escribe y lee `state.yaml`.
-Las skills de sub-agentes no interactúan con este archivo.
+**Responsabilidad exclusiva:** Solo el orquestador escribe y mantiene `state.yaml`.
+Las skills de sub-agentes no interactúan con este archivo directamente, con la ÚNICA EXCEPCIÓN de la skill `sdd-status`, que tiene autorización para leerlo masivamente.
 
 ## Reglas Comunes
 

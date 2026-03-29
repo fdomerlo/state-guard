@@ -291,9 +291,14 @@ sys.exit(0)
 
 validate_source() {
     local missing=0
-    for skill_dir in "$SKILLS_SRC"/sdd-*/; do
+    for skill_dir in "$SKILLS_SRC"/*/; do
+        local skill_name
+        skill_name=$(basename "$skill_dir")
+        if [ "$skill_name" = "_shared" ] || [ "$skill_name" = "skill-registry" ]; then
+            continue
+        fi
         if [ ! -f "$skill_dir/SKILL.md" ]; then
-            print_error "Missing: $(basename "$skill_dir")/SKILL.md"
+            print_error "Missing: $skill_name/SKILL.md"
             missing=$((missing + 1))
         fi
     done
@@ -339,12 +344,16 @@ install_skills() {
     fi
 
     local count=0
-    for skill_dir in "$SKILLS_SRC"/sdd-*/; do
+    for skill_dir in "$SKILLS_SRC"/*/; do
         local skill_name
         skill_name=$(basename "$skill_dir")
 
-        # Verify source SKILL.md exists before creating target directory
-        if [ ! -f "$skill_dir/SKILL.md" ]; then
+        if [ "$skill_name" = "_shared" ]; then
+            continue
+        fi
+
+        # Verify source SKILL.md exists for sdd skills
+        if [[ "$skill_name" == sdd-* ]] && [ ! -f "$skill_dir/SKILL.md" ]; then
             print_warn "Skipping $skill_name (SKILL.md not found in source)"
             continue
         fi
@@ -352,10 +361,7 @@ install_skills() {
         mkdir -p "$target_dir/$skill_name" 2>/dev/null || {
             make_writable "$target_dir/$skill_name"
         }
-        if [ -f "$target_dir/$skill_name/SKILL.md" ]; then
-            make_writable "$target_dir/$skill_name/SKILL.md"
-        fi
-        cp "$skill_dir/SKILL.md" "$target_dir/$skill_name/SKILL.md"
+        cp -R "$skill_dir/"* "$target_dir/$skill_name/" 2>/dev/null || true
         print_skill "$skill_name"
         count=$((count + 1))
     done

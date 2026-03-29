@@ -68,8 +68,8 @@ blocked_reason: null                 # descripción del bloqueo, o null si block
 
 **Notas de transición:**
 
-- `spec` y `design` pueden aparecer en cualquier orden en `completed_phases` (se ejecutan en paralelo).
-- `current_phase` refleja la **última** de las dos en completarse cuando corren en paralelo.
+- `spec` y `design` deben aparecer en orden secuencial estricto en `completed_phases` (no se ejecutan en paralelo).
+- `current_phase` refleja la fase específica actual en el flujo lineal.
 - Un cambio recién creado (solo `propose` completo) tiene `current_phase: propose`.
 - Al archivar exitosamente, el archivo se mueve — no hace falta actualizar `state.yaml`.
 
