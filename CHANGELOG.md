@@ -6,6 +6,20 @@ Generado el: 2026-03-24T12:00:00Z
 
 ---
 
+## [2026-03-29] feat-sdd-fix
+
+**Intención**: Implementación completa de la skill `sdd-fix` para auditoría y reparación de estados corruptos, incluyendo comando OpenCode y actualización de la suite de tests.
+
+**Alcance**:
+
+- Crear `skills/sdd-fix/SKILL.md` — skill de auditoría que escanea `state.yaml`, valida schema y coherencia en disco, y repara discrepancias retrocediendo `current_phase` a la última fase válida
+- Crear `examples/opencode/commands/sdd-fix.md` — comando slash para OpenCode
+- Registrar `/sdd-fix` en `skills/_shared/orchestrator-core.md`
+- Actualizar `scripts/install_test.sh` (14→15 skills, 15→16 comandos, 70→75 global)
+- Restaurar la sección `/sdd-fix` en `MANUAL.md` (previamente documentada pero sin implementación)
+
+---
+
 ## [2026-03-29] refactor-orchestrator-core
 
 **Intención**: Refactorizar la arquitectura del orquestador SDD para eliminar deuda técnica, optimizar el consumo de tokens y asegurar la precisión en las validaciones de git y testing.

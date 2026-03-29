@@ -5,7 +5,7 @@ description: >
   Disparador: Cuando el orquestador te lanza para reflexionar sobre una funcionalidad, investigar el código base o aclarar requisitos.
 license: MIT
 metadata:
-  author: gentleman-programming
+  author: ctrbts-steve
   version: "2.0"
 ---
 

@@ -5,7 +5,7 @@ description: >
   Disparador: Cuando el usuario ejecuta /sdd-changelog o quiere generar un changelog desde los cambios archivados.
 license: MIT
 metadata:
-  author: gentleman-programming
+  author: ctrbts-steve
   version: "1.0"
 ---
 

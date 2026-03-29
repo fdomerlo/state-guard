@@ -5,7 +5,7 @@ description: >
   Disparador: Cuando el orquestador lanza esta skill para auditar un cambio contra sus especificaciones sin ejecutar código.
 license: MIT
 metadata:
-  author: gentleman-programming
+  author: ctrbts-steve
   version: "1.0"
 ---
 

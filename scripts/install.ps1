@@ -212,8 +212,8 @@ function Compile-AndAppendConfig {
     )
     
     $CoreFile = Join-Path $RepoDir "skills\_shared\orchestrator-core.md"
-    $MarkerBegin = "### BEGIN SDD ORCHESTRATOR ###"
-    $MarkerEnd = "### END SDD ORCHESTRATOR ###"
+    $MarkerBegin = "<!-- BEGIN SDD ORCHESTRATOR -->"
+    $MarkerEnd = "<!-- END SDD ORCHESTRATOR -->"
     
     $targetDir = Split-Path -Parent $TargetFile
     if ($targetDir -and -not (Test-Path $targetDir)) {

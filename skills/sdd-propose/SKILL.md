@@ -5,7 +5,7 @@ description: >
   Disparador: Cuando el orquestador te lanza para crear o actualizar una propuesta de cambio.
 license: MIT
 metadata:
-  author: gentleman-programming
+  author: ctrbts-steve
   version: "2.0"
 ---
 

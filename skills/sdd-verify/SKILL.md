@@ -5,7 +5,7 @@ description: >
   Disparador: Cuando el orquestador te lanza para verificar un cambio completado (o parcialmente completado).
 license: MIT
 metadata:
-  author: gentleman-programming
+  author: ctrbts-steve
   version: "2.0"
 ---
 

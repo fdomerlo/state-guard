@@ -51,6 +51,7 @@ Estas reglas se aplican a TODA petición del usuario, no solo a flujos SDD.
 - `/sdd-status` → ejecuta `sdd-status` (muestra el estado de todos los cambios activos).
 - `/sdd-verify [change]` → ejecuta `sdd-verify`.
 - `/sdd-review [change]` → ejecuta `sdd-review` (auditoría estática de código contra specs).
+- `/sdd-fix` → ejecuta `sdd-fix` (audita y repara estados corruptos o archivos faltantes en el sistema openspec).
 - `/sdd-split [change]` → ejecuta `sdd-split` (divide proposals monolíticas en sub-cambios).
 - `/sdd-archive [change]` → ejecuta `sdd-archive`.
 - `/sdd-changelog` → ejecuta `sdd-changelog` (genera CHANGELOG.md desde archive).

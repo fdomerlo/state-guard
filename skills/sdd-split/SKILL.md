@@ -5,7 +5,7 @@ description: >
   Disparador: Cuando el orquestador lanza esta skill para dividir una proposal demasiado grande en iteraciones manejables.
 license: MIT
 metadata:
-  author: gentleman-programming
+  author: ctrbts-steve
   version: "1.0"
 ---
 
