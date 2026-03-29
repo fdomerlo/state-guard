@@ -40,7 +40,7 @@ openspec/changes/*/state.yaml
 Para cada archivo encontrado, extrae los siguientes campos:
 
 - `change`: Nombre del cambio
-- `phase`: Fase actual (explore, propose, spec, design, tasks, apply, verify, archive, done, blocked)
+- `current_phase`: Fase actual (explore, propose, spec, design, tasks, apply, verify, archive, done, blocked)
 - `started_at`: Fecha de inicio en formato ISO 8601
 - `pending_phases`: Lista de fases pendientes
 - `blocked_reason`: Razón del bloqueo (si aplica)
@@ -48,8 +48,8 @@ Para cada archivo encontrado, extrae los siguientes campos:
 ### Paso 3: Filtrar Cambios Archivados
 
 Ignora los cambios que tengan:
-- `phase: done`
-- `phase: archive`
+- `current_phase: done`
+- `current_phase: archive`
 
 ### Paso 4: Calcular Tiempo Transcurrido
 
@@ -65,9 +65,9 @@ Aplica la lógica de semáforo:
 
 | Condición | Emoji | Significado |
 |-----------|-------|-------------|
-| `phase == "blocked"` | 🟡 | Bloqueado |
-| `phase == "done"` | 🔴 | Completado (no debería aparecer) |
-| `pending_phases` no está vacío Y `phase != "blocked"` | 🟢 | Activo |
+| `current_phase == "blocked"` | 🟡 | Bloqueado |
+| `current_phase == "done"` | 🔴 | Completado (no debería aparecer) |
+| `pending_phases` no está vacío Y `current_phase != "blocked"` | 🟢 | Activo |
 
 ### Paso 6: Formatear Tabla Markdown
 
@@ -80,7 +80,7 @@ Genera una tabla con las siguientes columnas:
 ```
 
 - **Cambio**: Nombre del cambio (de `change`)
-- **Fase Actual**: Phase con primera letra mayúscula (de `phase`)
+- **Fase Actual**: Current_phase con primera letra mayúscula (de `current_phase`)
 - **Tiempo Transcurrido**: Formato "Xh Ym" (del cálculo)
 - **Estado**: Emoji del semáforo
 
@@ -95,7 +95,7 @@ Devuelve la tabla Markdown con el estado de todos los cambios activos.
 
 ## Reglas
 
-- SIEMPRE filtrar cambios con phase "done" o "archive"
+- SIEMPRE filtrar cambios con current_phase "done" o "archive"
 - Si no hay cambios activos, mostrar mensaje informativo
 - Manejar gracefully archivos malformados (continuar, no fallar)
 - El formato de fase debe ser legible (primera letra mayúscula)

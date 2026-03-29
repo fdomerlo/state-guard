@@ -6,6 +6,18 @@ Generado el: 2026-03-24T12:00:00Z
 
 ---
 
+## [2026-03-29] refactor-orchestrator-core
+
+**Intención**: Refactorizar la arquitectura del orquestador SDD para eliminar deuda técnica, optimizar el consumo de tokens y asegurar la precisión en las validaciones de git y testing.
+
+**Alcance**:
+
+- **Core**: Unificación del esquema de estado (`state.yaml`) para utilizar exclusivamente `current_phase`.
+- **Arquitectura**: Sincronización del DAG a un flujo estrictamente lineal (`explore -> propose -> spec -> design -> tasks -> apply -> verify -> archive`).
+- **Optimización de Tokens**: Eliminación de la carga redundante de contratos globales (`openspec-convention.md`, `persistence-contract.md`) en los sub-agentes, delegando la provisión de rutas exactas al orquestador.
+- **Seguridad**: Refuerzo de `sdd-archive` para bloquear el archivado ante cualquier cambio no commiteado en el repositorio (no solo en la carpeta de specs).
+- **Testing**: Prohibición estricta de validaciones estáticas/alucinadas en `sdd-apply` y `sdd-verify`; ahora se exige ejecución real en terminal.
+
 ## [2026-03-24] refactor-instalador-y-contratos-base
 
 **Intención**: Robustecer el script de instalación cambiando los marcadores de inyección por comentarios HTML (para no romper el renderizado Markdown en los IDEs) y purgar los contratos de persistencia compartidos para eliminar cualquier rastro de dependencias externas o bases de datos vectoriales (Engram).

@@ -91,9 +91,8 @@ graph LR
     subgraph "Fases SDD"
         E[Explore] --> P[Propose]
         P --> S[Spec]
-        P --> D[Design]
-        S --> T[Tasks]
-        D --> T
+        S --> D[Design]
+        D --> T[Tasks]
         T --> A[Apply]
         A --> V[Verify]
         V --> R[Archive]
@@ -125,9 +124,9 @@ Los cambios describen qué es diferente del estado actual, no reescriben todo. A
 
 El archivo `state.yaml` rastrea el estado de cada cambio, previniendo colisiones en trabajo concurrente.
 
-### Skills como Código
+### Skills como Código y Optimización Extrema de Tokens
 
-Cada sub-agente es un archivo Markdown puro que cualquier asistente de IA puede ejecutar. Sin dependencias externas.
+Cada sub-agente es un archivo Markdown puro que cualquier asistente de IA puede ejecutar. Sin dependencias externas. El orquestador usa "inyección dinámica de rutas" para proveer solo el contexto estrictamente necesario a cada sub-agente, omitiendo contratos globales y logrando ahorrar miles de tokens de contexto por invocación.
 
 ### Modo OpenSpec
 

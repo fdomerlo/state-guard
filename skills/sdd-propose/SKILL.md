@@ -22,9 +22,7 @@ Del orquestador:
 
 ## Execution and Persistence Contract
 
-Lee y sigue `skills/_shared/persistence-contract.md` para las reglas de resolución de modo.
-
-- Si el modo es `openspec`: Lee y sigue `skills/_shared/openspec-convention.md`. Recupera `explore` como dependencia si está disponible.
+- Si el modo es `openspec`: Recupera `explore` como dependencia si está disponible usando las rutas proporcionadas.
 - Si el modo es `none`: Devuelve solo el resultado. Nunca crear ni modificar archivos del proyecto.
 
 ## Qué Hacer

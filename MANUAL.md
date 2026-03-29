@@ -81,7 +81,7 @@ openspec/changes/{nombre-del-cambio}/state.yaml
 change: {nombre-del-cambio}
 started_at: "YYYY-MM-DDTHH:MM:SS"   # ISO 8601
 last_updated: "YYYY-MM-DDTHH:MM:SS" # Actualizado en cada transición
-phase: {fase-actual}                 # explore|propose|spec|design|tasks|apply|verify|archive
+current_phase: {fase-actual}        # explore|propose|spec|design|tasks|apply|verify|archive
 completed_phases:
   - explore
   - propose

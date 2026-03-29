@@ -21,9 +21,7 @@ El orquestador te dará:
 
 ## Execution and Persistence Contract
 
-Lee y sigue `skills/_shared/persistence-contract.md` para las reglas de resolución de modo.
-
-- Si el modo es `openspec`: Lee y sigue `skills/_shared/openspec-convention.md`.
+- Si el modo es `openspec`: Usa las rutas proporcionadas por el orquestador.
 - Si el modo es `none`: Devuelve solo el resultado.
 
 ### Recuperación de Contexto

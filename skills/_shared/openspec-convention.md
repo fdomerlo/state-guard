@@ -41,7 +41,7 @@ openspec/
 ## Schema de state.yaml
 
 El orquestador es el **único responsable** de escribir y mantener `state.yaml`.
-Las skills de sub-agentes **nunca** escriben ni leen este archivo directamente.
+Las skills de sub-agentes **nunca** escriben ni leen este archivo directamente, con la ÚNICA EXCEPCIÓN de la skill `sdd-status`, que tiene autorización para leerlo masivamente.
 
 ```yaml
 # openspec/changes/{change-name}/state.yaml

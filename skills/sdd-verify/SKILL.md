@@ -23,9 +23,7 @@ Del orquestador:
 
 ## Execution and Persistence Contract
 
-Lee y sigue `skills/_shared/persistence-contract.md` para las reglas de resolución de modo.
-
-- Si el modo es `openspec`: Lee y sigue `skills/_shared/openspec-convention.md`. Recupera `proposal`, `spec`, `design` y `tasks` como dependencias. Guarda el reporte en `openspec/changes/{nombre-del-cambio}/verify-report.md`.
+- Si el modo es `openspec`: Recupera `proposal`, `spec`, `design` y `tasks` como dependencias usando las rutas proporcionadas. Guarda el reporte en `openspec/changes/{nombre-del-cambio}/verify-report.md`.
 - Si el modo es `none`: Devuelve el reporte de verificación solo de forma inline. Nunca escribir archivos.
 
 ## Qué Hacer
@@ -86,6 +84,8 @@ Buscar archivos de test relacionados con el cambio
 
 ### Paso 4b: Ejecutar Tests (Ejecución Real)
 
+CRÍTICO: Debes ejecutar usando una herramienta de terminal real. ESTÁ PROHIBIDO simular o inferir el resultado sin haber ejecutado el comando y analizado su salida estándar.
+
 Detectar el test runner del proyecto y ejecutar los tests:
 
 ```
@@ -109,6 +109,8 @@ Marcar: WARNING si tests omitidos se relacionan con áreas modificadas
 ```
 
 ### Paso 4c: Build y Verificación de Tipos (Ejecución Real)
+
+CRÍTICO: Debes ejecutar usando una herramienta de terminal real. ESTÁ PROHIBIDO simular o inferir el resultado sin haber ejecutado el comando y analizado su salida estándar.
 
 Detectar y ejecutar el comando de build/type-check:
 

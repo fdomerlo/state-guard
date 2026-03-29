@@ -59,10 +59,7 @@ Estas reglas se aplican a TODA petición del usuario, no solo a flujos SDD.
 ### Grafo de Dependencias
 
 ```text
-proposal -> specs --> tasks -> apply -> verify -> archive
-             ^
-             |
-           design
+explore -> propose -> spec -> design -> tasks -> apply -> verify -> archive
 ```
 
 ### Gestión de Estado (state.yaml) — OBLIGATORIO
@@ -74,9 +71,9 @@ proposal -> specs --> tasks -> apply -> verify -> archive
 | Evento | Acción |
 |--------|--------|
 | `/sdd-new` lanza el primer sub-agente | Crear el archivo con `started_at` = ahora |
-| Sub-agente retorna `status: ok` o `warning` | Mover fase a `completed_phases`, actualizar `phase` y `pending_phases` |
-| Una fase queda bloqueada | Setear `phase: blocked`, escribir `blocked_reason` |
-| `sdd-archive` exitoso | Setear `phase: done`, vaciar `pending_phases` |
+| Sub-agente retorna `status: ok` o `warning` | Mover fase a `completed_phases`, actualizar `current_phase` y `pending_phases` |
+| Una fase queda bloqueada | Setear `current_phase: blocked`, escribir `blocked_reason` |
+| `sdd-archive` exitoso | Setear `current_phase: done`, vaciar `pending_phases` |
 
 **Schema:**
 
@@ -85,7 +82,7 @@ proposal -> specs --> tasks -> apply -> verify -> archive
 change: {nombre-del-cambio}
 started_at: "2026-03-14T10:00:00"    # ISO 8601 — solo al crear, nunca modificar
 last_updated: "2026-03-14T12:30:00"  # ISO 8601 — actualizar en cada transición
-phase: tasks  # explore|propose|spec|design|tasks|apply|verify|archive|done|blocked
+current_phase: tasks  # explore|propose|spec|design|tasks|apply|verify|archive|done|blocked
 completed_phases:
   - explore
   - propose
@@ -106,7 +103,7 @@ blocked_reason: null   # null, o string describiendo el bloqueo
 
 ### Protocolo de Contexto para Sub-agentes
 
-Cada fase SDD tiene reglas estrictas de lectura y escritura. Los sub-agentes leen los artefactos directamente del sistema de archivos (`openspec/`). **Tú (el orquestador) solo les pasas las referencias (rutas), NO el contenido completo.**
+Cada fase SDD tiene reglas estrictas de lectura y escritura. Los sub-agentes leen los artefactos directamente del sistema de archivos (`openspec/`). **Tú (el orquestador) solo les pasas las referencias (rutas), NO el contenido completo.** Al invocar a un sub-agente, ERES RESPONSABLE de pasarle las rutas exactas de los archivos que debe leer y dónde debe escribir su output, sin obligarlos a leer las convenciones completas del proyecto. Envíales solo el contexto estrictamente necesario.
 
 | Fase | Lee dependencias de (OpenSpec) | Escribe artefacto |
 | --- | --- | --- |
@@ -140,6 +137,6 @@ Mantené este prompt ligero. Utilizá los archivos de convención compartidos ba
 Si perdés el rastro del estado del SDD (ej. tras una recarga del IDE), **antes de responder cualquier otra cosa**:
 
 1. Leé `openspec/changes/*/state.yaml` para todos los cambios presentes.
-2. Usá `phase` para saber dónde continuar.
+2. Usá `current_phase` para saber dónde continuar.
 3. Usá `completed_phases` para saber qué NO repetir.
 4. Si no existe ningún `state.yaml`, explorá el filesystem de `openspec/changes/` para inferir el estado a partir de qué archivos existen.

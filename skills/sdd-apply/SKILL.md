@@ -22,9 +22,7 @@ Del orquestador:
 
 ## Execution and Persistence Contract
 
-Lee y sigue `skills/_shared/persistence-contract.md` para las reglas de resolución de modo.
-
-- Si el modo es `openspec`: Lee y sigue `skills/_shared/openspec-convention.md`. Recupera `proposal`, `spec`, `design` y `tasks` como dependencias. Actualiza `tasks.md` con marcas `[x]`.
+- Si el modo es `openspec`: Recupera `proposal`, `spec`, `design` y `tasks` como dependencias usando las rutas proporcionadas. Actualiza `tasks.md` con marcas `[x]`.
 - Si el modo es `none`: Devuelve solo el progreso. No actualizar artefactos del proyecto.
 
 ## Qué Hacer
@@ -53,6 +51,8 @@ SI es modo estándar → usar Paso 2b (Flujo Estándar)
 ```
 
 ### Paso 2a: Implementar Tareas (Flujo TDD — RED → GREEN → REFACTOR)
+
+CRÍTICO: Debes ejecutar los tests utilizando una herramienta de terminal real. ESTÁ PROHIBIDO simular o inferir que un test pasó sin haber ejecutado el comando y analizado su salida estándar.
 
 Cuando TDD está activo, CADA tarea sigue este ciclo:
 

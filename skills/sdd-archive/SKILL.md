@@ -21,9 +21,7 @@ Del orquestador:
 
 ## Execution and Persistence Contract
 
-Lee y sigue `skills/_shared/persistence-contract.md` para las reglas de resolución de modo.
-
-- Si el modo es `openspec`: Lee y sigue `skills/_shared/openspec-convention.md`. Recupera `verify-report`, `proposal`, `spec`, `design` y `tasks` como dependencias. Realiza la fusión de specs y movimiento de carpetas al archivo.
+- Si el modo es `openspec`: Recupera `verify-report`, `proposal`, `spec`, `design` y `tasks` como dependencias usando las rutas proporcionadas. Realiza la fusión de specs y movimiento de carpetas al archivo.
 - Si el modo es `none`: Devuelve solo el resumen de cierre. No realizar operaciones de archivado de archivos.
 
 ## Qué Hacer
@@ -59,19 +57,14 @@ verify_git_clean_for_change() {
         return 0
     fi
 
-    # Filtrar solo archivos del directorio del cambio
-    local changed_files
-    changed_files=$(echo "$status" | grep "$change_dir" || true)
-
-    if [ -n "$changed_files" ]; then
-        echo "ERROR: Uncommitted changes detected in $change_dir:"
-        echo "$changed_files"
+    if [ -n "$status" ]; then
+        echo "ERROR: Uncommitted changes detected in repository:"
+        echo "$status"
         echo ""
         echo "Please commit your changes before archiving."
         return 1
     fi
 
-    # Hay cambios pero no en el directorio del cambio - continuar
     return 0
 }
 ```

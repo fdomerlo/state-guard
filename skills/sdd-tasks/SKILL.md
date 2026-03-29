@@ -21,9 +21,7 @@ Del orquestador:
 
 ## Execution and Persistence Contract
 
-Lee y sigue `skills/_shared/persistence-contract.md` para las reglas de resolución de modo.
-
-- Si el modo es `openspec`: Lee y sigue `skills/_shared/openspec-convention.md`. Recupera `proposal`, `spec` y `design` como dependencias.
+- Si el modo es `openspec`: Recupera `proposal`, `spec` y `design` como dependencias usando las rutas proporcionadas.
 - Si el modo es `none`: Devuelve solo el resultado. Nunca crear ni modificar archivos del proyecto.
 
 ## Qué Hacer
