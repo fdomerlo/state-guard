@@ -35,6 +35,8 @@ openspec/
 | sdd-tasks | Crea | `openspec/changes/{change-name}/tasks.md` |
 | sdd-apply | Actualiza | `openspec/changes/{change-name}/tasks.md` (marca `[x]`) |
 | sdd-verify | Crea | `openspec/changes/{change-name}/verify-report.md` |
+| sdd-review | Crea (opcional) | `openspec/changes/{change-name}/review-report.md` |
+| sdd-fix | Repara | `openspec/changes/{change-name}/state.yaml` |
 | sdd-archive | Mueve | `openspec/changes/{change-name}/` → `openspec/changes/archive/YYYY-MM-DD-{change-name}/` |
 | sdd-archive | Actualiza | `openspec/specs/{dominio}/spec.md` (fusiona deltas en specs principales) |
 

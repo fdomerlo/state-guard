@@ -21,9 +21,9 @@ Del orquestador:
 
 ## Execution and Persistence Contract
 
-Utiliza únicamente las rutas y el contexto que el orquestador te provea directamente.
+Este sub-agente es responsable de la lectura directa en disco. El orquestador solo le provee el modo de almacenamiento y, opcionalmente, el nombre del proyecto.
 
-- Si el modo es `openspec`: Leé los cambios archivados desde el contexto provisto y generá el CHANGELOG.md.
+- Si el modo es `openspec`: Escanea `openspec/changes/archive/` directamente en disco, lee los `proposal.md` de cada cambio archivado y genera el `CHANGELOG.md`.
 - Si el modo es `none`: Devuelve solo el resumen sin escribir archivos.
 
 ## Qué Hacer

@@ -94,6 +94,7 @@ pending_phases:
   - apply
   - verify
   - archive
+blocked: false             # true si verify reporta CRITICAL sin resolver
 blocked_reason: null   # null, o string describiendo el bloqueo
 ```
 
@@ -121,7 +122,7 @@ Cada fase SDD tiene reglas estrictas de lectura y escritura. Los sub-agentes lee
 
 ### Contrato de Resultados
 
-Cada fase que delegues debe retornarte estrictamente esta estructura: `status`, `executive_summary`, `artifacts`, `next_recommended`, `risks`.
+Cada fase que delegues debe retornarte estrictamente esta estructura: `status`, `executive_summary`, `artifacts`, `next_recommended`, `risks`. Opcionalmente, una fase puede incluir `detailed_report` con un análisis extenso cuando el resumen ejecutivo no sea suficiente.
 
 ### Estado y Convenciones (Fuente de la Verdad)
 

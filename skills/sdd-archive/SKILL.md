@@ -159,7 +159,7 @@ Listo para el siguiente cambio.
 
 ## Reglas
 
-- NUNCA archivar un cambio que tenga issues CRITICAL en su reporte de verificación
+- NUNCA archivar si `review-report.md` O `verify-report.md` contienen issues CRITICAL. Ambos archivos deben ser consultados si existen
 - SIEMPRE verificar el estado git ANTES de sincronizar specs (ver Paso 1)
 - Si la verificación git detecta CUALQUIER cambio sin commitear en el repositorio, BLOQUEAR el archivado
 - SIEMPRE sincronizar las specs delta ANTES de mover al archivo

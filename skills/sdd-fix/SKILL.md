@@ -17,6 +17,7 @@ Eres un sub-agente responsable de **auditar y reparar el estado del DAG de SDD**
 ## Qué Recibís
 
 El orquestador te dará:
+
 - El modo de almacenamiento de artefactos (`openspec | none`)
 - Las rutas a los directorios de cambios activos
 
@@ -33,11 +34,11 @@ Utiliza únicamente las rutas y el contexto que el orquestador te provea directa
 
 Busca todos los archivos `state.yaml` activos en el directorio:
 
-```
+```text
 openspec/changes/*/state.yaml
 ```
 
-Ignora cambios archivados (los que estén bajo `openspec/archive/`).
+Ignora cambios archivados (los que estén bajo `openspec/changes/archive/`). No descender a subdirectorios de archive.
 
 ### Paso 2: Validar Schema
 
@@ -48,7 +49,8 @@ Para cada `state.yaml` encontrado, verifica:
 - **Campo `last_updated`**: Debe existir y ser una fecha válida ISO 8601 posterior o igual a `started_at`.
 - **Campo `completed_phases`**: Debe ser una lista (puede estar vacía).
 - **Campo `pending_phases`**: Debe ser una lista (puede estar vacía).
-- **Campo `blocked_reason`**: Debe existir (puede ser `null`).
+- **Campo `blocked`**: Debe existir y ser un valor booleano (`true` o `false`). Si `blocked: true`, el campo `blocked_reason` DEBE contener una descripción no nula del bloqueo. Si `blocked: false`, `blocked_reason` debe ser `null`.
+- **Campo `blocked_reason`**: Debe existir (puede ser `null` si `blocked: false`).
 
 Si falta algún campo obligatorio, marcá el cambio como **CORRUPTO** en el reporte.
 
@@ -83,24 +85,29 @@ Si el schema está corrupto (campos faltantes), intentá reconstruir el `state.y
 
 ### Paso 5: Devolver Resumen
 
-Devuelve un reporte estructurado siguiendo el formato del Return Envelope:
+Devuelve un reporte estructurado siguiendo **estrictamente** el formato Markdown del Return Envelope definido en `skills/_shared/sdd-phase-common.md`:
 
-```yaml
-status: ok | warning | error
-executive_summary: "Se auditaron N cambios: X sanos, Y reparados, Z irrecuperables."
-artifacts:
-  - path: openspec/changes/{cambio}/state.yaml
-    action: repaired | untouched | reconstructed
-details:
-  - change: nombre-del-cambio
-    original_phase: tasks
-    repaired_phase: spec
-    issues_found:
-      - "Falta design.md (requerido para fase tasks)"
-      - "Falta tasks.md (requerido para fase tasks)"
-next_recommended: "/sdd-continue para retomar el cambio reparado"
-risks:
-  - "Cambios reparados pueden haber perdido progreso de fases intermedias"
+```markdown
+## Resultado de la Fase
+
+**status**: ok | warning | error
+
+### executive_summary
+Se auditaron N cambios: X sanos, Y reparados, Z irrecuperables.
+
+### artifacts
+- `openspec/changes/{cambio}/state.yaml` — Repaired | Untouched | Reconstructed
+
+### next_recommended
+/sdd-continue para retomar el cambio reparado
+
+### risks
+- Cambios reparados pueden haber perdido progreso de fases intermedias
+
+### detailed_report
+| Cambio | Fase Original | Fase Reparada | Problemas Encontrados |
+|--------|--------------|---------------|----------------------|
+| {nombre} | tasks | spec | Falta design.md, Falta tasks.md |
 ```
 
 ## Reglas

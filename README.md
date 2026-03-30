@@ -38,6 +38,7 @@ powershell .\scripts\install.ps1
 | `/sdd-spec` | Escribe especificaciones delta para un cambio SDD. |
 | `/sdd-design` | Crea el documento de diseño técnico para un cambio. |
 | `/sdd-tasks` | Desglosa un cambio en tareas de implementación. |
+| `/sdd-fix` | Audita y repara estados corruptos en `state.yaml`. Detecta artefactos faltantes y retrocede fases. |
 | `/sdd-changelog` | Genera un changelog automático a partir de los cambios archivados. |
 
 ---
