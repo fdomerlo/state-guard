@@ -35,6 +35,7 @@ powershell .\scripts\install.ps1
 | `/sdd-status` | Muestra el estado de todos los cambios activos mediante tabla con indicadores visuales. |
 | `/sdd-split` | Divide proposals monolíticas en sub-cambios manejables. Útil para cambios demasiado grandes. |
 | `/sdd-review` | Realiza auditoría estática de código comparando contra las especificaciones. |
+| `/sdd-propose <nombre>` | Crea o itera sobre una propuesta de cambio de manera independiente. |
 | `/sdd-spec` | Escribe especificaciones delta para un cambio SDD. |
 | `/sdd-design` | Crea el documento de diseño técnico para un cambio. |
 | `/sdd-tasks` | Desglosa un cambio en tareas de implementación. |

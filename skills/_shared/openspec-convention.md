@@ -178,3 +178,5 @@ openspec/changes/archive/YYYY-MM-DD-{change-name}/
 ```
 
 Usar fecha ISO de hoy. El archivo es un **RASTRO DE AUDITORÍA** — nunca eliminar ni modificar.
+
+**Fusión de Deltas**: Al archivar, los specs delta en `specs/{dominio}/` se fusionan automáticamente con los specs principales en `openspec/specs/{dominio}/spec.md`. Esta fusión actualiza los requisitos principales con los cambios implementados en el cambio archivado.

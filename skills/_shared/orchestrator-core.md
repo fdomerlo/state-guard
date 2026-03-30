@@ -42,21 +42,32 @@ Estas reglas se aplican a TODA petición del usuario, no solo a flujos SDD.
 
 ### Comandos de Orquestación
 
-- `/sdd-init` → ejecuta `sdd-init` (inicializa el proyecto forzando el modo openspec).
-- `/sdd-explore <topic>` → ejecuta `sdd-explore`.
+#### Meta-comandos de Orquestación
+
+Los siguientes comandos son **meta-comandos** — el orquestador los maneja directamente orquestando múltiples fases:
+
 - `/sdd-new <change>` → ejecuta `sdd-explore` y luego `sdd-propose`.
 - `/sdd-continue [change]` → crea el siguiente artefacto faltante en la cadena de dependencias.
 - `/sdd-ff [change]` → ejecuta `sdd-propose` → `sdd-spec` → `sdd-design` → `sdd-tasks`.
+
+#### Skills Directos
+
+Los siguientes comandos ejecutan **skills individuales** que puedes invocar directamente:
+
+- `/sdd-init` → ejecuta `sdd-init` (inicializa el proyecto forzando el modo openspec).
+- `/sdd-explore <topic>` → ejecuta `sdd-explore`.
+- `/sdd-propose <change>` → ejecuta la skill `sdd-propose` para crear o iterar sobre una propuesta de manera independiente.
+- `/sdd-spec <change>` → ejecuta `sdd-spec` para escribir especificaciones delta.
+- `/sdd-design <change>` → ejecuta `sdd-design` para crear el documento de diseño técnico.
+- `/sdd-tasks <change>` → ejecuta `sdd-tasks` para desglosar en tareas de implementación.
 - `/sdd-apply [change]` → ejecuta `sdd-apply` en lotes.
-- `/sdd-status` → ejecuta `sdd-status` (muestra el estado de todos los cambios activos).
 - `/sdd-verify [change]` → ejecuta `sdd-verify`.
 - `/sdd-review [change]` → ejecuta `sdd-review` (auditoría estática de código contra specs).
 - `/sdd-fix` → ejecuta `sdd-fix` (audita y repara estados corruptos o archivos faltantes en el sistema openspec).
 - `/sdd-split [change]` → ejecuta `sdd-split` (divide proposals monolíticas en sub-cambios).
 - `/sdd-archive [change]` → ejecuta `sdd-archive`.
 - `/sdd-changelog` → ejecuta `sdd-changelog` (genera CHANGELOG.md desde archive).
-- `/sdd-propose <change>` → ejecuta la skill `sdd-propose` para crear o iterar sobre una propuesta de manera independiente.
-*(Nota: `/sdd-new`, `/sdd-continue`, y `/sdd-ff` son meta-comandos que TÚ manejas orquestando fases; no son skills directos).*
+- `/sdd-status` → ejecuta `sdd-status` (muestra el estado de todos los cambios activos).
 
 ### Grafo de Dependencias
 

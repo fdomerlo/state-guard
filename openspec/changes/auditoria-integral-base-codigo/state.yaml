@@ -1,0 +1,16 @@
+change: auditoria-integral-base-codigo
+started_at: "2026-03-30T11:00:00"
+last_updated: "2026-03-30T14:30:00"
+current_phase: archive
+completed_phases:
+  - explore
+  - propose
+  - spec
+  - design
+  - tasks
+  - apply
+  - verify
+pending_phases:
+  - archive
+blocked: false
+blocked_reason: null
