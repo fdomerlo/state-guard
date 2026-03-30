@@ -99,13 +99,13 @@ blocked_reason: null                  # null o descripción del bloqueo
 
 ### Propiedades ACID
 
-**Atomicidad:** Cada fase se completa completamente o no se completa. El orquestador solo actualiza `state.yaml` después de que una fase termina exitosamente.
+**Atomicidad (Atomicity):** Cada fase se completa completamente o no se completa. El orquestador solo actualiza `state.yaml` después de que una fase termina exitosamente.
 
-**Consistencia:** El schema de `state.yaml` está validado. Las transiciones siguen un orden estricto definido por el grafo de dependencias.
+**Consistencia (Consistency):** El schema de `state.yaml` está validado. Las transiciones siguen un orden estricto definido por el grafo de dependencias.
 
 **Aislamiento (Isolation):** Cada cambio tiene su propio `state.yaml`. Múltiples cambios pueden ejecutarse en paralelo sin interferir entre sí.
 
-**Durabilidad:** El estado persiste en el filesystem del proyecto. Sobrevive a recargas de sesión, compactaciones de contexto y reinicios del IDE.
+**Durabilidad (Durability):** El estado persiste en el filesystem del proyecto. Sobrevive a recargas de sesión, compactaciones de contexto y reinicios del IDE.
 
 ### Prevención de Colisiones
 
