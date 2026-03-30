@@ -40,6 +40,10 @@ El script:
 
 RETORNA el resultado siguiendo estrictamente el formato del Return Envelope definido en `skills/_shared/sdd-phase-common.md`
 
+### Fallback (Para agentes sin Bash)
+
+Si tu entorno de ejecución no te permite ejecutar scripts de bash (como en Cursor, VSCode Copilot o Codex), TIENES PROHIBIDO fallar silenciosamente. DEBES escanear manualmente el directorio local `./skills/`, ignorar las carpetas que empiecen con `sdd-` y la carpeta `_shared`, leer la descripción de los `SKILL.md` restantes, y generar tú mismo el archivo `.agentify/skill-registry.md` escribiendo la tabla Markdown con el formato requerido.
+
 ## Reglas
 
 - Ejecutar el script desde la raíz del proyecto

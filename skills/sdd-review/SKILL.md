@@ -121,29 +121,16 @@ El reporte debe seguir este formato estructurado:
 
 ### Paso 7: Retornar Resultado
 
-Devolver al orquestador el resultado estructurado:
+El sub-agente DEBE devolver el resultado final al orquestador usando ESTRICTAMENTE el formato del Return Envelope definido en `skills/_shared/sdd-phase-common.md`. Los campos exactos son:
 
-```markdown
-## Resultado de Auditoría
+- `status` — `ok`, `warning` o `critical`
+- `executive_summary` — Resumen ejecutivo de la auditoría
+- `artifacts` — Lista de artefactos generados (ej. `review-report.md`)
+- `next_recommended` — Siguiente paso recomendado según el resultado
+- `risks` — Riesgos identificados durante la revisión
+- `detailed_report` (opcional) — Análisis extenso cuando el resumen ejecutivo no sea suficiente
 
-**Cambio**: {nombre-del-cambio}
-**Status**: {APROBADO | ADVERTENCIAS | BLOQUEADO}
-
-### Hallazgos
-- {lista de hallazgos}
-
-### Completitud
-- Total de requisitos: {N}
-- Implementados: {N}
-- Parciales: {N}
-- Faltantes: {N}
-
-### Siguiente Paso Recomendado
-{Dependiendo del status:
-- APROBADO: Proceder con sdd-verify para validación dinámica
-- ADVERTENCIAS: Revisar hallazgos y decidir si proceder
-- BLOQUEADO: Corregir problemas antes de continuar}
-```
+**NO** uses campos como "Hallazgos", "Completitud" u otros que no estén definidos en el Return Envelope estándar. Cualquier información adicional de la auditoría debe ir dentro de `detailed_report` o `executive_summary`.
 
 ## Reglas
 

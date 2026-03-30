@@ -226,9 +226,10 @@ test_opencode_commands() {
     assert_file_exists "$commands_dir/sdd-status.md" || return 1
     assert_file_exists "$commands_dir/sdd-review.md" || return 1
     assert_file_exists "$commands_dir/sdd-split.md" || return 1
+    assert_file_exists "$commands_dir/sdd-propose.md" || return 1
     local count
     count=$(find "$commands_dir" -name "sdd-*.md" | wc -l | tr -d ' ')
-    assert_eq "16" "$count" "Expected 16 OpenCode commands"
+    assert_eq "17" "$count" "Expected 17 OpenCode commands"
 }
 
 # ============================================================================
@@ -395,7 +396,7 @@ test_all_global_opencode_commands() {
     assert_dir_exists "$commands_dir" || return 1
     local count
     count=$(find "$commands_dir" -name "sdd-*.md" | wc -l | tr -d ' ')
-    assert_eq "16" "$count" "Expected 16 OpenCode commands with all-global"
+    assert_eq "17" "$count" "Expected 17 OpenCode commands with all-global"
 }
 
 # ============================================================================
@@ -420,7 +421,7 @@ test_idempotent_opencode() {
     assert_eq "15" "$skill_count" "Expected exactly 15 skills after double install" || return 1
     local cmd_count
     cmd_count=$(find "$HOME/.config/opencode/commands" -name "sdd-*.md" | wc -l | tr -d ' ')
-    assert_eq "16" "$cmd_count" "Expected exactly 16 commands after double install"
+    assert_eq "17" "$cmd_count" "Expected exactly 17 commands after double install"
 }
 
 test_idempotent_all_global() {
@@ -600,7 +601,7 @@ echo ""
 echo -e "${BOLD}OpenCode${NC}"
 run_test "Installs all 15 skills to ~/.config/opencode/skills" test_install_opencode
 run_test "Exactly 15 SKILL.md files" test_opencode_skill_count
-run_test "Installs 16 command files" test_opencode_commands
+run_test "Installs 17 command files" test_opencode_commands
 echo ""
 
 echo -e "${BOLD}Gemini CLI${NC}"

@@ -55,6 +55,7 @@ Estas reglas se aplican a TODA petición del usuario, no solo a flujos SDD.
 - `/sdd-split [change]` → ejecuta `sdd-split` (divide proposals monolíticas en sub-cambios).
 - `/sdd-archive [change]` → ejecuta `sdd-archive`.
 - `/sdd-changelog` → ejecuta `sdd-changelog` (genera CHANGELOG.md desde archive).
+- `/sdd-propose <change>` → ejecuta la skill `sdd-propose` para crear o iterar sobre una propuesta de manera independiente.
 *(Nota: `/sdd-new`, `/sdd-continue`, y `/sdd-ff` son meta-comandos que TÚ manejas orquestando fases; no son skills directos).*
 
 ### Grafo de Dependencias
