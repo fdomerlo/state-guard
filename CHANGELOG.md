@@ -2,7 +2,21 @@
 
 Todos los cambios completados y archivados en el proyecto.
 
-Generado el: 2026-03-24T12:00:00Z
+Generado el: 2026-04-03T15:47:00Z
+
+---
+
+## [2026-03-30] auditoria-integral-base-codigo
+
+**Intención**: Corregir deuda técnica remanente, inconsistencias entre documentación y código, y errores de lógica identificados en el repositorio agentify-sdd. El sistema SDD presenta brechas entre lo documentado y lo implementado que afectan la experiencia de usuario y la mantenibilidad del proyecto.
+
+**Alcance**:
+
+- Corregir README.md agregando comando `/sdd-propose` omitido en la tabla de comandos
+- Actualizar `orchestrator-core.md` para clarificar diferencia entre meta-comandos y comandos directos
+- Corregir incoherencia en `openspec-convention.md` (tabla vs descripción de sdd-archive)
+- Refactorizar `scripts/install.sh`: eliminar placeholders, corregir URL de error, reemplazar `|| true` por manejo de errores explícito, y externalizar script inline de Python
+- Generar reporte de hallazgos accionable con plan de mitigación
 
 ---
 
