@@ -227,7 +227,7 @@ merge_opencode_config() {
         config_dir="$HOME/.config/opencode"
     fi
     local target_config="$config_dir/opencode.json"
-    local source_config="$REPO_DIR/examples/opencode/opencode.json"
+    local source_config="$REPO_DIR/integrations/opencode/opencode.json"
     local core_file="$REPO_DIR/skills/_shared/orchestrator-core.md"
     
     local tool_name="OpenCode"
@@ -370,7 +370,7 @@ install_skills() {
 }
 
 install_opencode_commands() {
-    local commands_src="$REPO_DIR/examples/opencode/commands"
+    local commands_src="$REPO_DIR/integrations/opencode/commands"
     local commands_target
     commands_target="$(get_tool_path opencode-commands)"
 
@@ -401,7 +401,7 @@ install_for_agent() {
         claude-code)
             install_skills "$(get_tool_path claude-code)" "Claude Code"
             local config_target="${USERPROFILE:-$HOME}/.claude/CLAUDE.md"
-            compile_and_append_config "$config_target" "$REPO_DIR/examples/claude-code/CLAUDE.md" "Claude Code" "$(get_tool_path claude-code)"
+            compile_and_append_config "$config_target" "$REPO_DIR/integrations/claude-code/CLAUDE.md" "Claude Code" "$(get_tool_path claude-code)"
             ;;
         opencode)
             install_skills "$(get_tool_path opencode)" "OpenCode"
@@ -411,16 +411,16 @@ install_for_agent() {
         gemini-cli)
             install_skills "$(get_tool_path gemini-cli)" "Gemini CLI"
             local config_target="${USERPROFILE:-$HOME}/.gemini/GEMINI.md"
-            compile_and_append_config "$config_target" "$REPO_DIR/examples/gemini-cli/GEMINI.md" "Gemini CLI" "$(get_tool_path gemini-cli)"
+            compile_and_append_config "$config_target" "$REPO_DIR/integrations/gemini-cli/GEMINI.md" "Gemini CLI" "$(get_tool_path gemini-cli)"
             ;;
         codex)
             install_skills "$(get_tool_path codex)" "Codex"
-            print_next_step "Codex instructions file" "examples/codex/agents.md"
+            print_next_step "Codex instructions file" "integrations/codex/agents.md"
             ;;
         vscode)
             install_skills "$(get_tool_path vscode)" "VS Code (Copilot)"
             local config_target="./.github/copilot-instructions.md"
-            compile_and_append_config "$config_target" "$REPO_DIR/examples/vscode/copilot-instructions.md" "VS Code Copilot" "$(get_tool_path vscode)"
+            compile_and_append_config "$config_target" "$REPO_DIR/integrations/vscode/copilot-instructions.md" "VS Code Copilot" "$(get_tool_path vscode)"
             echo -e "  ${YELLOW}Note:${NC} Skills installed in current project (.vscode/skills/)"
             ;;
         antigravity)
@@ -428,12 +428,12 @@ install_for_agent() {
             install_skills "$target" "Antigravity"
             local config_target="./.agent/rules/sdd-orchestrator.md"
             mkdir -p "./.agent/rules" 2>/dev/null || true
-            compile_and_append_config "$config_target" "$REPO_DIR/examples/antigravity/sdd-orchestrator.md" "Antigravity" "$target"
+            compile_and_append_config "$config_target" "$REPO_DIR/integrations/antigravity/sdd-orchestrator.md" "Antigravity" "$target"
             ;;
         cursor)
             install_skills "$(get_tool_path cursor)" "Cursor"
             local config_target="./.cursorrules"
-            compile_and_append_config "$config_target" "$REPO_DIR/examples/cursor/.cursorrules" "Cursor" "$(get_tool_path cursor)"
+            compile_and_append_config "$config_target" "$REPO_DIR/integrations/cursor/.cursorrules" "Cursor" "$(get_tool_path cursor)"
             ;;
         project-local)
             install_skills "$(get_tool_path project-local)" "Project-local"
@@ -441,18 +441,18 @@ install_for_agent() {
             ;;
         all-global)
             install_skills "$(get_tool_path claude-code)" "Claude Code"
-            compile_and_append_config "${USERPROFILE:-$HOME}/.claude/CLAUDE.md" "$REPO_DIR/examples/claude-code/CLAUDE.md" "Claude Code" "$(get_tool_path claude-code)"
+            compile_and_append_config "${USERPROFILE:-$HOME}/.claude/CLAUDE.md" "$REPO_DIR/integrations/claude-code/CLAUDE.md" "Claude Code" "$(get_tool_path claude-code)"
             
             install_skills "$(get_tool_path opencode)" "OpenCode"
             install_opencode_commands
             merge_opencode_config
             
             install_skills "$(get_tool_path gemini-cli)" "Gemini CLI"
-            compile_and_append_config "${USERPROFILE:-$HOME}/.gemini/GEMINI.md" "$REPO_DIR/examples/gemini-cli/GEMINI.md" "Gemini CLI" "$(get_tool_path gemini-cli)"
+            compile_and_append_config "${USERPROFILE:-$HOME}/.gemini/GEMINI.md" "$REPO_DIR/integrations/gemini-cli/GEMINI.md" "Gemini CLI" "$(get_tool_path gemini-cli)"
             
             install_skills "$(get_tool_path codex)" "Codex"
             install_skills "$(get_tool_path cursor)" "Cursor"
-            compile_and_append_config "./.cursorrules" "$REPO_DIR/examples/cursor/.cursorrules" "Cursor" "$(get_tool_path cursor)"
+            compile_and_append_config "./.cursorrules" "$REPO_DIR/integrations/cursor/.cursorrules" "Cursor" "$(get_tool_path cursor)"
             
             echo -e "\n${GREEN}${BOLD}¡Todos los orquestadores globales configurados automáticamente!${NC}"
             ;;

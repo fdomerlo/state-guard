@@ -259,7 +259,7 @@ function Compile-AndAppendConfig {
 function Merge-OpenCodeConfig {
     $configDir = if ($OS -eq "windows") { "$env:USERPROFILE\.config\opencode" } else { "$HOME/.config/opencode" }
     $targetConfig = Join-Path $configDir "opencode.json"
-    $sourceConfig = Join-Path $RepoDir "examples\opencode\opencode.json"
+    $sourceConfig = Join-Path $RepoDir "integrations\opencode\opencode.json"
     $coreFile = Join-Path $RepoDir "skills\_shared\orchestrator-core.md"
     
     $toolName = "OpenCode"
@@ -422,7 +422,7 @@ function Install-Skills {
 }
 
 function Install-OpenCodeCommands {
-    $commandsSrc = Join-Path $RepoDir "examples\opencode\commands"
+    $commandsSrc = Join-Path $RepoDir "integrations\opencode\commands"
     $commandsTarget = Get-ToolPath "opencode-commands"
     
     Write-Host ""
@@ -459,7 +459,7 @@ function Install-ForAgent {
             if (-not $configTarget.Contains("$env:USERPROFILE")) {
                 $configTarget = "$HOME\.claude\CLAUDE.md"
             }
-            Compile-AndAppendConfig -TargetFile $configTarget -HeaderFile (Join-Path $RepoDir "examples\claude-code\CLAUDE.md") -ToolName "Claude Code" -SkillsPath $targetPath
+            Compile-AndAppendConfig -TargetFile $configTarget -HeaderFile (Join-Path $RepoDir "integrations\claude-code\CLAUDE.md") -ToolName "Claude Code" -SkillsPath $targetPath
         }
         "opencode" {
             $targetPath = Get-ToolPath "opencode"
@@ -471,18 +471,18 @@ function Install-ForAgent {
             $targetPath = Get-ToolPath "gemini-cli"
             Install-Skills $targetPath "Gemini CLI"
             $configTarget = if ($OS -eq "windows") { "$env:USERPROFILE\.gemini\GEMINI.md" } else { "$HOME/.gemini/GEMINI.md" }
-            Compile-AndAppendConfig -TargetFile $configTarget -HeaderFile (Join-Path $RepoDir "examples\gemini-cli\GEMINI.md") -ToolName "Gemini CLI" -SkillsPath $targetPath
+            Compile-AndAppendConfig -TargetFile $configTarget -HeaderFile (Join-Path $RepoDir "integrations\gemini-cli\GEMINI.md") -ToolName "Gemini CLI" -SkillsPath $targetPath
         }
         "codex" {
             $targetPath = Get-ToolPath "codex"
             Install-Skills $targetPath "Codex"
-            Write-NextStep "Codex instructions file" "examples\codex\agents.md"
+            Write-NextStep "Codex instructions file" "integrations\codex\agents.md"
         }
         "vscode" {
             $targetPath = Get-ToolPath "vscode"
             Install-Skills $targetPath "VS Code (Copilot)"
             $configTarget = ".\.github\copilot-instructions.md"
-            Compile-AndAppendConfig -TargetFile $configTarget -HeaderFile (Join-Path $RepoDir "examples\vscode\copilot-instructions.md") -ToolName "VS Code Copilot" -SkillsPath $targetPath
+            Compile-AndAppendConfig -TargetFile $configTarget -HeaderFile (Join-Path $RepoDir "integrations\vscode\copilot-instructions.md") -ToolName "VS Code Copilot" -SkillsPath $targetPath
             Write-Host "  ${YELLOW}Note:${NC} Skills installed in current project (.vscode/skills/)"
         }
         "antigravity" {
@@ -493,13 +493,13 @@ function Install-ForAgent {
             if ($configDir -and -not (Test-Path $configDir)) {
                 New-Item -ItemType Directory -Path $configDir -Force | Out-Null
             }
-            Compile-AndAppendConfig -TargetFile $configTarget -HeaderFile (Join-Path $RepoDir "examples\antigravity\sdd-orchestrator.md") -ToolName "Antigravity" -SkillsPath $target
+            Compile-AndAppendConfig -TargetFile $configTarget -HeaderFile (Join-Path $RepoDir "integrations\antigravity\sdd-orchestrator.md") -ToolName "Antigravity" -SkillsPath $target
         }
         "cursor" {
             $targetPath = Get-ToolPath "cursor"
             Install-Skills $targetPath "Cursor"
             $configTarget = if ($OS -eq "windows") { "$env:USERPROFILE\.cursorrules" } else { ".\.cursorrules" }
-            Compile-AndAppendConfig -TargetFile $configTarget -HeaderFile (Join-Path $RepoDir "examples\cursor\.cursorrules") -ToolName "Cursor" -SkillsPath $targetPath
+            Compile-AndAppendConfig -TargetFile $configTarget -HeaderFile (Join-Path $RepoDir "integrations\cursor\.cursorrules") -ToolName "Cursor" -SkillsPath $targetPath
         }
         "project-local" {
             $targetPath = Get-ToolPath "project-local"
@@ -512,7 +512,7 @@ function Install-ForAgent {
             $targetPath = Get-ToolPath "claude-code"
             Install-Skills $targetPath "Claude Code"
             $configTarget = if ($OS -eq "windows") { "$env:USERPROFILE\.claude\CLAUDE.md" } else { "$HOME/.claude/CLAUDE.md" }
-            Compile-AndAppendConfig -TargetFile $configTarget -HeaderFile (Join-Path $RepoDir "examples\claude-code\CLAUDE.md") -ToolName "Claude Code" -SkillsPath $targetPath
+            Compile-AndAppendConfig -TargetFile $configTarget -HeaderFile (Join-Path $RepoDir "integrations\claude-code\CLAUDE.md") -ToolName "Claude Code" -SkillsPath $targetPath
             
             # OpenCode
             $targetPath = Get-ToolPath "opencode"
@@ -524,7 +524,7 @@ function Install-ForAgent {
             $targetPath = Get-ToolPath "gemini-cli"
             Install-Skills $targetPath "Gemini CLI"
             $configTarget = if ($OS -eq "windows") { "$env:USERPROFILE\.gemini\GEMINI.md" } else { "$HOME/.gemini/GEMINI.md" }
-            Compile-AndAppendConfig -TargetFile $configTarget -HeaderFile (Join-Path $RepoDir "examples\gemini-cli\GEMINI.md") -ToolName "Gemini CLI" -SkillsPath $targetPath
+            Compile-AndAppendConfig -TargetFile $configTarget -HeaderFile (Join-Path $RepoDir "integrations\gemini-cli\GEMINI.md") -ToolName "Gemini CLI" -SkillsPath $targetPath
             
             # Codex
             $targetPath = Get-ToolPath "codex"
@@ -534,7 +534,7 @@ function Install-ForAgent {
             $targetPath = Get-ToolPath "cursor"
             Install-Skills $targetPath "Cursor"
             $configTarget = if ($OS -eq "windows") { "$env:USERPROFILE\.cursorrules" } else { ".\.cursorrules" }
-            Compile-AndAppendConfig -TargetFile $configTarget -HeaderFile (Join-Path $RepoDir "examples\cursor\.cursorrules") -ToolName "Cursor" -SkillsPath $targetPath
+            Compile-AndAppendConfig -TargetFile $configTarget -HeaderFile (Join-Path $RepoDir "integrations\cursor\.cursorrules") -ToolName "Cursor" -SkillsPath $targetPath
             
             Write-Host ""
             Write-Host "${GREEN}${BOLD}Todos los orquestadores globales configurados automaticamente!${NC}"

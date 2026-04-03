@@ -22,25 +22,25 @@ powershell .\scripts\install.ps1
 
 ## Comandos
 
-| Comando | Descripción |
-|---------|-------------|
-| `/sdd-init` | Inicializa el contexto SDD en el proyecto. Detecta el stack y crea la estructura `openspec/`. |
-| `/sdd-explore <tema>` | Investiga una idea antes de comprometerse. Lee el código base, compara enfoques e identifica riesgos. |
-| `/sdd-new <nombre>` | Inicia un nuevo cambio. Delega exploración y propuesta a sub-agentes especializados. |
-| `/sdd-continue` | Ejecuta la siguiente fase pendiente en el grafo de dependencias. |
-| `/sdd-ff` | Fast-forward de planificación: ejecuta propuesta → specs → diseño → tareas sin intervención. |
-| `/sdd-apply` | Implementa las tareas de un cambio. Escribe código siguiendo specs y diseño, marca tareas completadas. |
-| `/sdd-verify` | Valida la implementación contra las especificaciones. Ejecuta tests y genera reporte de cumplimiento. |
-| `/sdd-archive` | Cierra un cambio: fusiona las specs delta en las specs principales y mueve el cambio al archivo. |
-| `/sdd-status` | Muestra el estado de todos los cambios activos mediante tabla con indicadores visuales. |
-| `/sdd-split` | Divide proposals monolíticas en sub-cambios manejables. Útil para cambios demasiado grandes. |
-| `/sdd-review` | Realiza auditoría estática de código comparando contra las especificaciones. |
-| `/sdd-propose <nombre>` | Crea o itera sobre una propuesta de cambio de manera independiente. |
-| `/sdd-spec` | Escribe especificaciones delta para un cambio SDD. |
-| `/sdd-design` | Crea el documento de diseño técnico para un cambio. |
-| `/sdd-tasks` | Desglosa un cambio en tareas de implementación. |
-| `/sdd-fix` | Audita y repara estados corruptos en `state.yaml`. Detecta artefactos faltantes y retrocede fases. |
-| `/sdd-changelog` | Genera un changelog automático a partir de los cambios archivados. |
+| Comando | Descripción | Tipo |
+|---------|-------------|------|
+| `/sdd-init` | Inicializa el contexto SDD en el proyecto. Detecta el stack y crea la estructura `openspec/`. | Skill Directa |
+| `/sdd-new <nombre>` | Inicia un nuevo cambio. Delega exploración y propuesta a sub-agentes especializados. | **Meta-comando** |
+| `/sdd-continue` | Ejecuta la siguiente fase pendiente en el grafo de dependencias. | **Meta-comando** |
+| `/sdd-ff` | Fast-forward de planificación: ejecuta propuesta → specs → diseño → tareas sin intervención. | **Meta-comando** |
+| `/sdd-status` | Muestra el estado de todos los cambios activos mediante tabla con indicadores visuales. | Skill Directa |
+| `/sdd-fix` | Audita y repara estados corruptos en `state.yaml`. Detecta artefactos faltantes y retrocede fases. | Skill Directa |
+| `/sdd-changelog` | Genera un changelog automático a partir de los cambios archivados. | Skill Directa |
+| `/sdd-explore <tema>` | Investiga una idea antes de comprometerse. Lee el código base, compara enfoques e identifica riesgos. | Fase (Explore) |
+| `/sdd-propose <nombre>` | Crea o itera sobre una propuesta de cambio de manera independiente. | Fase (Propose) |
+| `/sdd-spec` | Escribe especificaciones delta para un cambio SDD. | Fase (Spec) |
+| `/sdd-design` | Crea el documento de diseño técnico para un cambio. | Fase (Design) |
+| `/sdd-tasks` | Desglosa un cambio en tareas de implementación. | Fase (Tasks) |
+| `/sdd-apply` | Implementa las tareas de un cambio. Escribe código siguiendo specs y diseño, marca tareas completadas. | Fase (Apply) |
+| `/sdd-verify` | Valida la implementación contra las especificaciones. Ejecuta tests y genera reporte de cumplimiento. | Fase (Verify) |
+| `/sdd-archive` | Cierra un cambio: fusiona las specs delta en las specs principales y mueve el cambio al archivo. | Fase (Archive) |
+| `/sdd-split` | Divide proposals monolíticas en sub-cambios manejables. Útil para cambios demasiado grandes. | Skill Directa |
+| `/sdd-review` | Realiza auditoría estática de código comparando contra las especificaciones. | Skill Directa |
 
 ---
 
@@ -78,13 +78,20 @@ El orquestador ejecutará cada fase secuencialmente, mostrando resúmenes y soli
 /sdd-verify
 ```
 
-### 6. Archivar
+### 6. Git Commit (PASO OBLIGATORIO)
 
-⚠️ **Importante**: El orquestador requiere que el *working tree* esté limpio. Asegúrate de hacer un commit de todos tus cambios antes de ejecutar el archivo.
+Antes de proceder al archivado, es **estrictamente obligatorio** guardar los cambios en el control de versiones. El comando `/sdd-archive` fallará si detecta cambios sin commitear.
 
 ```bash
 git add .
 git commit -m "feat: implementar mi-nueva-funcionalidad"
+```
+
+### 7. Archivar
+
+Cierra el ciclo del cambio, fusionando especificaciones y moviendo los artefactos al histórico.
+
+```bash
 /sdd-archive
 ```
 

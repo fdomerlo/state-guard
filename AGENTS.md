@@ -39,16 +39,18 @@ bash scripts/install_test.sh
 
 ### Comandos SDD Principales
 
-| Comando | Descripción |
-|---------|-------------|
-| `/sdd-init` | Inicializa contexto SDD |
-| `/sdd-explore <tema>` | Investiga idea |
-| `/sdd-new <nombre>` | Inicia nuevo cambio |
-| `/sdd-continue` | Continúa fase pendiente |
-| `/sdd-apply` | Implementa tareas |
-| `/sdd-verify` | Valida contra specs |
-| `/sdd-archive` | Archiva cambio completado |
-| `/sdd-status` | Muestra estado de cambios |
+| Comando | Descripción | Tipo |
+|---------|-------------|------|
+| `/sdd-init` | Inicializa contexto SDD | Skill Directa |
+| `/sdd-new <nombre>` | Inicia nuevo cambio | **Meta-comando** |
+| `/sdd-continue` | Continúa fase pendiente | **Meta-comando** |
+| `/sdd-ff` | Fast-forward de planificación | **Meta-comando** |
+| `/sdd-explore <tema>` | Investiga idea | Fase (Explore) |
+| `/sdd-propose <nombre>` | Crea o itera propuesta | Fase (Propose) |
+| `/sdd-apply` | Implementa tareas | Fase (Apply) |
+| `/sdd-verify` | Valida contra specs | Fase (Verify) |
+| `/sdd-archive` | Archiva cambio completado | Fase (Archive) |
+| `/sdd-status` | Muestra estado de cambios | Skill Directa |
 
 ---
 
@@ -126,6 +128,7 @@ change: nombre-del-cambio
 started_at: "2026-03-30T10:00:00"
 last_updated: "2026-03-30T12:30:00"
 current_phase: tasks
+status: active
 completed_phases:
   - explore
   - propose
@@ -136,7 +139,6 @@ pending_phases:
   - apply
   - verify
   - archive
-blocked: false
 blocked_reason: null
 ```
 
@@ -150,8 +152,8 @@ Tras pérdida de contexto:
 ### Integración con IDEs
 
 - **.cursorrules** (raíz): Reglas Cursor para SDD
-- **examples/cursor/.cursorrules**: Ejemplo configuración Cursor
-- **examples/vscode/copilot-instructions.md**: Instrucciones VS Code Copilot
+- **integrations/cursor/.cursorrules**: Ejemplo configuración Cursor
+- **integrations/vscode/copilot-instructions.md**: Instrucciones VS Code Copilot
 
 ---
 

@@ -461,7 +461,7 @@ test_skill_content_matches_source() {
 
 test_opencode_command_content_matches_source() {
     bash "$INSTALL_SCRIPT" --agent opencode > /dev/null 2>&1
-    local source_dir="$REPO_DIR/examples/opencode/commands"
+    local source_dir="$REPO_DIR/integrations/opencode/commands"
     local target_dir="$HOME/.config/opencode/commands"
     for cmd_file in "$source_dir"/sdd-*.md; do
         local name

@@ -85,6 +85,7 @@ change: {nombre-del-cambio}
 started_at: "YYYY-MM-DDTHH:MM:SS"   # ISO 8601
 last_updated: "YYYY-MM-DDTHH:MM:SS" # Actualizado en cada transición
 current_phase: {fase-actual}        # explore|propose|spec|design|tasks|apply|verify|archive
+status: {estado}                    # active | done | blocked
 completed_phases:
   - explore
   - propose
@@ -94,7 +95,7 @@ pending_phases:
   - apply
   - verify
   - archive
-blocked_reason: null                  # null o descripción del bloqueo
+blocked_reason: null                  # null o descripción del bloqueo (solo si status es blocked)
 ```
 
 ### Propiedades ACID
@@ -113,7 +114,7 @@ El orquestador detecta cambios concurrentes mediante:
 
 1. Lectura del `state.yaml` antes de cada transición de fase
 2. Verificación de que la fase anterior está marcada como completada
-3. Bloqueo de fases si `blocked_reason` no es null
+3. Bloqueo de fases si el campo `status` es `blocked` (proporcionando un `blocked_reason`)
 
 ---
 
@@ -186,7 +187,14 @@ El comando `/sdd-split` analiza una proposal monolítica y la divide en sub-camb
 
 ### /sdd-archive — Cierre de Cambios
 
-El comando `/sdd-archive` cierra un cambio: fusiona las specs delta en las specs principales y mueve el cambio al archivo. **Requiere commit previo en Git.**
+El comando `/sdd-archive` cierra un cambio: fusiona las specs delta en las specs principales y mueve el cambio al archivo. 
+
+**Flujo Obligatorio:**
+1. Ejecutar `/sdd-verify` y asegurar que todo es correcto.
+2. Realizar un `git commit` de todos los cambios de código y especificaciones.
+3. Ejecutar `/sdd-archive`.
+
+El comando verificará el estado de Git y **abortará la operación** si el *working tree* no está limpio.
 
 ### /sdd-review — Auditoría Estática
 
@@ -314,7 +322,7 @@ La instalación varía según la herramienta. Ejecuta `scripts/install.sh` y sel
 ### El estado no avanza
 
 1. Verificar que `state.yaml` existe
-2. Revisar que `blocked_reason` sea null
+2. Revisar que el campo `status` sea `active`. Si es `blocked`, revisar `blocked_reason`.
 3. Ejecutar `/sdd-fix` para reparación automática
 
 ### Los artefactos no persisten
