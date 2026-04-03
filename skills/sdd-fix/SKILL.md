@@ -44,7 +44,8 @@ Ignora cambios archivados (los que estén bajo `openspec/changes/archive/`). No 
 
 Para cada `state.yaml` encontrado, verifica:
 
-- **Campo `current_phase`**: Debe existir y contener un valor válido de la lista: `explore`, `propose`, `spec`, `design`, `tasks`, `apply`, `verify`, `archive`, `done`, `blocked`.
+- **Campo `current_phase`**: Debe existir y contener un valor válido de la lista: `explore`, `propose`, `spec`, `design`, `tasks`, `apply`, `verify`, `archive`.
+- **Campo `status`**: Debe existir y contener un valor válido de la lista: `active`, `done`, `blocked`.
 - **Campo `started_at`**: Debe existir y ser una fecha válida en formato ISO 8601.
 - **Campo `last_updated`**: Debe existir y ser una fecha válida ISO 8601 posterior o igual a `started_at`.
 - **Campo `completed_phases`**: Debe ser una lista (puede estar vacía).
@@ -115,7 +116,7 @@ Se auditaron N cambios: X sanos, Y reparados, Z irrecuperables.
 - NUNCA modificar artefactos de contenido (proposal.md, specs/, design.md, etc.) — solo reparar `state.yaml`
 - SIEMPRE validar schema ANTES de validar coherencia en disco
 - Si un `state.yaml` está completamente corrupto y no se puede inferir estado desde disco, reportarlo como irrecuperable
-- Si `current_phase` es `blocked`, NO reparar — solo reportar y respetar el bloqueo
-- Si `current_phase` es `done`, ignorar — no requiere reparación
+- Si `status` es `blocked`, NO reparar — solo reportar y respetar el bloqueo
+- Si `status` es `done`, ignorar — no requiere reparación
 - Manejar gracefully errores de lectura (permisos, archivos binarios, etc.)
 - RETORNA el resultado siguiendo estrictamente el formato del Return Envelope definido en `skills/_shared/sdd-phase-common.md`

@@ -5,6 +5,7 @@
 
 
 
+
 <!-- BEGIN SDD ORCHESTRATOR -->
 # Orquestador SDD — Antigravity
 
@@ -180,7 +181,7 @@ Cada fase que delegues debe retornarte estrictamente esta estructura: `status`, 
 
 ### Estado y Convenciones (Fuente de la Verdad)
 
-Mantené este prompt ligero. Utilizá los archivos de convención compartidos bajo `/tmp/tmp.PLrMef2QYo/home/.gemini/antigravity/skills/_shared/`:
+Mantené este prompt ligero. Utilizá los archivos de convención compartidos bajo `/home/ctrbts/.gemini/antigravity/skills/_shared/`:
 
 - `persistence-contract.md` — comportamiento del modo openspec.
 - `openspec-convention.md` — diseño de carpetas, rutas exactas y schema de `state.yaml`.

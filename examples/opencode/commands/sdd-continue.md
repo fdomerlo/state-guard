@@ -1,21 +1,10 @@
 ---
-description: Continúa la siguiente fase SDD en la cadena de dependencias
+description: Continúa un cambio SDD desde donde se quedó
 agent: sdd-orchestrator
 ---
-
-Sigue el flujo de trabajo del orquestador SDD para continuar el cambio activo.
-
-WORKFLOW:
-1. Comprueba qué artefactos ya existen para el cambio activo (propuesta, especificaciones, diseño, tareas)
-2. Determina la próxima fase necesaria según el grafo de dependencias:
-   proposal → specs → design → tasks → apply → verify → archive
-3. Lanza el sub-agente apropiado para la siguiente fase
-4. Presenta el resultado y pide al usuario que proceda
+Ejecuta el meta-comando de continuación para "{argument}".
+Como orquestador, lee `openspec/changes/{argument}/state.yaml` (o todos si no hay argumento) para determinar la `current_phase` y `pending_phases`. Luego, delega inmediatamente la siguiente fase al sub-agente correspondiente.
 
 CONTEXT:
-- Working directory: {workdir}
-- Current project: {project}
-- Change name: {argument}
-- Artifact store mode: openspec
-
-Lee las instrucciones del orquestador para coordinar este flujo de trabajo. NO ejecutes el trabajo de las fases directamente (inline) — delégalo a sub-agentes.
+- workdir: {workdir}
+- mode: openspec

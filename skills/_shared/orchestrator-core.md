@@ -48,7 +48,7 @@ Los siguientes comandos son **meta-comandos** — el orquestador los maneja dire
 
 - `/sdd-new <change>` → ejecuta `sdd-explore` y luego `sdd-propose`.
 - `/sdd-continue [change]` → crea el siguiente artefacto faltante en la cadena de dependencias.
-- `/sdd-ff [change]` → ejecuta `sdd-propose` → `sdd-spec` → `sdd-design` → `sdd-tasks`.
+- `/sdd-ff [change]` → ejecuta `sdd-propose` → `sdd-spec` → `sdd-design` → `sdd-tasks`. Cuando ejecutes el meta-comando `/sdd-ff`, TIENES ESTRICTAMENTE PROHIBIDO esperar hasta el final para guardar el estado. DEBES escribir/actualizar `state.yaml` en el disco después de completar CADA fase interna (propose, spec, design, tasks) para garantizar la recuperación en caso de fallo del IDE.
 
 #### Skills Directos
 
@@ -85,8 +85,8 @@ explore -> propose -> spec -> design -> tasks -> apply -> verify -> archive
 |--------|--------|
 | `/sdd-new` lanza el primer sub-agente | Crear el archivo con `started_at` = ahora |
 | Sub-agente retorna `status: ok` o `warning` | Mover fase a `completed_phases`, actualizar `current_phase` y `pending_phases` |
-| Una fase queda bloqueada | Setear `current_phase: blocked`, escribir `blocked_reason` |
-| `sdd-archive` exitoso | Setear `current_phase: done`, vaciar `pending_phases` |
+| Una fase queda bloqueada | Setear status: blocked, escribir blocked_reason |
+| sdd-archive exitoso | Setear status: done y mantener current_phase en archive, vaciar pending_phases |
 
 **Schema:**
 
@@ -95,7 +95,8 @@ explore -> propose -> spec -> design -> tasks -> apply -> verify -> archive
 change: {nombre-del-cambio}
 started_at: "2026-03-14T10:00:00"    # ISO 8601 — solo al crear, nunca modificar
 last_updated: "2026-03-14T12:30:00"  # ISO 8601 — actualizar en cada transición
-current_phase: tasks  # explore|propose|spec|design|tasks|apply|verify|archive|done|blocked
+current_phase: tasks  # explore|propose|spec|design|tasks|apply|verify|archive
+status: active        # active | done | blocked (default: active)
 completed_phases:
   - explore
   - propose

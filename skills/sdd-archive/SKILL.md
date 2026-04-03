@@ -154,6 +154,7 @@ Las siguientes specs ahora reflejan el nuevo comportamiento:
 
 ### Ciclo SDD Completo
 El cambio ha sido planificado, implementado, verificado y archivado completamente.
+Instruye al orquestador a setear status: done y mantener current_phase en archive.
 Listo para el siguiente cambio.
 ```
 

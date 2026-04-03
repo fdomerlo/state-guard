@@ -80,7 +80,11 @@ El orquestador ejecutará cada fase secuencialmente, mostrando resúmenes y soli
 
 ### 6. Archivar
 
+⚠️ **Importante**: El orquestador requiere que el *working tree* esté limpio. Asegúrate de hacer un commit de todos tus cambios antes de ejecutar el archivo.
+
 ```bash
+git add .
+git commit -m "feat: implementar mi-nueva-funcionalidad"
 /sdd-archive
 ```
 

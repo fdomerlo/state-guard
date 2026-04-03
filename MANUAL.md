@@ -184,6 +184,10 @@ El comando `/sdd-split` analiza una proposal monolítica y la divide en sub-camb
 /sdd-split mi-cambio-grande
 ```
 
+### /sdd-archive — Cierre de Cambios
+
+El comando `/sdd-archive` cierra un cambio: fusiona las specs delta en las specs principales y mueve el cambio al archivo. **Requiere commit previo en Git.**
+
 ### /sdd-review — Auditoría Estática
 
 El comando `/sdd-review` compara el código implementado contra las especificaciones sin ejecutar tests.

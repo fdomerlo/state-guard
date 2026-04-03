@@ -52,6 +52,7 @@ change: {nombre-del-cambio}
 started_at: "YYYY-MM-DDTHH:MM:SS"   # ISO 8601 — se establece al crear, nunca se modifica
 last_updated: "YYYY-MM-DDTHH:MM:SS" # actualizar en cada transición de fase
 current_phase: {fase-actual}         # última fase completada exitosamente
+status: active                       # active | done | blocked (default: active)
 completed_phases:                    # lista ordenada, solo fases con status: ok
   - explore    # incluir solo si sdd-explore fue ejecutado
   - propose
@@ -61,7 +62,7 @@ pending_phases:                      # fases que aún no se ejecutaron
   - apply
   - verify
   - archive
-blocked: false                       # true si verify reporta CRITICAL sin resolver
+blocked: false                       # true si status es blocked y verify reporta CRITICAL sin resolver
 blocked_reason: null                 # descripción del bloqueo, o null si blocked: false
 ```
 
