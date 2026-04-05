@@ -51,6 +51,8 @@ bash scripts/install_test.sh
 | `/sdd-verify` | Valida contra specs | Fase (Verify) |
 | `/sdd-archive` | Archiva cambio completado | Fase (Archive) |
 | `/sdd-status` | Muestra estado de cambios | Skill Directa |
+| `/sdd-checkpoint` | Genera resumen de estado y lo guarda | Skill Directa |
+| `/sdd-rollback` | Purga carpeta del cambio y restaura desde git | Skill Directa |
 
 ---
 
@@ -148,6 +150,8 @@ Tras pérdida de contexto:
 1. Leer `openspec/changes/*/state.yaml`
 2. Usar `current_phase` para identificar fase actual
 3. Usar `completed_phases` para evitar repetir trabajo
+
+**Para sub-agentes: Los cambios activos tienen specs delta en `openspec/changes/{nombre}/specs/`. Al recuperar el estado, leer primero estas specs delta antes de las specs principales en `openspec/specs/`.**
 
 ### Integración con IDEs
 

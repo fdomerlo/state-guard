@@ -185,6 +185,24 @@ El comando `/sdd-split` analiza una proposal monolítica y la divide en sub-camb
 /sdd-split mi-cambio-grande
 ```
 
+### /sdd-checkpoint — Guardado de Estado
+
+El comando `/sdd-checkpoint` genera un resumen del estado actual de la sesión y lo guarda en el archivo de estado del cambio.
+
+**Cuándo usarlo:**
+
+- Antes de realizar operaciones riesgosas
+- Para mantener persistencia manual adicional a la automática
+- Al cambiar de contexto de trabajo
+
+**Ejemplo de uso:**
+
+```text
+/sdd-checkpoint
+```
+
+El archivo de estado se actualiza con el resumen actual, incluyendo fase actual y progreso.
+
 ### /sdd-archive — Cierre de Cambios
 
 El comando `/sdd-archive` cierra un cambio: fusiona las specs delta en las specs principales y mueve el cambio al archivo. 
@@ -233,6 +251,24 @@ El comando `/sdd-fix` detecta y repara problemas comunes en el proyecto.
 
 ```text
 /sdd-fix
+```
+
+### /sdd-rollback — Revertir un Cambio
+
+El comando `/sdd-rollback` purga la carpeta del cambio y restaura los archivos modificados desde git.
+
+**⚠️ ADVERTENCIA: Pérdida de Trabajo**
+
+Este comando **elimina permanentemente** todo el trabajo no commiteado en el directorio del cambio. Antes de ejecutar:
+
+1. Confirma que no hay cambios sin guardar
+2. Ejecuta `git status` para verificar el estado
+3. Solo usar cuando el cambio no tiene solución o debe reiniciarse completamente
+
+**Ejemplo de uso:**
+
+```text
+/sdd-rollback mi-cambio
 ```
 
 ---

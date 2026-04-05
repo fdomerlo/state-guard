@@ -41,6 +41,8 @@ powershell .\scripts\install.ps1
 | `/sdd-archive` | Cierra un cambio: fusiona las specs delta en las specs principales y mueve el cambio al archivo. | Fase (Archive) |
 | `/sdd-split` | Divide proposals monolíticas en sub-cambios manejables. Útil para cambios demasiado grandes. | Skill Directa |
 | `/sdd-review` | Realiza auditoría estática de código comparando contra las especificaciones. | Skill Directa |
+| `/sdd-checkpoint` | Genera un resumen del estado actual de la sesión y lo guarda en el archivo de estado. | Skill Directa |
+| `/sdd-rollback` | Purga la carpeta del cambio y restaura los archivos modificados desde git. | Skill Directa |
 
 ---
 
@@ -139,7 +141,15 @@ El archivo `state.yaml` rastrea el estado de cada cambio, previniendo colisiones
 
 ### Skills como Código y Optimización Extrema de Tokens
 
-Cada sub-agente es un archivo Markdown puro que cualquier asistente de IA puede ejecutar. Sin dependencias externas. El orquestador usa "inyección dinámica de rutas" para proveer solo el contexto estrictamente necesario a cada sub-agente, omitiendo contratos globales y logrando ahorrar miles de tokens de contexto por invocación.
+Cada sub-agente es un archivo Markdown puro que cualquier asistente de IA puede ejecutar. Sin dependencias externas. El orquestador usa "inyección dinámica de rutas" para prover solo el contexto estrictamente necesario a cada sub-agente, omitiendo contratos globales y logrando ahorrar miles de tokens de contexto por invocación.
+
+### Batching de Tareas
+
+El sistema permite agrupar múltiples tareas relacionadas para ejecución secuencial o paralela. El batching optimiza el flujo de trabajo cuando hay tareas dependientes que requieren coordinación. El orquestador maneja automáticamente las dependencias entre tareas y determina el orden de ejecución óptimo.
+
+### Inyección Modular de Contexto
+
+El orquestador implementa inyección modular de contexto mediante la técnica de "inyección dinámica de rutas". En lugar de cargar contratos globales, cada skill recibe únicamente el contexto necesario para su fase específica. Esto reduce significativamente el consumo de tokens y mejora la velocidad de procesamiento. Los sub-agentes reciben contexto inyectado que incluye rutas a artefactos, convenciones del proyecto y configuración específica de la fase.
 
 ### Modo OpenSpec
 
