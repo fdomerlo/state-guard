@@ -1,5 +1,9 @@
 {
   "$schema": "https://opencode.ai/config.json",
+  "commands": {
+    "sdd-checkpoint": "commands/sdd-checkpoint.md",
+    "sdd-rollback": "commands/sdd-rollback.md"
+  },
   "agent": {
     "sdd-orchestrator": {
       "mode": "all",

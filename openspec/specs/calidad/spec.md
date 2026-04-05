@@ -70,6 +70,101 @@ El script install.sh SHALL mostrar mensajes de error claros con rutas específic
 - WHEN El script reporta el error
 - THEN Incluye información de contexto (ruta afectada, operación intentada) para facilitar diagnóstico
 
+## Delta: sync-opencode-commands (2026-04-05)
+
+### Requisito: Nuevos Comandos en OpenCode
+
+El sistema DEBE incluir los comandos `sdd-checkpoint` y `sdd-rollback` en la integración de OpenCode.
+
+#### Escenario: Comando checkpoint disponible
+
+- GIVEN el usuario ejecuta `/sdd-checkpoint` en OpenCode
+- WHEN el comando delega al skill `sdd-checkpoint`
+- THEN el skill genera un checkpoint y lo guarda en el archivo de sesión
+- AND retorna confirmación al usuario
+
+#### Escenario: Comando rollback disponible
+
+- GIVEN el usuario ejecuta `/sdd-rollback` en OpenCode
+- WHEN el comando delega al skill `sdd-rollback`
+- THEN el skill purga la carpeta del cambio y restaura archivos desde git
+- AND retorna confirmación al usuario
+
+### Requisito: Registro en opencode.json
+
+El sistema DEBE registrar los nuevos comandos en el archivo de configuración de OpenCode.
+
+#### Escenario: Comandos registrados correctamente
+
+- GIVEN se crea un nuevo archivo de comando en `commands/`
+- WHEN el archivo se agrega a `integrations/opencode/opencode.json`
+- THEN el comando está disponible para ejecución via `/sdd-{nombre}`
+
+### Requisito: Restricción de Contexto en OpenCode
+
+El sistema DEBE indicar a los modelos de OpenCode leer solo Specs Delta.
+
+#### Escenario: sdd-propose usa specs delta
+
+- GIVEN `sdd-propose` se ejecuta en OpenCode
+- WHEN el modelo recibe el prompt
+- THEN solo lee el archivo `proposal.md` del cambio
+- AND NO lee toda la carpeta `changes/`
+
+#### Escenario: sdd-apply usa specs delta
+
+- GIVEN `sdd-apply` se ejecuta en OpenCode
+- WHEN el modelo recibe el prompt
+- THEN solo lee los archivos en `openspec/changes/{nombre}/specs/`
+- AND NO lee toda la carpeta `specs/` del proyecto
+
+#### Escenario: sdd-verify usa specs delta
+
+- GIVEN `sdd-verify` se ejecuta en OpenCode
+- WHEN el modelo recibe el prompt
+- THEN solo lee los archivos delta en `changes/{nombre}/specs/` y `design.md`
+- AND NO lee toda la carpeta `specs/` del proyecto
+
+### Requisito: Batching en sdd-apply
+
+El sistema DEBE indicar al modelo esperar lote inline de tareas del orquestador.
+
+#### Escenario: sdd-apply recibe lote inline
+
+- GIVEN `sdd-apply` se ejecuta
+- WHEN el orquestador pasa tareas inline en el prompt
+- THEN el modelo procesa el lote sin leer `tasks.md` completo
+- AND procesa cada tarea secuencialmente
+
+#### Escenario: sdd-apply con batching optimiza contexto
+
+- GIVEN múltiples tareas pending en el change
+- WHEN `sdd-apply` recibe el lote
+- THEN el contexto incluye solo las tareas del lote
+- AND no requiere lectura adicional de archivos de tareas
+
+## Archivos Afectados (sync-opencode-commands)
+
+| Acción | Archivo |
+|--------|---------|
+| Crear | integrations/opencode/commands/sdd-checkpoint.md |
+| Crear | integrations/opencode/commands/sdd-rollback.md |
+| Modificar | integrations/opencode/opencode.json |
+| Modificar | integrations/opencode/commands/sdd-apply.md |
+| Modificar | integrations/opencode/commands/sdd-propose.md |
+| Modificar | integrations/opencode/commands/sdd-verify.md |
+
+## Criterios de Verificación (sync-opencode-commands)
+
+1. `sdd-checkpoint.md` creado en `commands/`
+2. `sdd-rollback.md` creado en `commands/`
+3. `opencode.json` actualizado con nuevos comandos
+4. `sdd-apply.md` tiene restricción de specs delta + batching
+5. `sdd-propose.md` tiene restricción de specs delta
+6. `sdd-verify.md` tiene restricción de specs delta
+
+---
+
 ## Requisitos ELIMINADOS
 
 ### Requisito: (ninguno)

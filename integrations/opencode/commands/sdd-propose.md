@@ -10,3 +10,5 @@ CONTEXT:
 - Current project: {project}
 - Change name: {argument}
 - Artifact store mode: openspec
+
+RESTRICCIÓN: Lee solo el archivo `proposal.md` del cambio, NO toda la carpeta `changes/`.

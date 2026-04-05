@@ -10,3 +10,5 @@ CONTEXT:
 - Working directory: {workdir}
 - Current project: {project}
 - Artifact store mode: openspec
+
+RESTRICCIÓN: Lee solo los archivos delta en `openspec/changes/{nombre}/specs/` y `design.md`, NO toda la carpeta `specs/`.
