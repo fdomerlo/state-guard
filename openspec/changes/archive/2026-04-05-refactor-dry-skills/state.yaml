@@ -1,0 +1,17 @@
+change: refactor-dry-skills
+started_at: "2026-04-05T10:00:00"
+last_updated: "2026-04-05T17:40:00"
+current_phase: archive
+status: done
+completed_phases:
+  - explore
+  - propose
+  - spec
+  - design
+  - tasks
+  - apply
+  - verify
+pending_phases:
+  - archive
+blocked: false
+blocked_reason: null

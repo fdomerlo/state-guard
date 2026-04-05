@@ -146,4 +146,4 @@ Listo para implementación (sdd-apply).
 - Si el proyecto usa TDD, integrar tareas test-first: tarea RED (escribir test fallido) → tarea GREEN (hacerlo pasar) → tarea REFACTOR (limpiar)
 - ### Presupuesto de Tamaño
   - Tu output NO DEBE exceder 530 palabras.
-- RETORNA el resultado siguiendo estrictamente el formato del Return Envelope definido en `skills/_shared/sdd-phase-common.md`
+

@@ -99,4 +99,3 @@ Devuelve la tabla Markdown con el estado de todos los cambios activos.
 - Si no hay cambios activos, mostrar mensaje informativo
 - Manejar gracefully archivos malformados (continuar, no fallar)
 - El formato de fase debe ser legible (primera letra mayúscula)
-- RETORNA el resultado siguiendo estrictamente el formato del Return Envelope definido en `skills/_shared/sdd-phase-common.md`

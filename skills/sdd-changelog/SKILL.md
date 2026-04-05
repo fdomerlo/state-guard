@@ -134,4 +134,4 @@ Devuelve al orquestador:
 - Si ya existe un CHANGELOG.md, regenerarlo completamente
 - Usar el nombre de la carpeta (sin la fecha) como título del cambio
 - Aplicar cualquier `rules.changelog` de `openspec/config.yaml` si existe
-- RETORNA el resultado siguiendo estrictamente el formato del Return Envelope definido en `skills/_shared/sdd-phase-common.md`
+

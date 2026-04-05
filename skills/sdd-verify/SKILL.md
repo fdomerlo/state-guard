@@ -28,6 +28,17 @@ Del orquestador:
 
 ## Qué Hacer
 
+### Paso 0: Leer el Contexto
+
+Antes de verificar, leé las dependencias del cambio actual:
+
+1. **Specs delta del cambio** — leer todos los archivos en `openspec/changes/{nombre-del-cambio}/specs/`
+2. **Diseño** — leer `openspec/changes/{nombre-del-cambio}/design.md`
+3. **Tareas** — leer `openspec/changes/{nombre-del-cambio}/tasks.md`
+
+**REGLA CRÍTICA**: Queda PROHIBIDO cargar o leer `specs/` completo del proyecto. Solo specs delta del cambio activo.
+**REGLA CRÍTICA**: Queda PROHIBIDO buscar en todo el código base. Solo leer archivos específicos mencionados en las tareas del cambio.
+
 ### Paso 1: Verificar Completitud
 
 Verificar que TODAS las tareas estén hechas:
@@ -88,25 +99,7 @@ CRÍTICO: Debes ejecutar usando una herramienta de terminal real. ESTÁ PROHIBID
 
 Detectar el test runner del proyecto y ejecutar los tests:
 
-```
-Detectar test runner desde:
-├── openspec/config.yaml → rules.verify.test_command (máxima prioridad)
-├── package.json → scripts.test
-├── pyproject.toml / pytest.ini → pytest
-├── Makefile → make test
-└── Fallback: consultar al orquestador
-
-Ejecutar: {test_command}
-Capturar:
-├── Total de tests ejecutados
-├── Pasaron
-├── Fallaron (listar cada uno con nombre y error)
-├── Omitidos
-└── Código de salida
-
-Marcar: CRITICAL si el código de salida != 0 (algún test falló)
-Marcar: WARNING si tests omitidos se relacionan con áreas modificadas
-```
+Consultar `skills/_shared/test-runner-detection.md` con parámetro `{fase}=verify` para la lógica de detección.
 
 ### Paso 4c: Build y Verificación de Tipos (Ejecución Real)
 
@@ -277,4 +270,4 @@ Devuelve al orquestador el mismo contenido que escribiste en `verify-report.md`:
 - NO corregir ningún problema — solo reportarlos. El orquestador decide qué hacer.
 - En modo `openspec`, SIEMPRE guardar el reporte en `openspec/changes/{nombre-del-cambio}/verify-report.md` — esto persiste la verificación para sdd-archive y el rastro de auditoría
 - Aplicar cualquier `rules.verify` de `openspec/config.yaml`
-- RETORNA el resultado siguiendo estrictamente el formato del Return Envelope definido en `skills/_shared/sdd-phase-common.md`
+

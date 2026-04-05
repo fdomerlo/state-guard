@@ -153,7 +153,6 @@ Listo para diseño (sdd-design). Si el diseño ya existe, listo para tareas (sdd
 - Aplicar cualquier `rules.specs` de `openspec/config.yaml`
 - ### Presupuesto de Tamaño
   - Tu output NO DEBE exceder 650 palabras.
-- RETORNA el resultado siguiendo estrictamente el formato del Return Envelope definido en `skills/_shared/sdd-phase-common.md`
 
 ## Referencia Rápida de Palabras Clave RFC 2119
 

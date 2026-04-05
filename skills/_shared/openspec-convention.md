@@ -64,6 +64,12 @@ pending_phases:                      # fases que aún no se ejecutaron
   - archive
 blocked: false                       # true si status es blocked y verify reporta CRITICAL sin resolver
 blocked_reason: null                 # descripción del bloqueo, o null si blocked: false
+session_summary: |                  # resumen de sesión (máx 5 líneas) - recuperado tras reload
+  - Fase actual: {fase}
+  - Estado: {active|blocked|done}
+  - Progreso: {X/Y tareas completadas}
+  - Última acción: {descripción breve}
+  - next_recommended: /sdd-{comando}
 ```
 
 **Valores válidos para `current_phase` y elementos de listas:**

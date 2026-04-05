@@ -145,4 +145,3 @@ Listo para tareas (sdd-tasks).
 - Si tenés preguntas abiertas que BLOQUEAN el diseño, decirlo claramente — no asumir
 - ### Presupuesto de Tamaño
   - Tu output NO DEBE exceder 800 palabras. Usa tablas para decisiones de arquitectura.
-- RETORNA el resultado siguiendo estrictamente el formato del Return Envelope definido en `skills/_shared/sdd-phase-common.md`
