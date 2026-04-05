@@ -26,6 +26,8 @@ Los siguientes comandos ejecutan **skills individuales** que puedes invocar dire
 - `/sdd-archive [change]` → ejecuta `sdd-archive`.
 - `/sdd-changelog` → ejecuta `sdd-changelog` (genera CHANGELOG.md desde archive).
 - `/sdd-status` → ejecuta `sdd-status` (muestra el estado de todos los cambios activos).
+- `/sdd-checkpoint` → ejecuta `sdd-checkpoint` (guarda resumen de sesión en state.yaml).
+- `/sdd-rollback` → ejecuta `sdd-rollback` (revierte cambio activo y restaura entorno).
 
 ## Grafo de Dependencias
 
