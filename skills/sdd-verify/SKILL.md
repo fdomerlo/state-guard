@@ -28,6 +28,17 @@ Del orquestador:
 
 ## Qué Hacer
 
+### Paso 0: Leer el Contexto
+
+Antes de verificar, leé las dependencias del cambio actual:
+
+1. **Specs delta del cambio** — leer todos los archivos en `openspec/changes/{nombre-del-cambio}/specs/`
+2. **Diseño** — leer `openspec/changes/{nombre-del-cambio}/design.md`
+3. **Tareas** — leer `openspec/changes/{nombre-del-cambio}/tasks.md`
+
+**REGLA CRÍTICA**: Queda PROHIBIDO cargar o leer `specs/` completo del proyecto. Solo specs delta del cambio activo.
+**REGLA CRÍTICA**: Queda PROHIBIDO buscar en todo el código base. Solo leer archivos específicos mencionados en las tareas del cambio.
+
 ### Paso 1: Verificar Completitud
 
 Verificar que TODAS las tareas estén hechas:

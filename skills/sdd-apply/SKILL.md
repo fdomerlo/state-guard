@@ -29,11 +29,24 @@ Del orquestador:
 
 ### Paso 1: Leer el Contexto
 
-Antes de escribir CUALQUIER código:
-1. Leer las specs — entender QUÉ debe hacer el código
-2. Leer el diseño — entender CÓMO estructurar el código
-3. Leer el código existente en los archivos afectados — entender los patrones actuales
-4. Revisar las convenciones de codificación del proyecto desde `config.yaml`
+Antes de escribir CUALQUIER código, leé las dependencias del cambio actual:
+
+1. **Specs delta del cambio** — leer todos los archivos en `openspec/changes/{nombre-del-cambio}/specs/`
+2. **Diseño** — leer `openspec/changes/{nombre-del-cambio}/design.md`
+3. **Tareas** — leer `openspec/changes/{nombre-del-cambio}/tasks.md`
+4. **Código existente** — leer los archivos afectados para seguir patrones actuales
+5. **Convenciones** — leer `config.yaml` para reglas de codificación
+
+**NOTA:** SOLO leer specs delta del cambio actual. NUNCA leer `specs/` completo del proyecto.
+
+### Paso 1b: Batching de Tareas
+
+El orquestador es responsable de:
+1. Leer `tasks.md` del cambio actual
+2. Extraer solo las próximas 3 tareas pendientes (no completadas)
+3. Pasarlas como texto inline al sub-agente (no el archivo completo)
+
+El sub-agente recibe las tareas como texto inline, no como referencia a archivo.
 
 ### Paso 2: Detectar el Modo de Implementación
 
@@ -106,13 +119,15 @@ PARA CADA TAREA:
 
 ### Paso 3: Marcar Tareas como Completas
 
-Actualiza `tasks.md` — cambia `- [ ]` por `- [x]` para las tareas completadas:
+**El orquestador** es responsable de actualizar `tasks.md` — cambiar `- [ ]` por `- [x]` para las tareas completadas.
+
+El sub-agente debe reportar qué tareas completó en su resumen de retorno, pero NO debe editar el archivo `tasks.md` directamente.
 
 ```markdown
 ## Fase 1: Fundación
 
-- [x] 1.1 Crear `internal/auth/middleware.go` con validación JWT
-- [x] 1.2 Agregar struct `AuthConfig` a `internal/config/config.go`
+- [x] 1.1 Crear `internal/auth/middleware.go` con validación JWT  ← orquestador marca
+- [x] 1.2 Agregar struct `AuthConfig` a `internal/config/config.go`  ← orquestador marca
 - [ ] 1.3 Agregar rutas de auth a `internal/server/server.go`  ← aún pendiente
 ```
 
@@ -165,7 +180,7 @@ Si ninguno, indicar "Ninguno."}
 - SIEMPRE leer las specs antes de implementar — las specs son tus criterios de aceptación
 - SIEMPRE seguir las decisiones de diseño — no improvisar un enfoque diferente
 - SIEMPRE ajustarse a los patrones y convenciones de código existentes en el proyecto
-- En modo `openspec`, marcar las tareas como completas en `tasks.md` A MEDIDA QUE avanzás, no al final
+- En modo `openspec`, el orquestador marca las tareas como completas en `tasks.md`. El sub-agente reporta el progreso en su resumen.
 - Si descubrís que el diseño es incorrecto o incompleto, ANOTARLO en tu resumen de retorno — no desviarse en silencio
 - Si una tarea está bloqueada por algo inesperado, DETENERSE y reportar
 - NUNCA implementar tareas que no te fueron asignadas
