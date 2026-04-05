@@ -86,7 +86,7 @@ Si el schema está corrupto (campos faltantes), intentá reconstruir el `state.y
 
 ### Paso 5: Devolver Resumen
 
-Devuelve un reporte estructurado siguiendo **estrictamente** el formato Markdown del Return Envelope definido en `skills/_shared/sdd-phase-common.md`:
+
 
 ```markdown
 ## Resultado de la Fase
@@ -119,4 +119,4 @@ Se auditaron N cambios: X sanos, Y reparados, Z irrecuperables.
 - Si `status` es `blocked`, NO reparar — solo reportar y respetar el bloqueo
 - Si `status` es `done`, ignorar — no requiere reparación
 - Manejar gracefully errores de lectura (permisos, archivos binarios, etc.)
-- RETORNA el resultado siguiendo estrictamente el formato del Return Envelope definido en `skills/_shared/sdd-phase-common.md`
+

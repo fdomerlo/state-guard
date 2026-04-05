@@ -162,4 +162,4 @@ PARA CADA SUB-CAMBIO:
 - **Ser conservador** — mejor más sub-cambios pequeños que uno grande
 - **Considerar el orden de dependencias** — algunos sub-cambios deben ejecutarse antes que otros
 - En modo `openspec`, siempre guardar el plan en `split-plan.md`
-- RETORNA el resultado siguiendo estrictamente el formato del Return Envelope definido en `skills/_shared/sdd-phase-common.md`
+

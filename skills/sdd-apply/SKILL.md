@@ -85,14 +85,7 @@ PARA CADA TAREA:
 
 Detecta el test runner para la ejecución:
 
-```
-Detectar test runner desde:
-├── openspec/config.yaml → rules.apply.test_command (máxima prioridad)
-├── package.json → scripts.test
-├── pyproject.toml / pytest.ini → pytest
-├── Makefile → make test
-└── Fallback: reportar que los tests no pudieron ejecutarse automáticamente
-```
+Consultar `skills/_shared/test-runner-detection.md` con parámetro `{fase}=apply` para la lógica de detección.
 
 **Importante**: Si hay skills de codificación instaladas (ej: `tdd/SKILL.md`, `pytest/SKILL.md`, `vitest/SKILL.md`), leer y seguir esos patrones para escribir tests.
 
@@ -180,24 +173,3 @@ Si ninguno, indicar "Ninguno."}
 - Aplicar cualquier `rules.apply` de `openspec/config.yaml`
 - Si se detecta modo TDD (Paso 2), SIEMPRE seguir el ciclo RED → GREEN → REFACTOR — nunca omitir RED (escribir el test fallido primero)
 - Al ejecutar tests en TDD, ejecutar SOLO el archivo/suite de tests relevante, no toda la suite (para mayor velocidad)
-- RETORNA el resultado siguiendo estrictamente el formato del Return Envelope definido en `skills/_shared/sdd-phase-common.md`
-
-## Errores Comunes
-
-Al implementar tareas, evitá estos errores frecuentes:
-
-### 1. Modificar specs/design sin actualizar proposal primero
-**Problema**: Cambiar las especificaciones o el diseño sin antes actualizar la propuesta para reflejar esos cambios.
-**Solución**: Siempre actualizá proposal.md primero si hay cambios en el alcance o enfoque técnico.
-
-### 2. Ignorar el checklist de tareas
-**Problema**: No seguir la lista de tareas definida o implementar funcionalidades fuera de las tareas asignadas.
-**Solución**: Implementá solo las tareas asignadas. Si encontrás tareas adicionales necesarias, reportalas al orquestador.
-
-### 3. No seguir los patrones de código existentes
-**Problema**: Implementar código que no sigue las convenciones, estilos o patrones del proyecto.
-**Solución**: Antes de implementar, leé los archivos existentes del proyecto para entender los patrones en uso.
-
-### 4. Dejar tareas incompletas sin documentación
-**Problema**: Marcar tareas como completadas sin haberlas terminado realmente, o sin documentar desviaciones.
-**Solución**: Marcá tareas como completadas SOLO cuando estén 100% hechas. Si hay problemas, documentalos en el resumen.

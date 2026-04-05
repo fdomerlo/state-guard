@@ -170,4 +170,4 @@ Listo para el siguiente cambio.
 - El archivo es un RASTRO DE AUDITORÍA — nunca eliminar ni modificar cambios archivados
 - Si `openspec/changes/archive/` no existe, crearlo
 - Aplicar cualquier `rules.archive` de `openspec/config.yaml`
-- RETORNA el resultado siguiendo estrictamente el formato del Return Envelope definido en `skills/_shared/sdd-phase-common.md`
+

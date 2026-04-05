@@ -121,7 +121,7 @@ El reporte debe seguir este formato estructurado:
 
 ### Paso 7: Retornar Resultado
 
-El sub-agente DEBE devolver el resultado final al orquestador usando ESTRICTAMENTE el formato del Return Envelope definido en `skills/_shared/sdd-phase-common.md`. Los campos exactos son:
+El sub-agente DEBE devolver el resultado final al orquestador.
 
 - `status` — `ok`, `warning` o `critical`
 - `executive_summary` — Resumen ejecutivo de la auditoría
@@ -130,7 +130,7 @@ El sub-agente DEBE devolver el resultado final al orquestador usando ESTRICTAMEN
 - `risks` — Riesgos identificados durante la revisión
 - `detailed_report` (opcional) — Análisis extenso cuando el resumen ejecutivo no sea suficiente
 
-**NO** uses campos como "Hallazgos", "Completitud" u otros que no estén definidos en el Return Envelope estándar. Cualquier información adicional de la auditoría debe ir dentro de `detailed_report` o `executive_summary`.
+
 
 ## Reglas
 
@@ -140,4 +140,3 @@ El sub-agente DEBE devolver el resultado final al orquestador usando ESTRICTAMEN
 - Usar las palabras clave RFC 2119 (MUST, SHALL, SHOULD, MAY) para categorizar requisitos
 - Ser objetivo — reportar lo que ES, no lo que debería ser
 - En modo `openspec`, siempre guardar el reporte en `review-report.md`
-- RETORNA el resultado siguiendo estrictamente el formato del Return Envelope definido en `skills/_shared/sdd-phase-common.md`
