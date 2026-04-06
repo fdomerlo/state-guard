@@ -345,9 +345,6 @@ Agentify SDD soporta múltiples herramientas de IA:
 | OpenCode | ✅ | ✅ |
 | Antigravity | ✅ | ✅ |
 | Gemini CLI | — | ✅ |
-| Codex | — | ✅ |
-| VS Code | — | ✅ |
-| Cursor | — | ✅ |
 
 La instalación varía según la herramienta. Ejecuta `scripts/install.sh` y selecciona tu herramienta.
 

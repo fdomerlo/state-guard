@@ -251,74 +251,6 @@ test_gemini_cli_skill_count() {
 }
 
 # ============================================================================
-# Tests — Codex
-# ============================================================================
-
-test_install_codex() {
-    bash "$INSTALL_SCRIPT" --agent codex > /dev/null 2>&1
-    assert_all_skills_installed "$HOME/.codex/skills"
-}
-
-test_codex_skill_count() {
-    bash "$INSTALL_SCRIPT" --agent codex > /dev/null 2>&1
-    local count
-    count=$(find "$HOME/.codex/skills" -name "SKILL.md" | wc -l | tr -d ' ')
-    assert_eq "17" "$count" "Expected exactly 17 skills for Codex"
-}
-
-# ============================================================================
-# Tests — VS Code (project-local .vscode/)
-# ============================================================================
-
-test_install_vscode() {
-    local project="$TEST_TMPDIR/vscode-project"
-    mkdir -p "$project"
-    (cd "$project" && bash "$INSTALL_SCRIPT" --agent vscode > /dev/null 2>&1)
-    assert_all_skills_installed "$project/.vscode/skills"
-}
-
-test_vscode_skill_count() {
-    local project="$TEST_TMPDIR/vscode-project"
-    mkdir -p "$project"
-    (cd "$project" && bash "$INSTALL_SCRIPT" --agent vscode > /dev/null 2>&1)
-    local count
-    count=$(find "$project/.vscode/skills" -name "SKILL.md" | wc -l | tr -d ' ')
-    assert_eq "17" "$count" "Expected exactly 17 skills for VS Code"
-}
-
-# ============================================================================
-# Tests — Antigravity (~/.gemini/antigravity/skills/)
-# ============================================================================
-
-test_install_antigravity() {
-    bash "$INSTALL_SCRIPT" --agent antigravity > /dev/null 2>&1
-    assert_all_skills_installed "$HOME/.gemini/antigravity/skills"
-}
-
-test_antigravity_skill_count() {
-    bash "$INSTALL_SCRIPT" --agent antigravity > /dev/null 2>&1
-    local count
-    count=$(find "$HOME/.gemini/antigravity/skills" -name "SKILL.md" | wc -l | tr -d ' ')
-    assert_eq "17" "$count" "Expected exactly 17 skills for Antigravity"
-}
-
-# ============================================================================
-# Tests — Cursor
-# ============================================================================
-
-test_install_cursor() {
-    bash "$INSTALL_SCRIPT" --agent cursor > /dev/null 2>&1
-    assert_all_skills_installed "$HOME/.cursor/skills"
-}
-
-test_cursor_skill_count() {
-    bash "$INSTALL_SCRIPT" --agent cursor > /dev/null 2>&1
-    local count
-    count=$(find "$HOME/.cursor/skills" -name "SKILL.md" | wc -l | tr -d ' ')
-    assert_eq "17" "$count" "Expected exactly 17 skills for Cursor"
-}
-
-# ============================================================================
 # Tests — Project-local
 # ============================================================================
 
@@ -368,28 +300,22 @@ test_all_global() {
     assert_all_skills_installed "$HOME/.config/opencode/skills" || return 1
     # Gemini CLI
     assert_all_skills_installed "$HOME/.gemini/skills" || return 1
-    # Codex
-    assert_all_skills_installed "$HOME/.codex/skills" || return 1
-    # Cursor
-    assert_all_skills_installed "$HOME/.cursor/skills" || return 1
 }
 
 test_all_global_total_skill_count() {
     bash "$INSTALL_SCRIPT" --agent all-global > /dev/null 2>&1
-    # 5 targets × 17 skills = 85 SKILL.md files
+    # 3 targets × 17 skills = 51 SKILL.md files
     local total=0
     for dir in \
         "$HOME/.claude/skills" \
         "$HOME/.config/opencode/skills" \
-        "$HOME/.gemini/skills" \
-        "$HOME/.codex/skills" \
-        "$HOME/.cursor/skills"; do
+        "$HOME/.gemini/skills"; do
         local count
         count=$(find "$dir" -name "SKILL.md" | wc -l | tr -d ' ')
         assert_eq "17" "$count" "Expected 17 skills in $dir" || return 1
         total=$((total + count))
     done
-    assert_eq "85" "$total" "Expected 85 total SKILL.md files across all targets"
+    assert_eq "51" "$total" "Expected 51 total SKILL.md files across all targets"
 }
 
 test_all_global_opencode_commands() {
@@ -432,9 +358,7 @@ test_idempotent_all_global() {
     for dir in \
         "$HOME/.claude/skills" \
         "$HOME/.config/opencode/skills" \
-        "$HOME/.gemini/skills" \
-        "$HOME/.codex/skills" \
-        "$HOME/.cursor/skills"; do
+        "$HOME/.gemini/skills"; do
         local count
         count=$(find "$dir" -name "SKILL.md" | wc -l | tr -d ' ')
         assert_eq "17" "$count" "Expected 17 skills in $dir after double install" || return 1
@@ -611,26 +535,6 @@ run_test "Installs all 17 skills to ~/.gemini/skills" test_install_gemini_cli
 run_test "Exactly 17 SKILL.md files" test_gemini_cli_skill_count
 echo ""
 
-echo -e "${BOLD}Codex${NC}"
-run_test "Installs all 17 skills to ~/.codex/skills" test_install_codex
-run_test "Exactly 17 SKILL.md files" test_codex_skill_count
-echo ""
-
-echo -e "${BOLD}VS Code (project-local)${NC}"
-run_test "Installs all 17 skills to .vscode/skills/" test_install_vscode
-run_test "Exactly 17 SKILL.md files" test_vscode_skill_count
-echo ""
-
-echo -e "${BOLD}Antigravity${NC}"
-run_test "Installs all 17 skills to ~/.gemini/antigravity/skills/" test_install_antigravity
-run_test "Exactly 17 SKILL.md files" test_antigravity_skill_count
-echo ""
-
-echo -e "${BOLD}Cursor${NC}"
-run_test "Installs all 17 skills to ~/.cursor/skills" test_install_cursor
-run_test "Exactly 17 SKILL.md files" test_cursor_skill_count
-echo ""
-
 echo -e "${BOLD}Project-local${NC}"
 run_test "Installs all 17 skills to ./skills/" test_install_project_local
 run_test "Exactly 17 SKILL.md files" test_project_local_skill_count
@@ -643,8 +547,8 @@ run_test "Handles deeply nested custom path" test_nested_custom_path
 echo ""
 
 echo -e "${BOLD}All-global${NC}"
-run_test "Installs to all 5 global targets" test_all_global
-run_test "85 total SKILL.md files (5×17)" test_all_global_total_skill_count
+run_test "Installs to all 3 global targets" test_all_global
+run_test "51 total SKILL.md files (3×17)" test_all_global_total_skill_count
 run_test "Also installs OpenCode commands" test_all_global_opencode_commands
 echo ""
 

@@ -129,18 +129,9 @@ function Get-ToolPath {
             if ($OS -eq "windows") { return "$env:USERPROFILE\.gemini\skills" }
             return "$home/.gemini/skills"
         }
-        "codex" {
-            if ($OS -eq "windows") { return "$env:USERPROFILE\.codex\skills" }
-            return "$home/.codex/skills"
-        }
-        "vscode" { return ".\.vscode\skills" }
         "antigravity" {
             if ($OS -eq "windows") { return "$env:USERPROFILE\.gemini\antigravity\skills" }
             return "$home/.gemini/antigravity/skills"
-        }
-        "cursor" {
-            if ($OS -eq "windows") { return "$env:USERPROFILE\.cursor\skills" }
-            return "$home/.cursor/skills"
         }
         "project-local" { return ".\skills" }
     }
@@ -196,7 +187,7 @@ function Show-Help {
     Write-Host "  -Path DIR      Custom install path (use with -Agent custom)"
     Write-Host "  -Help          Show this help"
     Write-Host ""
-    Write-Host "Agents: claude-code, opencode, gemini-cli, codex, vscode, antigravity, cursor, project-local, all-global"
+    Write-Host "Agents: claude-code, opencode, gemini-cli, antigravity, project-local, all-global"
 }
 
 # ============================================================================
@@ -473,18 +464,6 @@ function Install-ForAgent {
             $configTarget = if ($OS -eq "windows") { "$env:USERPROFILE\.gemini\GEMINI.md" } else { "$HOME/.gemini/GEMINI.md" }
             Compile-AndAppendConfig -TargetFile $configTarget -HeaderFile (Join-Path $RepoDir "integrations\gemini-cli\GEMINI.md") -ToolName "Gemini CLI" -SkillsPath $targetPath
         }
-        "codex" {
-            $targetPath = Get-ToolPath "codex"
-            Install-Skills $targetPath "Codex"
-            Write-NextStep "Codex instructions file" "integrations\codex\agents.md"
-        }
-        "vscode" {
-            $targetPath = Get-ToolPath "vscode"
-            Install-Skills $targetPath "VS Code (Copilot)"
-            $configTarget = ".\.github\copilot-instructions.md"
-            Compile-AndAppendConfig -TargetFile $configTarget -HeaderFile (Join-Path $RepoDir "integrations\vscode\copilot-instructions.md") -ToolName "VS Code Copilot" -SkillsPath $targetPath
-            Write-Host "  ${YELLOW}Note:${NC} Skills installed in current project (.vscode/skills/)"
-        }
         "antigravity" {
             $target = Get-ToolPath "antigravity"
             Install-Skills $target "Antigravity"
@@ -494,12 +473,6 @@ function Install-ForAgent {
                 New-Item -ItemType Directory -Path $configDir -Force | Out-Null
             }
             Compile-AndAppendConfig -TargetFile $configTarget -HeaderFile (Join-Path $RepoDir "integrations\antigravity\sdd-orchestrator.md") -ToolName "Antigravity" -SkillsPath $target
-        }
-        "cursor" {
-            $targetPath = Get-ToolPath "cursor"
-            Install-Skills $targetPath "Cursor"
-            $configTarget = if ($OS -eq "windows") { "$env:USERPROFILE\.cursorrules" } else { ".\.cursorrules" }
-            Compile-AndAppendConfig -TargetFile $configTarget -HeaderFile (Join-Path $RepoDir "integrations\cursor\.cursorrules") -ToolName "Cursor" -SkillsPath $targetPath
         }
         "project-local" {
             $targetPath = Get-ToolPath "project-local"
@@ -526,15 +499,9 @@ function Install-ForAgent {
             $configTarget = if ($OS -eq "windows") { "$env:USERPROFILE\.gemini\GEMINI.md" } else { "$HOME/.gemini/GEMINI.md" }
             Compile-AndAppendConfig -TargetFile $configTarget -HeaderFile (Join-Path $RepoDir "integrations\gemini-cli\GEMINI.md") -ToolName "Gemini CLI" -SkillsPath $targetPath
             
-            # Codex
-            $targetPath = Get-ToolPath "codex"
-            Install-Skills $targetPath "Codex"
-            
-            # Cursor
-            $targetPath = Get-ToolPath "cursor"
-            Install-Skills $targetPath "Cursor"
-            $configTarget = if ($OS -eq "windows") { "$env:USERPROFILE\.cursorrules" } else { ".\.cursorrules" }
-            Compile-AndAppendConfig -TargetFile $configTarget -HeaderFile (Join-Path $RepoDir "integrations\cursor\.cursorrules") -ToolName "Cursor" -SkillsPath $targetPath
+            # Antigravity
+            $targetPath = Get-ToolPath "antigravity"
+            Install-Skills $targetPath "Antigravity"
             
             Write-Host ""
             Write-Host "${GREEN}${BOLD}Todos los orquestadores globales configurados automaticamente!${NC}"
@@ -567,27 +534,21 @@ function Show-InteractiveMenu {
     Write-Host "  1) Claude Code    ($(Get-ToolPath "claude-code"))"
     Write-Host "  2) OpenCode       ($(Get-ToolPath "opencode"))"
     Write-Host "  3) Gemini CLI     ($(Get-ToolPath "gemini-cli"))"
-    Write-Host "  4) Codex          ($(Get-ToolPath "codex"))"
-    Write-Host "  5) VS Code        ($(Get-ToolPath "vscode"))"
-    Write-Host "  6) Antigravity    (~/.gemini/antigravity/skills/)"
-    Write-Host "  7) Cursor         ($(Get-ToolPath "cursor"))"
-    Write-Host "  8) Project-local  ($(Get-ToolPath "project-local"))"
-    Write-Host "  9) All global     (Claude Code + OpenCode + Gemini CLI + Codex + Cursor)"
-    Write-Host "  10) Custom path"
+    Write-Host "  4) Antigravity    (~/.gemini/antigravity/skills/)"
+    Write-Host "  5) Project-local  ($(Get-ToolPath "project-local"))"
+    Write-Host "  6) All global     (Claude Code + OpenCode + Gemini CLI + Antigravity)"
+    Write-Host "  7) Custom path"
     Write-Host ""
-    $choice = Read-Host "Choice [1-10]"
+    $choice = Read-Host "Choice [1-7]"
     
     switch ($choice) {
         "1"  { Install-ForAgent "claude-code" }
         "2"  { Install-ForAgent "opencode" }
         "3"  { Install-ForAgent "gemini-cli" }
-        "4"  { Install-ForAgent "codex" }
-        "5"  { Install-ForAgent "vscode" }
-        "6"  { Install-ForAgent "antigravity" }
-        "7"  { Install-ForAgent "cursor" }
-        "8"  { Install-ForAgent "project-local" }
-        "9"  { Install-ForAgent "all-global" }
-        "10" { Install-ForAgent "custom" }
+        "4"  { Install-ForAgent "antigravity" }
+        "5"  { Install-ForAgent "project-local" }
+        "6"  { Install-ForAgent "all-global" }
+        "7"  { Install-ForAgent "custom" }
         default {
             Write-Error "Invalid choice"
             exit 1
