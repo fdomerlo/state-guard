@@ -339,12 +339,12 @@ Las specs usan el formato **GIVEN/WHEN/THEN**:
 
 Agentify SDD soporta múltiples herramientas de IA:
 
-| Herramienta | Sub-agentes | Skills Inline |
-|-------------|:-----------:|:-------------:|
-| Claude Code | ✅ | ✅ |
-| OpenCode | ✅ | ✅ |
-| Antigravity | ✅ | ✅ |
-| Gemini CLI | — | ✅ |
+| Herramienta | Sub-agentes |
+|-------------|:-----------:|
+| Claude Code | ✅ |
+| OpenCode | ✅ |
+| Antigravity | ✅ |
+| Gemini CLI | — |
 
 La instalación varía según la herramienta. Ejecuta `scripts/install.sh` y selecciona tu herramienta.
 

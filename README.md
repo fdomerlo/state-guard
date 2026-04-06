@@ -129,6 +129,21 @@ graph LR
 
 ---
 
+## Herramientas CLI Compatibles
+
+Agentify SDD es un framework **exclusivamente Agent-First y CLI-First**. El orquestador delega tareas a las siguientes herramientas CLI autónomas que soportan sub-agentes reales:
+
+| Herramienta | Descripción |
+|-------------|-------------|
+| **Claude Code** | Agente CLI de Anthropic con soporte completo de sub-agentes |
+| **OpenCode** | Agente CLI de OpenCode con orquestación de múltiples agentes |
+| **Gemini CLI** | Agente CLI de Google para ejecución de herramientas |
+| **Antigravity** | Agente CLI con capacidades avanzadas de orquestación |
+
+El framework **no soporta editores pasivos/inline** (como VS Code, Cursor o Codex) dado que estos no ofrecen capacidad de sub-agentes reales necesarios para el paradigma SDD.
+
+---
+
 ## Conceptos Clave
 
 ### Specs Delta

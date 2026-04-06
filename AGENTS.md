@@ -153,11 +153,16 @@ Tras pérdida de contexto:
 
 **Para sub-agentes: Los cambios activos tienen specs delta en `openspec/changes/{nombre}/specs/`. Al recuperar el estado, leer primero estas specs delta antes de las specs principales en `openspec/specs/`.**
 
-### Integración con IDEs
+### Enfoque Agent-First y CLI-First
 
-- **.cursorrules** (raíz): Reglas Cursor para SDD
-- **integrations/cursor/.cursorrules**: Ejemplo configuración Cursor
-- **integrations/vscode/copilot-instructions.md**: Instrucciones VS Code Copilot
+Agentify SDD es un marco de orquestación **exclusivamente Agent-First y CLI-First**. El orquestador delega tareas a herramientas CLI autónomas con capacidad de sub-agentes reales:
+
+- **Claude Code**: Agente CLI de Anthropic con soporte completo de sub-agentes
+- **OpenCode**: Agente CLI de OpenCode con orquestación de múltiples agentes
+- **Gemini CLI**: Agente CLI de Google para ejecución de herramientas
+- **Antigravity**: Agente CLI con capacidades de orquestación
+
+El framework no soporta editores pasivos/inline (como VS Code, Cursor o Codex) dado que estos no ofrecen capacidad de sub-agentes reales necesarios para SDD.
 
 ---
 
