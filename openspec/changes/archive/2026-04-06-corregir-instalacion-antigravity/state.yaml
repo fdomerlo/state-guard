@@ -1,0 +1,17 @@
+change: corregir-instalacion-antigravity
+started_at: "2026-04-06T10:00:00"
+last_updated: "2026-04-06T10:25:00"
+current_phase: apply
+status: in_progress
+completed_phases:
+  - explore
+  - propose
+  - spec
+  - design
+  - tasks
+pending_phases:
+  - apply
+  - verify
+  - archive
+blocked: false
+blocked_reason: null
