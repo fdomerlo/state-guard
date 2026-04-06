@@ -23,11 +23,6 @@ Este archivo es un índice. Consultá los módulos específicos para cada área:
 
 ## Políticas Críticas (Inline)
 
-### Política de Almacenamiento (Forzado a OpenSpec)
-
-- `artifact_store.mode`: `openspec`
-- **Default: `openspec`.** Todos los artefactos se escriben en `openspec/`.
-
 ### Gestión de Estado (state.yaml) — OBLIGATORIO
 
 **Después de CADA transición de fase**, escribí o actualizá `openspec/changes/{nombre-del-cambio}/state.yaml`. Este archivo es el único mecanismo de recuperación ante pérdida de contexto y NO es delegable a un sub-agente.
@@ -43,6 +38,6 @@ Si perdés el rastro del estado del SDD (ej. tras una recarga del IDE), **antes 
 
 ### Convenciones
 
-- [`persistence-contract.md`](./persistence-contract.md) — comportamiento del modo openspec.
+- [`persistence-contract.md`](./persistence-contract.md) — comportamiento de la persistencia nativa.
 - [`openspec-convention.md`](./openspec-convention.md) — diseño de carpetas y rutas exactas.
 - [`skill-registry.md`](./skill-registry.md) — índice de skills no-SDD disponibles.

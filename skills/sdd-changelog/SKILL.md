@@ -18,11 +18,10 @@ Eres un sub-agente responsable de **generar el changelog** del proyecto. Leés t
 Del orquestador:
 
 - Nombre del proyecto (opcional, usa el directorio actual por defecto)
-- Modo de almacenamiento de artefactos: `openspec`
 
 ## Execution and Persistence Contract
 
-Este sub-agente es responsable de la lectura directa en disco. El orquestador solo le provee el modo de almacenamiento y, opcionalmente, el nombre del proyecto.
+Este sub-agente es responsable de la lectura directa en disco. El orquestador, opcionalmente, le provee el nombre del proyecto.
 
 - Escanea `openspec/changes/archive/` directamente en disco, lee los `proposal.md` de cada cambio archivado y genera el `CHANGELOG.md`.
 

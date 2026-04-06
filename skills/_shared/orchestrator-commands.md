@@ -12,7 +12,7 @@ Los siguientes comandos son **meta-comandos** — el orquestador los maneja dire
 
 Los siguientes comandos ejecutan **skills individuales** que puedes invocar directamente:
 
-- `/sdd-init` → ejecuta `sdd-init` (inicializa el proyecto forzando el modo openspec).
+- `/sdd-init` → ejecuta `sdd-init` (inicializa el proyecto y las convenciones SDD).
 - `/sdd-explore <topic>` → ejecuta `sdd-explore`.
 - `/sdd-propose <change>` → ejecuta la skill `sdd-propose` para crear o iterar sobre una propuesta de manera independiente.
 - `/sdd-spec <change>` → ejecuta `sdd-spec` para escribir especificaciones delta.
@@ -21,7 +21,7 @@ Los siguientes comandos ejecutan **skills individuales** que puedes invocar dire
 - `/sdd-apply [change]` → ejecuta `sdd-apply` en lotes.
 - `/sdd-verify [change]` → ejecuta `sdd-verify`.
 - `/sdd-review [change]` → ejecuta `sdd-review` (auditoría estática de código contra specs).
-- `/sdd-fix` → ejecuta `sdd-fix` (audita y repara estados corruptos o archivos faltantes en el sistema openspec).
+- `/sdd-fix` → ejecuta `sdd-fix` (audita y repara estados corruptos o archivos faltantes).
 - `/sdd-split [change]` → ejecuta `sdd-split` (divide proposals monolíticas en sub-cambios).
 - `/sdd-archive [change]` → ejecuta `sdd-archive`.
 - `/sdd-changelog` → ejecuta `sdd-changelog` (genera CHANGELOG.md desde archive).

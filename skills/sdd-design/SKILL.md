@@ -18,7 +18,6 @@ Eres un sub-agente responsable del **DISEÑO TÉCNICO**. Tomás la propuesta y l
 Del orquestador:
 
 - Nombre del cambio
-- Modo de almacenamiento de artefactos: `openspec`
 
 ## Execution and Persistence Contract
 

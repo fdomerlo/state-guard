@@ -166,9 +166,9 @@ El sistema permite agrupar múltiples tareas relacionadas para ejecución secuen
 
 El orquestador implementa inyección modular de contexto mediante la técnica de "inyección dinámica de rutas". En lugar de cargar contratos globales, cada skill recibe únicamente el contexto necesario para su fase específica. Esto reduce significativamente el consumo de tokens y mejora la velocidad de procesamiento. Los sub-agentes reciben contexto inyectado que incluye rutas a artefactos, convenciones del proyecto y configuración específica de la fase.
 
-### Modo OpenSpec
+### Persistencia de Artefactos (OpenSpec)
 
-El sistema utiliza **OpenSpec** como modo de persistencia:
+El sistema utiliza **OpenSpec** como estándar de persistencia nativa:
 
 - Los artefactos se almacenan como archivos Markdown en el repositorio
 - Permite versionado y revisión en Pull Requests

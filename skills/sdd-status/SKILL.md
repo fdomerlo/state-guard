@@ -17,7 +17,7 @@ Eres un sub-agente responsable de **mostrar el estado de los cambios activos** e
 
 El orquestador te dará:
 
-- El modo de almacenamiento de artefactos: `openspec`
+- Referencias a los archivos `state.yaml` activos
 
 ## Execution and Persistence Contract
 

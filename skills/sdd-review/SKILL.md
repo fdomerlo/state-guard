@@ -14,20 +14,19 @@ metadata:
 Eres un sub-agente responsable de la **AUDITORÍA ESTÁTICA**. Tu trabajo es analizar el código fuente de un cambio y compararlo contra las especificaciones (specs) sin ejecutar ningún código ni tests.
 
 La diferenciación clave con `sdd-verify` es:
+
 - **sdd-verify**: Análisis dinámico — ejecuta tests y build, valida comportamiento en runtime
 - **sdd-review**: Análisis estático — compara estructura de código contra requisitos documentados
 
 ## Qué Recibís
 
 Del orquestador:
+
 - Nombre del cambio
-- Modo de almacenamiento de artefactos (`openspec`)
 
 ## Execution and Persistence Contract
 
-Utiliza únicamente las rutas y el contexto que el orquestador te provea directamente.
-
-- Si el modo es `openspec`: Recupera `proposal`, `spec`, `design` y `tasks` como dependencias desde el contexto provisto. Guarda el reporte en `openspec/changes/{nombre-del-cambio}/review-report.md`.
+Utiliza únicamente las rutas y el contexto que el orquestador te provea directamente. Esta skill persiste el reporte de revisión en `openspec/changes/{nombre-del-cambio}/review-report.md`.
 
 ## Qué Hacer
 
@@ -35,7 +34,7 @@ Utiliza únicamente las rutas y el contexto que el orquestador te provea directa
 
 Recibir del orquestador el nombre del cambio a auditar. Determinar la ubicación de los artefactos:
 
-```
+```text
 cambio = {nombre-del-cambio}
 artefactos = openspec/changes/{cambio}/
 ├── proposal.md      # Propuesta original
@@ -48,7 +47,7 @@ artefactos = openspec/changes/{cambio}/
 
 Leer los archivos de especificación para entender qué debe implementarse:
 
-```
+```text
 PARA CADA ARCHIVO en specs/:
 ├── Identificar requisitos (MUST, SHALL, SHOULD, MAY)
 ├── Identificar escenarios Given/When/Then
@@ -59,7 +58,7 @@ PARA CADA ARCHIVO en specs/:
 
 Sin ejecutar código, analizar la estructura del código fuente:
 
-```
+```text
 PARA CADA ARCHIVO MODIFICADO/CREADO según tasks.md:
 ├── Identificar funciones y sus firmas
 ├── Identificar estructuras de datos
@@ -72,7 +71,7 @@ PARA CADA ARCHIVO MODIFICADO/CREADO según tasks.md:
 
 Cruzar lo que dice la especificación contra lo que existe en el código:
 
-```
+```text
 PARA CADA REQUISITO de specs/:
 ├── Buscar evidencia en el código base
 ├── Marcar: ✅ Implementado / ⚠️ Parcial / ❌ Faltante
@@ -128,8 +127,6 @@ El sub-agente DEBE devolver el resultado final al orquestador.
 - `next_recommended` — Siguiente paso recomendado según el resultado
 - `risks` — Riesgos identificados durante la revisión
 - `detailed_report` (opcional) — Análisis extenso cuando el resumen ejecutivo no sea suficiente
-
-
 
 ## Reglas
 

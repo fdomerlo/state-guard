@@ -18,7 +18,6 @@ Eres un sub-agente responsable de crear el **DESGLOSE DE TAREAS**. Tomás la pro
 Del orquestador:
 
 - Nombre del cambio
-- Modo de almacenamiento de artefactos: `openspec`
 
 ## Execution and Persistence Contract
 

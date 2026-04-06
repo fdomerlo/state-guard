@@ -20,11 +20,10 @@ El análisis estático por sí solo NO es suficiente. DEBES ejecutar el código.
 Del orquestador:
 
 - Nombre del cambio
-- Modo de almacenamiento de artefactos: `openspec`
 
 ## Execution and Persistence Contract
 
-- Recupera `proposal`, `spec`, `design` y `tasks` como dependencias usando las rutas proporcionadas. Guarda el reporte en `openspec/changes/{nombre-del-cambio}/verify-report.md`.
+Utiliza únicamente las rutas y el contexto que el orquestador te provea directamente. Esta skill persiste el reporte de verificación en `openspec/changes/{nombre-del-cambio}/verify-report.md`.
 
 ## Qué Hacer
 
@@ -43,7 +42,7 @@ Antes de verificar, leé las dependencias del cambio actual:
 
 Verificar que TODAS las tareas estén hechas:
 
-```
+```text
 Leer tasks.md
 ├── Contar total de tareas
 ├── Contar tareas completadas [x]
@@ -55,7 +54,7 @@ Leer tasks.md
 
 Para CADA requisito y escenario de spec, buscar en el código base evidencia estructural:
 
-```
+```text
 PARA CADA REQUISITO en specs/:
 ├── Buscar evidencia de implementación en el código base
 ├── Para cada ESCENARIO:
@@ -72,7 +71,7 @@ Nota: Esto es solo análisis estático. La validación conductual con ejecución
 
 Verificar que se siguieron las decisiones de diseño:
 
-```
+```text
 PARA CADA DECISIÓN en design.md:
 ├── ¿Se usó realmente el enfoque elegido?
 ├── ¿Se implementaron accidentalmente las alternativas rechazadas?
@@ -84,7 +83,7 @@ PARA CADA DECISIÓN en design.md:
 
 Verificar que los archivos de test existen y cubren los escenarios correctos:
 
-```
+```text
 Buscar archivos de test relacionados con el cambio
 ├── ¿Existen tests para cada escenario de spec?
 ├── ¿Los tests cubren caminos felices?
@@ -107,7 +106,7 @@ CRÍTICO: Debes ejecutar usando una herramienta de terminal real. ESTÁ PROHIBID
 
 Detectar y ejecutar el comando de build/type-check:
 
-```
+```text
 Detectar comando de build desde:
 ├── openspec/config.yaml → rules.verify.build_command (máxima prioridad)
 ├── package.json → scripts.build → también ejecutar tsc --noEmit si existe tsconfig.json
@@ -129,7 +128,7 @@ Marcar: WARNING si hay errores de tipos aunque el build pase
 
 Ejecutar con cobertura solo si `rules.verify.coverage_threshold` está definido en `openspec/config.yaml`:
 
-```
+```text
 SI coverage_threshold está configurado:
 ├── Ejecutar: {test_command} --coverage (o equivalente para el test runner)
 ├── Parsear el reporte de cobertura
@@ -147,7 +146,7 @@ Este es el paso más importante. Cruzar CADA escenario de spec contra los result
 
 Para cada escenario de las specs, encontrar qué test(s) lo cubren y cuál fue el resultado:
 
-```
+```text
 PARA CADA REQUISITO en specs/:
   PARA CADA ESCENARIO:
   ├── Encontrar tests que cubren este escenario (por nombre, descripción o ruta de archivo)
@@ -164,9 +163,7 @@ Un escenario de spec solo se considera CUMPLIDO cuando existe un test que pasó 
 
 ### Paso 6: Persistir el Reporte de Verificación
 
-Persiste el reporte según el `artifact_store.mode` resuelto, siguiendo las convenciones en `skills/_shared/`:
-
-- **openspec**: Escribir en `openspec/changes/{nombre-del-cambio}/verify-report.md`
+Escribir el reporte completo en `openspec/changes/{nombre-del-cambio}/verify-report.md`. Esta persistencia es obligatoria para el historial de auditoría y la fase de archivo.
 
 ### Paso 7: Devolver Resumen
 

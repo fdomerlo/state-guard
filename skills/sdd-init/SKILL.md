@@ -11,14 +11,9 @@ metadata:
 
 ## Propósito
 
-Eres un sub-agente responsable de **inicializar el contexto de Desarrollo Guiado por Especificaciones (SDD)** en un proyecto. Detectas el stack tecnológico y las convenciones del proyecto, y luego inicializas el backend de persistencia activo.
+Eres un sub-agente responsable de **inicializar el contexto de Desarrollo Guiado por Especificaciones (SDD)** en un proyecto. Detectas el stack tecnológico y las convenciones del proyecto, y luego inicializas el backend de persistencia activo.## Execution and Persistence Contract
 
-## Execution and Persistence Contract
-
-Utiliza únicamente las rutas y el contexto que el orquestador te provea directamente.
-
-- Si el modo es `openspec`: Ejecuta el bootstrap completo de convenciones.
-- Si el modo es `none`: Devuelve el contexto detectado sin escribir archivos del proyecto.
+Utiliza únicamente las rutas y el contexto que el orquestador te provea directamente. Esta skill realiza el bootstrap completo de las convenciones SDD en el File System.
 
 ## Qué Hacer
 
@@ -30,11 +25,11 @@ Lee el proyecto para entender:
 - Convenciones existentes (linters, frameworks de testing, CI)
 - Patrones de arquitectura en uso
 
-### Paso 2: Inicializar el Backend de Persistencia
+### Paso 2: Inicializar la Estructura OpenSpec
 
-Si el modo se resuelve a `openspec`, crea esta estructura de directorios:
+Crea esta estructura de directorios en la raíz del proyecto:
 
-```
+```text
 openspec/
 ├── config.yaml              ← Configuración SDD específica del proyecto
 ├── specs/                   ← Fuente de verdad (vacía inicialmente)
@@ -42,9 +37,9 @@ openspec/
     └── archive/             ← Cambios completados
 ```
 
-### Paso 3: Generar la Configuración (modo openspec)
+### Paso 3: Generar la Configuración
 
-Basándote en lo detectado, crea la configuración en modo `openspec`:
+Basándote en lo detectado, crea el archivo `openspec/config.yaml`:
 
 ```yaml
 # openspec/config.yaml
@@ -68,19 +63,13 @@ rules:
     - Incluir diagramas de secuencia para flujos complejos
     - Documentar decisiones de arquitectura con justificación
     - "[!] Si proposal.md marca el riesgo como Medio/Alto, DEBES incluir una Estrategia de Testing rigurosa."
-    - "Explotar razonamiento arquitectónico: DEBES incluir diagramas Mermaid exhaustivos (State, Sequence o Class) para cualquier flujo no trivial."
-    - "Priorizar modularidad extrema: Diseña el sistema asumiendo que el código será escrito por un modelo de IA con ventana de contexto limitada. Interfaces claras y acoplamiento nulo."
   tasks:
     - Agrupar tareas por fase (infraestructura, implementación, testing)
     - Usar numeración jerárquica (1.1, 1.2, etc.)
     - Mantener tareas pequeñas, completables en una sesión
-    - "[!] Si design.md incluye una Estrategia de Testing, DEBES generar tareas explícitas para escribir esos tests."
-    - "Granularidad Atómica: Cada tarea debe ser lo suficientemente pequeña para implementarse en un solo archivo o módulo lógico. Evitar 'tareas monstruo'."
   apply:
     - Seguir los patrones y convenciones de código existentes
-    - Cargar skills de codificación relevantes para el stack del proyecto
     - "Código Defensivo y Pragmatismo: Aplica principios SOLID, DRY y Clean Code. Prefiere Early Returns (Guard Clauses). NUNCA sobre-ingeniar."
-    - "Completitud: No uses placeholders como '...código restante aquí...'. Si escribes un archivo, escríbelo completo y listo para producción."
   verify:
     - Ejecutar tests si existe infraestructura de testing
     - Comparar la implementación contra cada escenario de spec
@@ -92,13 +81,6 @@ rules:
 #   terms:
 #     - term: "Artefacto"
 #       definition: "Archivo generado por una fase SDD (proposal, spec, design, tasks)"
-#     - term: "Cambio"
-#       definition: "Una unidad de trabajo en el DAG de SDD"
-#     - term: "Estado"
-#       definition: "Condición actual de un cambio en el DAG de SDD"
-#       aliases: ["phase"]
-#     - term: "Fase"
-#       definition: "Etapa del flujo SDD (explore, propose, spec, design, tasks, apply, verify, archive)"
 ```
 
 ### Paso 4: Inicializar Registry de Skills
@@ -107,16 +89,14 @@ Como paso final, ejecuta `skills/skill-registry/scan.sh` (o inicializa el archiv
 
 ### Paso 5: Devolver Resumen
 
-Devuelve un resumen estructurado adaptado al modo resuelto:
-
-#### Si el modo es `openspec`
+Devuelve un resumen estructurado del estado resultante:
 
 ```
 ## SDD Inicializado
 
 **Proyecto**: {nombre del proyecto}
 **Stack**: {stack detectado}
-**Persistencia**: openspec
+**Persistencia**: File System (OpenSpec)
 
 ### Estructura Creada
 - openspec/config.yaml ← Configuración del proyecto con contexto detectado
@@ -127,24 +107,9 @@ Devuelve un resumen estructurado adaptado al modo resuelto:
 Listo para /sdd-explore {tema} o /sdd-new {nombre-del-cambio}.
 ```
 
-#### Si el modo es `none`
-
-```
-## SDD Inicializado
-
-**Proyecto**: {nombre del proyecto}
-**Stack**: {stack detectado}
-**Persistencia**: none (efímero)
-
-### Contexto Detectado
-{resumen del stack y convenciones detectados}
-
-### Recomendación
-Ejecuta `sdd init` para habilitar `openspec` y persistir artefactos entre sesiones.
-Sin persistencia, todos los artefactos SDD se perderán al terminar la conversación.
-
-### Próximos Pasos
+ Próximos Pasos
 Listo para /sdd-explore {tema} o /sdd-new {nombre-del-cambio}.
+
 ```
 
 ## Reglas

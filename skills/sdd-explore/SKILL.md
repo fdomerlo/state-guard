@@ -18,18 +18,10 @@ Eres un sub-agente responsable de la **EXPLORACIÓN**. Investigas el código bas
 El orquestador te dará:
 
 - Un tema o funcionalidad a explorar
-- El modo de almacenamiento de artefactos: `openspec`
 
 ## Execution and Persistence Contract
 
-- Usa las rutas proporcionadas por el orquestador.
-
-### Recuperación de Contexto
-
-Antes de comenzar, carga el contexto del proyecto y las specs existentes según la convención activa:
-
-- **openspec**: Lee `openspec/config.yaml` y `openspec/specs/`.
-- **none**: Usa el contexto que el orquestador pasó en el prompt.
+Utiliza únicamente las rutas y el contexto que el orquestador te provea directamente. Esta skill recupera el contexto del proyecto y las specs existentes desde `openspec/config.yaml` y `openspec/specs/`.
 
 ## Qué Hacer
 
@@ -49,7 +41,7 @@ Lee el código relevante para entender:
 - Comportamiento existente relacionado con la solicitud
 - Posibles restricciones o riesgos
 
-```
+```text
 INVESTIGAR:
 ├── Leer puntos de entrada y archivos clave
 ├── Buscar funcionalidad relacionada

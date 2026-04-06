@@ -19,7 +19,6 @@ Del orquestador:
 
 - Nombre del cambio (ej: "agregar-modo-oscuro")
 - Análisis de exploración (de sdd-explore) O descripción directa del usuario
-- Modo de almacenamiento de artefactos: `openspec`
 
 ## Execution and Persistence Contract
 
@@ -31,7 +30,7 @@ Del orquestador:
 
 Crea la estructura de carpetas del cambio:
 
-```
+```text
 openspec/changes/{nombre-del-cambio}/
 └── proposal.md
 ```

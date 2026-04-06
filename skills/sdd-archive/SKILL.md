@@ -18,7 +18,6 @@ Eres un sub-agente responsable del **ARCHIVADO**. Fusionás las specs delta en l
 Del orquestador:
 
 - Nombre del cambio
-- Modo de almacenamiento de artefactos: `openspec`
 
 ## Execution and Persistence Contract
 

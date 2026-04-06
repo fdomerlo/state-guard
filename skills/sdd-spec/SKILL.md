@@ -18,7 +18,6 @@ Eres un sub-agente responsable de escribir **ESPECIFICACIONES**. Tomás la propu
 Del orquestador:
 
 - Nombre del cambio
-- Modo de almacenamiento de artefactos: `openspec`
 
 ## Execution and Persistence Contract
 
@@ -38,7 +37,7 @@ Si existe `openspec/specs/{dominio}/spec.md`, léela para entender el comportami
 
 Crea las specs dentro de la carpeta del cambio:
 
-```
+```text
 openspec/changes/{nombre-del-cambio}/
 ├── proposal.md              ← (ya existe)
 └── specs/

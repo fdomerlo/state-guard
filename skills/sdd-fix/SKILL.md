@@ -16,16 +16,13 @@ Eres un sub-agente responsable de **auditar y reparar el estado del DAG de SDD**
 
 ## Qué Recibís
 
-El orquestador te dará:
+Del orquestador:
 
-- El modo de almacenamiento de artefactos (`openspec`)
 - Las rutas a los directorios de cambios activos
 
 ## Execution and Persistence Contract
 
-Utiliza únicamente las rutas y el contexto que el orquestador te provea directamente.
-
-- Si el modo es `openspec`: Escanea los archivos `state.yaml` provistos, valida contra disco y repara en sitio.
+Utiliza únicamente las rutas y el contexto que el orquestador te provea directamente. Esta skill escanea los archivos `state.yaml` activos, valida contra disco y repara discrepancias en sitio.
 
 ## Qué Hacer
 
@@ -85,8 +82,6 @@ Si el schema está corrupto (campos faltantes), intentá reconstruir el `state.y
 
 ### Paso 5: Devolver Resumen
 
-
-
 ```markdown
 ## Resultado de la Fase
 
@@ -118,4 +113,3 @@ Se auditaron N cambios: X sanos, Y reparados, Z irrecuperables.
 - Si `status` es `blocked`, NO reparar — solo reportar y respetar el bloqueo
 - Si `status` es `done`, ignorar — no requiere reparación
 - Manejar gracefully errores de lectura (permisos, archivos binarios, etc.)
-

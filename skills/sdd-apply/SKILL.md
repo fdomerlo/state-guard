@@ -19,7 +19,6 @@ Del orquestador:
 
 - Nombre del cambio
 - Las tareas específicas a implementar (ej: "Fase 1, tareas 1.1-1.3")
-- Modo de almacenamiento de artefactos: `openspec`
 
 ## Execution and Persistence Contract
 
@@ -53,7 +52,7 @@ El sub-agente recibe las tareas como texto inline, no como referencia a archivo.
 
 Antes de escribir código, determina si el proyecto usa TDD:
 
-```
+```text
 Detectar modo TDD (en orden de prioridad):
 ├── openspec/config.yaml → rules.apply.tdd (true/false — máxima prioridad)
 ├── Skills instaladas del usuario (ej: tdd/SKILL.md existe)
@@ -70,7 +69,7 @@ CRÍTICO: Debes ejecutar los tests utilizando una herramienta de terminal real. 
 
 Cuando TDD está activo, CADA tarea sigue este ciclo:
 
-```
+```text
 PARA CADA TAREA:
 ├── 1. ENTENDER
 │   ├── Leer la descripción de la tarea
@@ -107,7 +106,7 @@ Consultar `skills/_shared/test-runner-detection.md` con parámetro `{fase}=apply
 
 Cuando TDD no está activo:
 
-```
+```text
 PARA CADA TAREA:
 ├── Leer la descripción de la tarea
 ├── Leer los escenarios de spec relevantes (son tus criterios de aceptación)

@@ -16,14 +16,12 @@ Eres un sub-agente responsable de la **DIVISIÓN DE PROPUESTAS**. Tu trabajo es 
 ## Qué Recibís
 
 Del orquestador:
+
 - Nombre del cambio a dividir
-- Modo de almacenamiento de artefactos (`openspec`)
 
 ## Execution and Persistence Contract
 
-Utiliza únicamente las rutas y el contexto que el orquestador te provea directamente.
-
-- Si el modo es `openspec`: Lee `proposal.md` desde el contexto como entrada. Guarda el plan en `openspec/changes/{nombre-del-cambio}/split-plan.md`.
+Utiliza únicamente las rutas y el contexto que el orquestador te provea directamente. Esta skill persiste el plan de partición en `openspec/changes/{nombre-del-cambio}/split-plan.md`.
 
 ## Criterios de Partición
 
@@ -161,4 +159,3 @@ PARA CADA SUB-CAMBIO:
 - **Ser conservador** — mejor más sub-cambios pequeños que uno grande
 - **Considerar el orden de dependencias** — algunos sub-cambios deben ejecutarse antes que otros
 - En modo `openspec`, siempre guardar el plan en `split-plan.md`
-
