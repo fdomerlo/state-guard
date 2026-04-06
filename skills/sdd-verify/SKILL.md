@@ -268,5 +268,5 @@ Devuelve al orquestador el mismo contenido que escribiste en `verify-report.md`:
 - Los WARNING = deberían resolverse pero no bloquean
 - Las SUGGESTION = mejoras, no bloqueantes
 - NO corregir ningún problema — solo reportarlos. El orquestador decide qué hacer.
-- En modo `openspec`, SIEMPRE guardar el reporte en `openspec/changes/{nombre-del-cambio}/verify-report.md` — esto persiste la verificación para sdd-archive y el rastro de auditoría
+- SIEMPRE guardar el reporte en `openspec/changes/{nombre-del-cambio}/verify-report.md` — esto persiste la verificación para sdd-archive y el rastro de auditoría
 - Aplicar cualquier `rules.verify` de `openspec/config.yaml`

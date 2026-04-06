@@ -76,7 +76,7 @@ Si se detectan artefactos faltantes para la fase actual:
 3. **Recalculá `completed_phases`**: Incluí solo las fases anteriores a la nueva `current_phase` cuyos artefactos existan.
 4. **Recalculá `pending_phases`**: Incluí la `current_phase` y todas las fases posteriores.
 5. **Actualizá `last_updated`**: Seteá a la fecha/hora actual en formato ISO 8601.
-6. **Escribí el `state.yaml` reparado** en disco (solo en modo `openspec`).
+6. **Escribí el `state.yaml` reparado** en disco.
 
 Si el schema está corrupto (campos faltantes), intentá reconstruir el `state.yaml` desde cero basándote en los artefactos presentes en disco.
 

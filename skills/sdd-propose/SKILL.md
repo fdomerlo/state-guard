@@ -113,7 +113,7 @@ Listo para specs (sdd-spec) o diseño (sdd-design).
 
 ## Reglas
 
-- En modo `openspec`, SIEMPRE crear el archivo `proposal.md`
+- SIEMPRE crear el archivo `proposal.md`
 - Si el directorio del cambio ya existe con una propuesta, LEERLA primero y ACTUALIZARLA
 - Mantener la propuesta CONCISA — es una herramienta de pensamiento, no una novela
 - Toda propuesta DEBE tener un plan de rollback

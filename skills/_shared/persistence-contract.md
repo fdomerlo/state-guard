@@ -49,7 +49,7 @@ Esto controla la verbosidad de la salida en el chat, pero NO afecta lo que se gu
 
 ## Carga de Glosario (para sub-agentes)
 
-Al inicio de cada skill, después de determinar el modo de persistencia:
+Al inicio de cada skill:
 
 1. Buscar archivo `openspec/config.yaml`
 2. Si existe y contiene clave `glossary`, cargar los términos

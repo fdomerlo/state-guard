@@ -158,4 +158,4 @@ PARA CADA SUB-CAMBIO:
 - **Advertir sobre dependencias circularas** — si se detectan, documentarlas
 - **Ser conservador** — mejor más sub-cambios pequeños que uno grande
 - **Considerar el orden de dependencias** — algunos sub-cambios deben ejecutarse antes que otros
-- En modo `openspec`, siempre guardar el plan en `split-plan.md`
+- Siempre guardar el plan en `split-plan.md`

@@ -135,4 +135,4 @@ El sub-agente DEBE devolver el resultado final al orquestador.
 - **NUNCA comparar contra diseño** — solo contra especificaciones
 - Usar las palabras clave RFC 2119 (MUST, SHALL, SHOULD, MAY) para categorizar requisitos
 - Ser objetivo — reportar lo que ES, no lo que debería ser
-- En modo `openspec`, siempre guardar el reporte en `review-report.md`
+- Siempre guardar el reporte en `review-report.md`

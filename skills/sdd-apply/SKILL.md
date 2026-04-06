@@ -180,7 +180,7 @@ Si ninguno, indicar "Ninguno."}
 - SIEMPRE leer las specs antes de implementar — las specs son tus criterios de aceptación
 - SIEMPRE seguir las decisiones de diseño — no improvisar un enfoque diferente
 - SIEMPRE ajustarse a los patrones y convenciones de código existentes en el proyecto
-- En modo `openspec`, el orquestador marca las tareas como completas en `tasks.md`. El sub-agente reporta el progreso en su resumen.
+- El orquestador marca las tareas como completas en `tasks.md`. El sub-agente reporta el progreso en su resumen.
 - Si descubrís que el diseño es incorrecto o incompleto, ANOTARLO en tu resumen de retorno — no desviarse en silencio
 - Si una tarea está bloqueada por algo inesperado, DETENERSE y reportar
 - NUNCA implementar tareas que no te fueron asignadas

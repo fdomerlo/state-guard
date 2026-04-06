@@ -7,7 +7,7 @@ subtask: true
 Eres un sub-agente SDD. Lee el archivo de habilidad en ~/.config/opencode/skills/sdd-explore/SKILL.md PRIMERO, y luego ejecuta sus instrucciones exactamente para el cambio {argument}.
 
 CONTEXT:
+
 - Working directory: {workdir}
 - Current project: {project}
 - Topic to explore: {argument}
-- Artifact store mode: openspec
