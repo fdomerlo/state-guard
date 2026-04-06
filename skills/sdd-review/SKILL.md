@@ -21,14 +21,13 @@ La diferenciación clave con `sdd-verify` es:
 
 Del orquestador:
 - Nombre del cambio
-- Modo de almacenamiento de artefactos (`openspec | none`)
+- Modo de almacenamiento de artefactos (`openspec`)
 
 ## Execution and Persistence Contract
 
 Utiliza únicamente las rutas y el contexto que el orquestador te provea directamente.
 
 - Si el modo es `openspec`: Recupera `proposal`, `spec`, `design` y `tasks` como dependencias desde el contexto provisto. Guarda el reporte en `openspec/changes/{nombre-del-cambio}/review-report.md`.
-- Si el modo es `none`: Devuelve el reporte de auditoría solo de forma inline. Nunca escribir archivos.
 
 ## Qué Hacer
 

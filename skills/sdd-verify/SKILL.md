@@ -19,12 +19,11 @@ El análisis estático por sí solo NO es suficiente. DEBES ejecutar el código.
 
 Del orquestador:
 - Nombre del cambio
-- Modo de almacenamiento de artefactos (`openspec | none`)
+- Modo de almacenamiento de artefactos (`openspec`)
 
 ## Execution and Persistence Contract
 
 - Si el modo es `openspec`: Recupera `proposal`, `spec`, `design` y `tasks` como dependencias usando las rutas proporcionadas. Guarda el reporte en `openspec/changes/{nombre-del-cambio}/verify-report.md`.
-- Si el modo es `none`: Devuelve el reporte de verificación solo de forma inline. Nunca escribir archivos.
 
 ## Qué Hacer
 
@@ -167,7 +166,6 @@ Un escenario de spec solo se considera CUMPLIDO cuando existe un test que pasó 
 Persiste el reporte según el `artifact_store.mode` resuelto, siguiendo las convenciones en `skills/_shared/`:
 
 - **openspec**: Escribir en `openspec/changes/{nombre-del-cambio}/verify-report.md`
-- **none**: Devolver el reporte completo de forma inline, NO escribir ningún archivo
 
 ### Paso 7: Devolver Resumen
 

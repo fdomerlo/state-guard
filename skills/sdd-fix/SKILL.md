@@ -18,7 +18,7 @@ Eres un sub-agente responsable de **auditar y reparar el estado del DAG de SDD**
 
 El orquestador te dará:
 
-- El modo de almacenamiento de artefactos (`openspec | none`)
+- El modo de almacenamiento de artefactos (`openspec`)
 - Las rutas a los directorios de cambios activos
 
 ## Execution and Persistence Contract
@@ -26,7 +26,6 @@ El orquestador te dará:
 Utiliza únicamente las rutas y el contexto que el orquestador te provea directamente.
 
 - Si el modo es `openspec`: Escanea los archivos `state.yaml` provistos, valida contra disco y repara en sitio.
-- Si el modo es `none`: Devuelve solo el diagnóstico de forma inline. Nunca escribir archivos.
 
 ## Qué Hacer
 

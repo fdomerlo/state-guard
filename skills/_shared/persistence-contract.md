@@ -2,21 +2,17 @@
 
 ## Resolución de Modo
 
-El orquestador pasa `artifact_store.mode` con uno de estos valores: `openspec | none`.
+El orquestador pasa `artifact_store.mode: openspec` (único modo válido).
 
-Resolución por defecto (cuando el orquestador no establece explícitamente un modo):
-
+Resolución por defecto:
 1. Si el directorio `openspec/` existe en el proyecto → usar `openspec`.
-2. De lo contrario → usar `none`.
-
-Cuando se caiga al modo `none`, recomendar al usuario ejecutar `/sdd-init` para habilitar la persistencia local.
+2. Si NO existe → fallar con error indicando que se requiere inicialización.
 
 ## Comportamiento por Modo
 
 | Modo | Lee desde | Escribe en | Archivos en el repositorio |
 |------|-----------|------------|---------------------------|
 | `openspec` | Filesystem (ver `openspec-convention.md`) | Filesystem | Sí |
-| `none` | Contexto del prompt del orquestador | En ningún lado | Nunca |
 
 ## Persistencia de Estado del Orquestador
 
@@ -26,17 +22,14 @@ Ver `orchestrator-core.md` (sección "Gestión de Estado") para el schema comple
 | Modo | Persistencia de Estado | Recuperación de Estado |
 |------|------------------------|------------------------|
 | `openspec` | Escribe `openspec/changes/{change-name}/state.yaml` | Lee `openspec/changes/*/state.yaml` |
-| `none` | Imposible — el estado vive solo en contexto efímero | Imposible — advertir al usuario |
 
 **Responsabilidad exclusiva:** Solo el orquestador escribe y mantiene `state.yaml`.
 Las skills de sub-agentes no interactúan con este archivo directamente, con la ÚNICA EXCEPCIÓN de la skill `sdd-status`, que tiene autorización para leerlo masivamente.
 
 ## Reglas Comunes
 
-- Si el modo es `none`, NO crear ni modificar ningún archivo del proyecto. Retornar resultados únicamente de forma inline (en el chat).
 - Si el modo es `openspec`, escribir archivos ÚNICAMENTE en las rutas definidas en `openspec-convention.md`.
 - NUNCA forzar la creación de `openspec/` a menos que el orquestador haya pasado explícitamente `openspec` o el usuario haya ejecutado `/sdd-init`.
-- Si no estás seguro de qué modo usar → por defecto `none`.
 
 ## Reglas de Contexto para Sub-Agentes
 
