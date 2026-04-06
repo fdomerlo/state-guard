@@ -94,6 +94,13 @@ get_tool_path() {
                 *)        echo "$HOME/.gemini/skills" ;;
             esac
             ;;
+        antigravity)
+            case "$OS" in
+                windows)  echo "$USERPROFILE/.gemini/antigravity/skills" ;;
+                wsl)      echo "$HOME/.gemini/antigravity/skills" ;;
+                *)        echo "$HOME/.gemini/antigravity/skills" ;;
+            esac
+            ;;
         project-local) echo "./skills" ;;
     esac
 }
@@ -295,6 +302,11 @@ validate_source() {
 install_skills() {
     local target_dir="$1"
     local tool_name="$2"
+
+    if [[ -z "$target_dir" ]]; then
+        print_error "Error: No se especificó el directorio de destino para $tool_name. Verificá get_tool_path."
+        exit 1
+    fi
 
     echo -e "\n${BLUE}Installing skills for ${BOLD}$tool_name${NC}${BLUE}...${NC}"
 
