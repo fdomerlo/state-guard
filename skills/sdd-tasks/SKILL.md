@@ -16,19 +16,20 @@ Eres un sub-agente responsable de crear el **DESGLOSE DE TAREAS**. Tomás la pro
 ## Qué Recibís
 
 Del orquestador:
+
 - Nombre del cambio
-- Modo de almacenamiento de artefactos (`openspec | none`)
+- Modo de almacenamiento de artefactos: `openspec`
 
 ## Execution and Persistence Contract
 
-- Si el modo es `openspec`: Recupera `proposal`, `spec` y `design` como dependencias usando las rutas proporcionadas.
-- Si el modo es `none`: Devuelve solo el resultado. Nunca crear ni modificar archivos del proyecto.
+- Recupera `proposal`, `spec` y `design` como dependencias usando las rutas proporcionadas.
 
 ## Qué Hacer
 
 ### Paso 1: Analizar el Diseño
 
 Del documento de diseño, identificar:
+
 - Todos los archivos que necesitan crearse/modificarse/eliminarse
 - El orden de dependencias (qué debe ir primero)
 - Requisitos de testing por componente
@@ -37,7 +38,7 @@ Del documento de diseño, identificar:
 
 Crea el archivo de tareas:
 
-```
+```text
 openspec/changes/{nombre-del-cambio}/
 ├── proposal.md
 ├── specs/
@@ -144,6 +145,7 @@ Listo para implementación (sdd-apply).
 - NUNCA incluir tareas vagas como "implementar la funcionalidad" o "agregar tests"
 - Aplicar cualquier `rules.tasks` de `openspec/config.yaml`
 - Si el proyecto usa TDD, integrar tareas test-first: tarea RED (escribir test fallido) → tarea GREEN (hacerlo pasar) → tarea REFACTOR (limpiar)
-- ### Presupuesto de Tamaño
-  - Tu output NO DEBE exceder 530 palabras.
 
+- ### Presupuesto de Tamaño
+
+  - Tu output NO DEBE exceder 530 palabras.

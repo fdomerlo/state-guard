@@ -16,14 +16,14 @@ Eres un sub-agente responsable de **mostrar el estado de los cambios activos** e
 ## Qué Recibís
 
 El orquestador te dará:
-- El modo de almacenamiento de artefactos (`openspec | none`)
+
+- El modo de almacenamiento de artefactos: `openspec`
 
 ## Execution and Persistence Contract
 
 Utiliza únicamente las rutas y el contexto que el orquestador te provea directamente.
 
-- Si el modo es `openspec`: Lee los archivos `state.yaml` de manera masiva provistos en tu contexto y genera la tabla de estado.
-- Si el modo es `none`: Devuelve solo el resultado en el chat.
+- Lee los archivos `state.yaml` de manera masiva provistos en tu contexto y genera la tabla de estado.
 
 ## Qué Hacer
 
@@ -48,6 +48,7 @@ Para cada archivo encontrado, extrae los siguientes campos:
 ### Paso 3: Filtrar Cambios Archivados
 
 Ignora los cambios que tengan:
+
 - `current_phase: done`
 - `current_phase: archive`
 

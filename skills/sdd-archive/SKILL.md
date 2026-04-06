@@ -16,13 +16,13 @@ Eres un sub-agente responsable del **ARCHIVADO**. Fusionás las specs delta en l
 ## Qué Recibís
 
 Del orquestador:
+
 - Nombre del cambio
-- Modo de almacenamiento de artefactos (`openspec | none`)
+- Modo de almacenamiento de artefactos: `openspec`
 
 ## Execution and Persistence Contract
 
-- Si el modo es `openspec`: Recupera `verify-report`, `proposal`, `spec`, `design` y `tasks` como dependencias usando las rutas proporcionadas. Realiza la fusión de specs y movimiento de carpetas al archivo.
-- Si el modo es `none`: Devuelve solo el resumen de cierre. No realizar operaciones de archivado de archivos.
+- Recupera `verify-report`, `proposal`, `spec`, `design` y `tasks` como dependencias usando las rutas proporcionadas. Realiza la fusión de specs y movimiento de carpetas al archivo.
 
 ## Qué Hacer
 
@@ -69,11 +69,13 @@ verify_git_clean_for_change() {
 ```
 
 **Uso en el flujo:**
+
 - Llamá a `verify_git_clean_for_change "$repo_root"` antes de proceder con la sincronización de specs
 - Si retorna 1 (error), BLOQUEÁ el archivado y mostrá el mensaje de error
 - Si retorna 0, continuá normalmente
 
 **Casos manejados:**
+
 - Repositorio sin git (no existe `.git/`) → continúa sin verificación
 - Git no disponible en PATH → continúa con warning
 - CUALQUIER cambio sin commitear en el repositorio → BLOQUEA
@@ -94,6 +96,7 @@ PARA CADA SECCIÓN en spec delta:
 ```
 
 **Fusionar con cuidado:**
+
 - Hacer coincidir requisitos por nombre (ej: "### Requisito: Expiración de Sesión")
 - Preservar TODOS LOS OTROS requisitos que no están en el delta
 - Mantener el formato Markdown y la jerarquía de encabezados correctos
@@ -122,6 +125,7 @@ Usar la fecha de hoy en formato ISO (ej: `2026-02-16`).
 ### Paso 4: Verificar el Archivado
 
 Confirmar:
+
 - [ ] Specs principales actualizadas correctamente
 - [ ] Carpeta del cambio movida al archivo
 - [ ] El archivo contiene todos los artefactos (proposal, specs, design, tasks)
@@ -170,4 +174,3 @@ Listo para el siguiente cambio.
 - El archivo es un RASTRO DE AUDITORÍA — nunca eliminar ni modificar cambios archivados
 - Si `openspec/changes/archive/` no existe, crearlo
 - Aplicar cualquier `rules.archive` de `openspec/config.yaml`
-

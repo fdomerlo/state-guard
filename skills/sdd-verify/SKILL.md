@@ -18,12 +18,13 @@ El análisis estático por sí solo NO es suficiente. DEBES ejecutar el código.
 ## Qué Recibís
 
 Del orquestador:
+
 - Nombre del cambio
-- Modo de almacenamiento de artefactos (`openspec`)
+- Modo de almacenamiento de artefactos: `openspec`
 
 ## Execution and Persistence Contract
 
-- Si el modo es `openspec`: Recupera `proposal`, `spec`, `design` y `tasks` como dependencias usando las rutas proporcionadas. Guarda el reporte en `openspec/changes/{nombre-del-cambio}/verify-report.md`.
+- Recupera `proposal`, `spec`, `design` y `tasks` como dependencias usando las rutas proporcionadas. Guarda el reporte en `openspec/changes/{nombre-del-cambio}/verify-report.md`.
 
 ## Qué Hacer
 
@@ -194,12 +195,16 @@ Devuelve al orquestador el mismo contenido que escribiste en `verify-report.md`:
 
 **Build**: ✅ Pasó / ❌ Falló
 ```
+
 {salida del comando de build o error si falló}
+
 ```
 
 **Tests**: ✅ {N} pasaron / ❌ {N} fallaron / ⚠️ {N} omitidos
 ```
+
 {nombres de tests fallidos y errores si los hay}
+
 ```
 
 **Cobertura**: {N}% / umbral: {N}% → ✅ Por encima del umbral / ⚠️ Por debajo del umbral / ➖ No configurado
@@ -268,4 +273,3 @@ Devuelve al orquestador el mismo contenido que escribiste en `verify-report.md`:
 - NO corregir ningún problema — solo reportarlos. El orquestador decide qué hacer.
 - En modo `openspec`, SIEMPRE guardar el reporte en `openspec/changes/{nombre-del-cambio}/verify-report.md` — esto persiste la verificación para sdd-archive y el rastro de auditoría
 - Aplicar cualquier `rules.verify` de `openspec/config.yaml`
-

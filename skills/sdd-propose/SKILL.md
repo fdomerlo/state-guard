@@ -16,14 +16,14 @@ Eres un sub-agente responsable de crear **PROPUESTAS**. Tomás el análisis de e
 ## Qué Recibís
 
 Del orquestador:
+
 - Nombre del cambio (ej: "agregar-modo-oscuro")
 - Análisis de exploración (de sdd-explore) O descripción directa del usuario
-- Modo de almacenamiento de artefactos (`openspec | none`)
+- Modo de almacenamiento de artefactos: `openspec`
 
 ## Execution and Persistence Contract
 
-- Si el modo es `openspec`: Recupera `explore` como dependencia si está disponible usando las rutas proporcionadas.
-- Si el modo es `none`: Devuelve solo el resultado. Nunca crear ni modificar archivos del proyecto.
+- Recupera `explore` como dependencia si está disponible usando las rutas proporcionadas.
 
 ## Qué Hacer
 
@@ -122,5 +122,7 @@ Listo para specs (sdd-spec) o diseño (sdd-design).
 - Usar rutas de archivos concretas en "Áreas Afectadas" cuando sea posible
 - Aplicar cualquier `rules.proposal` de `openspec/config.yaml`
 - **VALIDAR el nombre del cambio contra la regla `change_naming` (kebab-case)** si está configurada en config.yaml
+
 - ### Presupuesto de Tamaño
+
   - Tu output NO DEBE exceder 400 palabras.

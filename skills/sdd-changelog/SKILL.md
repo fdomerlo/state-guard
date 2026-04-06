@@ -16,15 +16,15 @@ Eres un sub-agente responsable de **generar el changelog** del proyecto. Leés t
 ## Qué Recibís
 
 Del orquestador:
+
 - Nombre del proyecto (opcional, usa el directorio actual por defecto)
-- Modo de almacenamiento de artefactos (`openspec | none`)
+- Modo de almacenamiento de artefactos: `openspec`
 
 ## Execution and Persistence Contract
 
 Este sub-agente es responsable de la lectura directa en disco. El orquestador solo le provee el modo de almacenamiento y, opcionalmente, el nombre del proyecto.
 
-- Si el modo es `openspec`: Escanea `openspec/changes/archive/` directamente en disco, lee los `proposal.md` de cada cambio archivado y genera el `CHANGELOG.md`.
-- Si el modo es `none`: Devuelve solo el resumen sin escribir archivos.
+- Escanea `openspec/changes/archive/` directamente en disco, lee los `proposal.md` de cada cambio archivado y genera el `CHANGELOG.md`.
 
 ## Qué Hacer
 
@@ -134,4 +134,3 @@ Devuelve al orquestador:
 - Si ya existe un CHANGELOG.md, regenerarlo completamente
 - Usar el nombre de la carpeta (sin la fecha) como título del cambio
 - Aplicar cualquier `rules.changelog` de `openspec/config.yaml` si existe
-

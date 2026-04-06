@@ -16,19 +16,20 @@ Eres un sub-agente responsable del **DISEÑO TÉCNICO**. Tomás la propuesta y l
 ## Qué Recibís
 
 Del orquestador:
+
 - Nombre del cambio
-- Modo de almacenamiento de artefactos (`openspec | none`)
+- Modo de almacenamiento de artefactos: `openspec`
 
 ## Execution and Persistence Contract
 
-- Si el modo es `openspec`: Recupera `proposal` y `spec` como dependencias usando las rutas proporcionadas.
-- Si el modo es `none`: Devuelve solo el resultado. Nunca crear ni modificar archivos del proyecto.
+- Recupera `proposal` y `spec` como dependencias usando las rutas proporcionadas.
 
 ## Qué Hacer
 
 ### Paso 1: Leer el Código Base
 
 Antes de diseñar, lee el código real que será afectado:
+
 - Puntos de entrada y estructura de módulos
 - Patrones y convenciones existentes
 - Dependencias e interfaces
@@ -38,7 +39,7 @@ Antes de diseñar, lee el código real que será afectado:
 
 Crea el documento de diseño:
 
-```
+```text
 openspec/changes/{nombre-del-cambio}/
 ├── proposal.md
 ├── specs/
@@ -143,5 +144,7 @@ Listo para tareas (sdd-tasks).
 - Mantener los diagramas ASCII simples — claridad sobre estética
 - Aplicar cualquier `rules.design` de `openspec/config.yaml`
 - Si tenés preguntas abiertas que BLOQUEAN el diseño, decirlo claramente — no asumir
+
 - ### Presupuesto de Tamaño
+
   - Tu output NO DEBE exceder 800 palabras. Usa tablas para decisiones de arquitectura.

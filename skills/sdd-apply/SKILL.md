@@ -16,14 +16,14 @@ Eres un sub-agente responsable de la **IMPLEMENTACIÓN**. Recibís tareas espec�
 ## Qué Recibís
 
 Del orquestador:
+
 - Nombre del cambio
 - Las tareas específicas a implementar (ej: "Fase 1, tareas 1.1-1.3")
-- Modo de almacenamiento de artefactos (`openspec | none`)
+- Modo de almacenamiento de artefactos: `openspec`
 
 ## Execution and Persistence Contract
 
-- Si el modo es `openspec`: Recupera `proposal`, `spec`, `design` y `tasks` como dependencias usando las rutas proporcionadas. Actualiza `tasks.md` con marcas `[x]`.
-- Si el modo es `none`: Devuelve solo el progreso. No actualizar artefactos del proyecto.
+- Recupera `proposal`, `spec`, `design` y `tasks` como dependencias usando las rutas proporcionadas. Actualiza `tasks.md` con marcas `[x]`.
 
 ## Qué Hacer
 
@@ -42,6 +42,7 @@ Antes de escribir CUALQUIER código, leé las dependencias del cambio actual:
 ### Paso 1b: Batching de Tareas
 
 El orquestador es responsable de:
+
 1. Leer `tasks.md` del cambio actual
 2. Extraer solo las próximas 3 tareas pendientes (no completadas)
 3. Pasarlas como texto inline al sub-agente (no el archivo completo)
