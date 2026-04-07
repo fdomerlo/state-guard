@@ -251,6 +251,22 @@ test_gemini_cli_skill_count() {
 }
 
 # ============================================================================
+# Tests — Antigravity
+# ============================================================================
+
+test_install_antigravity() {
+    bash "$INSTALL_SCRIPT" --agent antigravity > /dev/null 2>&1
+    assert_all_skills_installed "$HOME/.gemini/antigravity/skills"
+}
+
+test_antigravity_skill_count() {
+    bash "$INSTALL_SCRIPT" --agent antigravity > /dev/null 2>&1
+    local count
+    count=$(find "$HOME/.gemini/antigravity/skills" -name "SKILL.md" | wc -l | tr -d ' ')
+    assert_eq "17" "$count" "Expected exactly 17 skills for Antigravity"
+}
+
+# ============================================================================
 # Tests — Project-local
 # ============================================================================
 
@@ -300,22 +316,25 @@ test_all_global() {
     assert_all_skills_installed "$HOME/.config/opencode/skills" || return 1
     # Gemini CLI
     assert_all_skills_installed "$HOME/.gemini/skills" || return 1
+    # Antigravity
+    assert_all_skills_installed "$HOME/.gemini/antigravity/skills" || return 1
 }
 
 test_all_global_total_skill_count() {
     bash "$INSTALL_SCRIPT" --agent all-global > /dev/null 2>&1
-    # 3 targets × 17 skills = 51 SKILL.md files
+    # 4 targets × 17 skills = 68 SKILL.md files
     local total=0
     for dir in \
         "$HOME/.claude/skills" \
         "$HOME/.config/opencode/skills" \
-        "$HOME/.gemini/skills"; do
+        "$HOME/.gemini/skills" \
+        "$HOME/.gemini/antigravity/skills"; do
         local count
         count=$(find "$dir" -name "SKILL.md" | wc -l | tr -d ' ')
         assert_eq "17" "$count" "Expected 17 skills in $dir" || return 1
         total=$((total + count))
     done
-    assert_eq "51" "$total" "Expected 51 total SKILL.md files across all targets"
+    assert_eq "68" "$total" "Expected 68 total SKILL.md files across all targets"
 }
 
 test_all_global_opencode_commands() {
@@ -352,13 +371,23 @@ test_idempotent_opencode() {
     assert_eq "19" "$cmd_count" "Expected exactly 19 commands after double install"
 }
 
+test_idempotent_antigravity() {
+    bash "$INSTALL_SCRIPT" --agent antigravity > /dev/null 2>&1
+    bash "$INSTALL_SCRIPT" --agent antigravity > /dev/null 2>&1
+    assert_all_skills_installed "$HOME/.gemini/antigravity/skills" || return 1
+    local count
+    count=$(find "$HOME/.gemini/antigravity/skills" -name "SKILL.md" | wc -l | tr -d ' ')
+    assert_eq "17" "$count" "Expected exactly 17 skills after double install"
+}
+
 test_idempotent_all_global() {
     bash "$INSTALL_SCRIPT" --agent all-global > /dev/null 2>&1
     bash "$INSTALL_SCRIPT" --agent all-global > /dev/null 2>&1
     for dir in \
         "$HOME/.claude/skills" \
         "$HOME/.config/opencode/skills" \
-        "$HOME/.gemini/skills"; do
+        "$HOME/.gemini/skills" \
+        "$HOME/.gemini/antigravity/skills"; do
         local count
         count=$(find "$dir" -name "SKILL.md" | wc -l | tr -d ' ')
         assert_eq "17" "$count" "Expected 17 skills in $dir after double install" || return 1
@@ -535,6 +564,11 @@ run_test "Installs all 17 skills to ~/.gemini/skills" test_install_gemini_cli
 run_test "Exactly 17 SKILL.md files" test_gemini_cli_skill_count
 echo ""
 
+echo -e "${BOLD}Antigravity${NC}"
+run_test "Installs all 17 skills to ~/.gemini/antigravity/skills" test_install_antigravity
+run_test "Exactly 17 SKILL.md files" test_antigravity_skill_count
+echo ""
+
 echo -e "${BOLD}Project-local${NC}"
 run_test "Installs all 17 skills to ./skills/" test_install_project_local
 run_test "Exactly 17 SKILL.md files" test_project_local_skill_count
@@ -547,14 +581,15 @@ run_test "Handles deeply nested custom path" test_nested_custom_path
 echo ""
 
 echo -e "${BOLD}All-global${NC}"
-run_test "Installs to all 3 global targets" test_all_global
-run_test "51 total SKILL.md files (3×17)" test_all_global_total_skill_count
+run_test "Installs to all 4 global targets" test_all_global
+run_test "68 total SKILL.md files (4×17)" test_all_global_total_skill_count
 run_test "Also installs OpenCode commands" test_all_global_opencode_commands
 echo ""
 
 echo -e "${BOLD}Idempotency${NC}"
 run_test "Claude Code: double install is safe" test_idempotent_claude_code
 run_test "OpenCode: double install is safe" test_idempotent_opencode
+run_test "Antigravity: double install is safe" test_idempotent_antigravity
 run_test "All-global: double install is safe" test_idempotent_all_global
 echo ""
 
