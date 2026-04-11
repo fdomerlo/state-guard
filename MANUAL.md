@@ -350,6 +350,45 @@ La instalación varía según la herramienta. Ejecuta `scripts/install.sh` y sel
 
 ---
 
+## Guía de Integración: Custom Skills
+
+El framework SDD es extensible mediante "Custom Skills", permitiendo integrar sub-agentes especializados que no son partes nativas del orquestador SDD (por ejemplo, herramientas de desarrollo frontend, diseño o base de datos).
+
+### 1. Ubicación Física
+Toda nueva skill debe residir en su propio directorio dentro de la carpeta `skills/`.
+**Regla:** Asegúrate de nombrar la carpeta de forma representativa (por ejemplo, `skills/frontend-design/`) y evita usar el prefijo `sdd-` o colisionar con la carpeta interna compartida `_shared/`.
+
+### 2. Archivo de Contrato (`SKILL.md`)
+Toda skill **DEBE** contener un archivo `SKILL.md` en su raíz. Este archivo actúa como el contrato de integración, las instrucciones directas (System Prompt) generadas para la herramienta y los metadatos necesarios. Sin este archivo, el skill no existirá.
+
+### 3. Indexación (`skill-registry`)
+Una vez añadida la skill, el desarrollador (o el sistema) debe registrarla para que pueda ser descubierta. Para esto, ejecuta la skill interna de indexación o corre su script directamente:
+```bash
+./skills/skill-registry/scan.sh
+```
+Esto escaneará las carpetas y actualizará el archivo de repositorio local en `.agentify/skill-registry.md`.
+
+### 4. Uso por el Orquestador
+El orquestador SDD lee `.agentify/skill-registry.md` al inicializar contexto y mapea cada entrada como una herramienta delegable válida. Al analizar la necesidad de un usuario, se basará en atributos declarados como `name` y `description` para delegar proactivamente el trabajo de sub-agentes no nativos.
+
+### Ejemplo Boilerplate (`frontend-design/SKILL.md`)
+```markdown
+---
+name: frontend-design
+description: Agente especialista en diseño UI/UX. Crea componentes web hermosos y listos para producción evitando la estética genérica por defecto de IA.
+trigger: Cuando el usuario quiere crear un sitio web, un nuevo panel y componente frontend interactivo.
+---
+
+# Funcionalidad Principal
+Actúas como un desarrollador y diseñador de componentes Vue/React/HTML...
+
+# Reglas
+1. Siempre sigue fielmente los colores y el design system nativo.
+2. Evita usar frameworks pesados si no se solicita.
+```
+
+---
+
 ## Resolución de Problemas
 
 ### El estado no avanza
