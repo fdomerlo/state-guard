@@ -40,7 +40,8 @@ openspec/changes/*/state.yaml
 Para cada archivo encontrado, extrae los siguientes campos:
 
 - `change`: Nombre del cambio
-- `current_phase`: Fase actual (explore, propose, spec, design, tasks, apply, verify, archive, done, blocked)
+- `current_phase`: Fase actual (explore, propose, spec, design, tasks, apply, verify, archive)
+- `status`: Estado actual (active, done, blocked)
 - `started_at`: Fecha de inicio en formato ISO 8601
 - `pending_phases`: Lista de fases pendientes
 - `blocked_reason`: Razón del bloqueo (si aplica)
@@ -49,7 +50,7 @@ Para cada archivo encontrado, extrae los siguientes campos:
 
 Ignora los cambios que tengan:
 
-- `current_phase: done`
+- `status: done`
 - `current_phase: archive`
 
 ### Paso 4: Calcular Tiempo Transcurrido
@@ -66,9 +67,9 @@ Aplica la lógica de semáforo:
 
 | Condición | Emoji | Significado |
 |-----------|-------|-------------|
-| `current_phase == "blocked"` | 🟡 | Bloqueado |
-| `current_phase == "done"` | 🔴 | Completado (no debería aparecer) |
-| `pending_phases` no está vacío Y `current_phase != "blocked"` | 🟢 | Activo |
+| `status == "blocked"` | 🟡 | Bloqueado |
+| `status == "done"` | 🔴 | Completado (no debería aparecer) |
+| `status == "active"` | 🟢 | Activo |
 
 ### Paso 6: Formatear Tabla Markdown
 
@@ -96,7 +97,7 @@ Devuelve la tabla Markdown con el estado de todos los cambios activos.
 
 ## Reglas
 
-- SIEMPRE filtrar cambios con current_phase "done" o "archive"
+- SIEMPRE filtrar cambios con status "done" o current_phase "archive"
 - Si no hay cambios activos, mostrar mensaje informativo
 - Manejar gracefully archivos malformados (continuar, no fallar)
 - El formato de fase debe ser legible (primera letra mayúscula)

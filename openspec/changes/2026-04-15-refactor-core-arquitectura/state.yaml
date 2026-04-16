@@ -1,0 +1,16 @@
+change: 2026-04-15-refactor-core-arquitectura
+started_at: "2026-04-16T14:41:35-03:00"
+last_updated: "2026-04-16T14:51:32-03:00"
+current_phase: archive
+status: active
+completed_phases:
+  - explore
+  - propose
+  - spec
+  - design
+  - tasks
+  - apply
+  - verify
+pending_phases:
+  - archive
+blocked_reason: null

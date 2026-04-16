@@ -47,12 +47,17 @@ bash scripts/install_test.sh
 | `/sdd-ff` | Fast-forward de planificación | **Meta-comando** |
 | `/sdd-explore <tema>` | Investiga idea | Fase (Explore) |
 | `/sdd-propose <nombre>` | Crea o itera propuesta | Fase (Propose) |
-| `/sdd-apply` | Implementa tareas | Fase (Apply) |
+| `/sdd-spec` | Define escenario y deltas | Fase (Spec) |
+| `/sdd-design` | Blueprint tecnico | Fase (Design) |
+| `/sdd-tasks` | Desglose iterable accionable| Fase (Tasks) |
+| `/sdd-apply` | Implementa tarea asumiendo checkmark | Fase (Apply) |
 | `/sdd-verify` | Valida contra specs | Fase (Verify) |
 | `/sdd-archive` | Archiva cambio completado | Fase (Archive) |
 | `/sdd-status` | Muestra estado de cambios | Skill Directa |
 | `/sdd-checkpoint` | Genera resumen de estado y lo guarda | Skill Directa |
 | `/sdd-rollback` | Purga carpeta del cambio y restaura desde git | Skill Directa |
+| `/sdd-review` | Auditoria estatica versus especificaciones | Skill Directa |
+| `/sdd-split` | Divide proposals engorrosos logrando granuladidad | Skill Directa |
 
 ---
 
@@ -188,6 +193,9 @@ El framework no soporta editores pasivos/inline (como VS Code, Cursor o Codex) d
 | apply | tasks.md (actualizado) | Sí |
 | verify | verify-report.md | Sí |
 
+### Contractualidad Fase "Apply"
+En la fase de implementación (`apply`), el **sub-agente portador pasa a ser el único responsable** de persistir el status documentado escribiendo el propio código sobre `tasks.md`, realizando transiciones asimétricas desde `- [ ]` a `- [x]`.
+
 ---
 
-*Última actualización: 2026-03-30*
+*Última actualización: 2026-04-16*

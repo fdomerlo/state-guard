@@ -45,7 +45,7 @@ os_label() {
 # ============================================================================
 
 setup_colors() {
-    if [[ "$OS" == "windows" ]] && [[ -z "${WT_SESSION:-}" ]] && [[ -z "${TERM_PROGRAM:-}" ]]; then
+    if [ "$OS" = "windows" ] && [ -z "${WT_SESSION:-}" ] && [ -z "${TERM_PROGRAM:-}" ]; then
         # Plain CMD without Windows Terminal — no ANSI support
         RED='' GREEN='' YELLOW='' BLUE='' CYAN='' BOLD='' NC=''
     else
@@ -110,7 +110,7 @@ get_tool_path() {
 # ============================================================================
 
 make_writable() {
-    if [[ "$OS" != "windows" ]]; then
+    if [ "$OS" != "windows" ]; then
         chmod u+w "$1" 2>/dev/null || true
     fi
 }
@@ -207,7 +207,7 @@ compile_and_append_config() {
 
 merge_opencode_config() {
     local config_dir
-    if [[ "$OS" == "windows" ]]; then
+    if [ "$OS" = "windows" ]; then
         config_dir="$USERPROFILE/.config/opencode"
     else
         config_dir="$HOME/.config/opencode"
@@ -303,7 +303,7 @@ install_skills() {
     local target_dir="$1"
     local tool_name="$2"
 
-    if [[ -z "$target_dir" ]]; then
+    if [ -z "$target_dir" ]; then
         print_error "Error: No se especificó el directorio de destino para $tool_name. Verificá get_tool_path."
         exit 1
     fi
@@ -344,7 +344,7 @@ install_skills() {
         fi
 
         # Verify source SKILL.md exists for sdd skills
-        if [[ "$skill_name" == sdd-* ]] && [ ! -f "$skill_dir/SKILL.md" ]; then
+        if [ "${skill_name#sdd-}" != "$skill_name" ] && [ ! -f "$skill_dir/SKILL.md" ]; then
             print_warn "Skipping $skill_name (SKILL.md not found in source)"
             continue
         fi
@@ -426,12 +426,16 @@ install_for_agent() {
             install_skills "$(get_tool_path gemini-cli)" "Gemini CLI"
             compile_and_append_config "${USERPROFILE:-$HOME}/.gemini/GEMINI.md" "$REPO_DIR/integrations/gemini-cli/GEMINI.md" "Gemini CLI" "$(get_tool_path gemini-cli)"
             
-            install_skills "$(get_tool_path antigravity)" "Antigravity"
+            local ag_target
+            ag_target="$(get_tool_path antigravity)"
+            install_skills "$ag_target" "Antigravity"
+            mkdir -p "./.agent/rules" 2>/dev/null || true
+            compile_and_append_config "./.agent/rules/sdd-orchestrator.md" "$REPO_DIR/integrations/antigravity/sdd-orchestrator.md" "Antigravity" "$ag_target"
             
             echo -e "\n${GREEN}${BOLD}¡Todos los orquestadores globales configurados automáticamente!${NC}"
             ;;
         custom)
-            if [[ -z "${CUSTOM_PATH:-}" ]]; then
+            if [ -z "${CUSTOM_PATH:-}" ]; then
                 read -rp "Enter target path: " CUSTOM_PATH
             fi
             install_skills "$CUSTOM_PATH" "Custom"
@@ -489,7 +493,7 @@ setup_colors
 # Parse arguments
 AGENT=""
 CUSTOM_PATH=""
-while [[ $# -gt 0 ]]; do
+while [ $# -gt 0 ]; do
     case "$1" in
         --agent)  AGENT="$2"; shift 2 ;;
         --path)   CUSTOM_PATH="$2"; shift 2 ;;
@@ -501,7 +505,7 @@ done
 print_header
 validate_source
 
-if [[ -n "$AGENT" ]]; then
+if [ -n "$AGENT" ]; then
     # Non-interactive mode
     install_for_agent "$AGENT"
 else

@@ -25,6 +25,10 @@ Del orquestador:
 
 ## Qué Hacer
 
+### Paso 0: Control de Bloqueantes Previos
+
+Verifica explícitamente en el directorio del cambio si los archivos `review-report.md` o `verify-report.md` contienen reportes clasificados o concluidos como **CRITICAL**. Si los contienen, **ABORTAR INMEDIATAMENTE** la ejecución de esta skill notificando al orquestador. Solo se puede archivar una especificación que está funcional y validada según su completitud.
+
 ### Paso 1: Verificar Estado Git Antes de Archivar
 
 Antes de sincronizar specs y mover al archivo, verificá el estado del repositorio git:
