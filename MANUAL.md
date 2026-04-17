@@ -156,7 +156,7 @@ rules:
     test_command: "npm test"  # o "pytest", "cargo test", etc.
 ```
 
-Si no se define, la verificación报告ará que los tests no pudieron ejecutarse automáticamente.
+Si no se define, la verificación reportará que los tests no pudieron ejecutarse automáticamente.
 
 ---
 
@@ -187,13 +187,13 @@ El comando `/sdd-split` analiza una proposal monolítica y la divide en sub-camb
 
 ### /sdd-checkpoint — Guardado de Estado
 
-El comando `/sdd-checkpoint` genera un resumen del estado actual de la sesión y lo guarda en el archivo de estado del cambio.
+El comando `/sdd-checkpoint` genera un resumen del estado actual de la sesión y lo guarda en el archivo de estado del cambio, posibilitando una recuperación de contexto eficiente (**Warm-Boot**).
 
 **Cuándo usarlo:**
 
 - Antes de realizar operaciones riesgosas
-- Para mantener persistencia manual adicional a la automática
-- Al cambiar de contexto de trabajo
+- Para inyectar la constancia viva al parámetro `session_summary` del state.yaml
+- Al restablecer el contexto de trabajo forzando al LLM a recargar panorama
 
 **Ejemplo de uso:**
 
@@ -201,7 +201,7 @@ El comando `/sdd-checkpoint` genera un resumen del estado actual de la sesión y
 /sdd-checkpoint
 ```
 
-El archivo de estado se actualiza con el resumen actual, incluyendo fase actual y progreso.
+El archivo de estado asimila el texto consolidando resiliencia.
 
 ### /sdd-archive — Cierre de Cambios
 
@@ -212,7 +212,7 @@ El comando `/sdd-archive` cierra un cambio: fusiona las specs delta en las specs
 2. Realizar un `git commit` de todos los cambios de código y especificaciones.
 3. Ejecutar `/sdd-archive`.
 
-El comando verificará el estado de Git y **abortará la operación** si el *working tree* no está limpio.
+El comando realizará el **Paso 0** inhibitorio evaluando reportes previos, abortando en seco la compresión sin importar el `working tree` si este detecta resoluciones `CRITICAL`. Finalmente verificará el estado de Git y volverá a interrumpir si detecta diferencias dirty a comitear.
 
 ### /sdd-review — Auditoría Estática
 

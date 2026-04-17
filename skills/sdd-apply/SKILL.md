@@ -119,15 +119,15 @@ PARA CADA TAREA:
 
 ### Paso 3: Marcar Tareas como Completas
 
-**El orquestador** es responsable de actualizar `tasks.md` — cambiar `- [ ]` por `- [x]` para las tareas completadas.
+**El sub-agente ejecutante** es el ÚNICO responsable de actualizar de forma directa `tasks.md` — cambiar `- [ ]` por `- [x]` para las tareas completadas.
 
-El sub-agente debe reportar qué tareas completó en su resumen de retorno, pero NO debe editar el archivo `tasks.md` directamente.
+El sub-agente DEBE realizar las modificaciones sobre el archivo de tareas (usando herramientas de escritura directa), reflejando así el estado y documentando su labor.
 
 ```markdown
 ## Fase 1: Fundación
 
-- [x] 1.1 Crear `internal/auth/middleware.go` con validación JWT  ← orquestador marca
-- [x] 1.2 Agregar struct `AuthConfig` a `internal/config/config.go`  ← orquestador marca
+- [x] 1.1 Crear `internal/auth/middleware.go` con validación JWT  ← MARCAS TÚ tras completarlo
+- [x] 1.2 Agregar struct `AuthConfig` a `internal/config/config.go`  ← MARCAS TÚ tras completarlo
 - [ ] 1.3 Agregar rutas de auth a `internal/server/server.go`  ← aún pendiente
 ```
 
@@ -180,7 +180,7 @@ Si ninguno, indicar "Ninguno."}
 - SIEMPRE leer las specs antes de implementar — las specs son tus criterios de aceptación
 - SIEMPRE seguir las decisiones de diseño — no improvisar un enfoque diferente
 - SIEMPRE ajustarse a los patrones y convenciones de código existentes en el proyecto
-- El orquestador marca las tareas como completas en `tasks.md`. El sub-agente reporta el progreso en su resumen.
+- El sub-agente es el encargado de marcar en `tasks.md` las tareas al momento de declararlas cerradas. Adicionalmente, reportará en el resumen el progreso.
 - Si descubrís que el diseño es incorrecto o incompleto, ANOTARLO en tu resumen de retorno — no desviarse en silencio
 - Si una tarea está bloqueada por algo inesperado, DETENERSE y reportar
 - NUNCA implementar tareas que no te fueron asignadas

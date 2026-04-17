@@ -6,6 +6,19 @@ Generado el: 2026-04-06T18:30:00Z
 
 ---
 
+## [2026-04-16] v1.1 - Consolidación ACID y Alineamiento POSIX
+
+**Intención**: Actualización mayor de la infraestructura orquestativa con el foco cardinal puesto en la fiabilidad del histórico, el setup agnostic y el blindaje asegurado a los contratos directos de sub-agentes en sus outputs asimétricos.
+
+**Alcance**:
+- **Unificación de esquema de estado**: Schema estricto centralizado via campo `status: active|done|blocked` erradicando variables predecibles obsoletas (`blocked` boolean).
+- **Contratos de delegación deterministas**: Clarificación operativa en la fase `apply` responsabilizando al agente lector, e introducción del dictamen "Paso 0" que frena archivados por errores `CRITICAL`.
+- **Soporte POSIX en instalación**: Compatibilizaciones globales universales extirpando bashismos en brackets para `scripts/install.sh`.
+- **Cleanup de seguridad en rollback**: Purga terminal de targets persistentes como `git clean -fd` devolviendo el entorno nativo `restore` preservando logs.
+- Documentaciones actualizadas (Warm-Boot de memoria, mitigación hallucination, table commands).
+
+---
+
 ## [2026-04-06] purga-integraciones-inline
 
 **Intención**: Posicionar Agentify-SDD como un marco exclusivamente Agent-First y CLI-First mediante la eliminación de soporte para herramientas visuales/pasivas (Codex, Cursor, VS Code/Copilot). Estas herramientas ejecutan skills inline sin capacidad de sub-agentes reales, lo cual es contrario al paradigma SDD.

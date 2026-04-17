@@ -69,8 +69,7 @@ openspec/changes/{nombre}/
 Ejecutá los siguientes comandos desde la raíz del proyecto:
 
 ```bash
-git checkout -- .
-git clean -fd
+git restore -- .
 ```
 
 ### Paso 6: Devolver Resultado

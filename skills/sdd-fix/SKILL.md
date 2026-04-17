@@ -46,8 +46,8 @@ Para cada `state.yaml` encontrado, verifica:
 - **Campo `last_updated`**: Debe existir y ser una fecha válida ISO 8601 posterior o igual a `started_at`.
 - **Campo `completed_phases`**: Debe ser una lista (puede estar vacía).
 - **Campo `pending_phases`**: Debe ser una lista (puede estar vacía).
-- **Campo `blocked`**: Debe existir y ser un valor booleano (`true` o `false`). Si `blocked: true`, el campo `blocked_reason` DEBE contener una descripción no nula del bloqueo. Si `blocked: false`, `blocked_reason` debe ser `null`.
-- **Campo `blocked_reason`**: Debe existir (puede ser `null` si `blocked: false`).
+- **Campo `blocked` (Legacy)**: Si se encuentra como booleano y equivale a `true`, debe removerse y el campo `status` debe cambiarse a `blocked`. No debe ser requerido de forma estricta.
+- **Campo `blocked_reason`**: Debe existir en todos los schemas, conteniendo el literal del error (puede ser `null` si `status` no es `blocked`).
 
 Si falta algún campo obligatorio, marcá el cambio como **CORRUPTO** en el reporte.
 

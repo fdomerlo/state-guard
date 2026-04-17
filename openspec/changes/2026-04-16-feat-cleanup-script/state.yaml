@@ -1,0 +1,16 @@
+change: 2026-04-16-feat-cleanup-script
+started_at: "2026-04-16T14:58:10-03:00"
+last_updated: "2026-04-16T15:02:45-03:00"
+current_phase: verify
+status: active
+completed_phases:
+  - explore
+  - propose
+  - spec
+  - design
+  - tasks
+  - apply
+pending_phases:
+  - verify
+  - archive
+blocked_reason: null

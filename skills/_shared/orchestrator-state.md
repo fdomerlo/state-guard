@@ -32,7 +32,6 @@ pending_phases:
   - apply
   - verify
   - archive
-blocked: false             # true si verify reporta CRITICAL sin resolver
 blocked_reason: null   # null, o string describiendo el bloqueo
 ```
 
