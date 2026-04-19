@@ -23,7 +23,9 @@ Del orquestador:
 
 ## Execution and Persistence Contract
 
-Utiliza únicamente las rutas y el contexto que el orquestador te provea directamente. Esta skill persiste el reporte de verificación en `openspec/changes/{nombre-del-cambio}/verify-report.md`.
+
+- Lee las convenciones base referenciadas en `skills/_shared/execution-contract.md` antes de proceder.
+
 
 ## Qué Hacer
 

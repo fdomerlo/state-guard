@@ -21,7 +21,9 @@ Del orquestador:
 
 ## Execution and Persistence Contract
 
-- Recupera `proposal` como dependencia usando las rutas proporcionadas.
+
+- Lee las convenciones base referenciadas en `skills/_shared/execution-contract.md` antes de proceder.
+
 
 ## Qué Hacer
 

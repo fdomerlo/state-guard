@@ -20,10 +20,9 @@ El orquestador te dará:
 
 ## Execution and Persistence Contract
 
-- Detectá el cambio activo
-- Obtené confirmación del usuario antes de ejecutar operaciones destructivas
-- Purgá la carpeta del cambio
-- Restaurá el entorno git
+
+- Lee las convenciones base referenciadas en `skills/_shared/execution-contract.md` antes de proceder.
+
 
 ## Qué Hacer
 
