@@ -22,9 +22,9 @@ El orquestador te dará:
 
 ## Execution and Persistence Contract
 
-- Detectá el cambio activo buscando `state.yaml` con `status: active` en `openspec/changes/*/`
-- Generá el resumen y escribilo en el campo `session_summary` del `state.yaml`
-- Actualizá el campo `last_updated` a la fecha actual
+
+- Lee las convenciones base referenciadas en `skills/_shared/execution-contract.md` antes de proceder.
+
 
 ## Qué Hacer
 

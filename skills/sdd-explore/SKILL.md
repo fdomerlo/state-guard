@@ -21,7 +21,9 @@ El orquestador te dará:
 
 ## Execution and Persistence Contract
 
-Utiliza únicamente las rutas y el contexto que el orquestador te provea directamente. Esta skill recupera el contexto del proyecto y las specs existentes desde `openspec/config.yaml` y `openspec/specs/`.
+
+- Lee las convenciones base referenciadas en `skills/_shared/execution-contract.md` antes de proceder.
+
 
 ## Qué Hacer
 

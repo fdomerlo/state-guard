@@ -138,7 +138,7 @@ Agentify SDD es un framework **exclusivamente Agent-First y CLI-First**. El orqu
 |-------------|-------------|
 | **Claude Code** | Agente CLI de Anthropic con soporte completo de sub-agentes |
 | **OpenCode** | Agente CLI de OpenCode con orquestación de múltiples agentes |
-| **Gemini CLI** | Agente CLI de Google para ejecución de herramientas |
+| **Gemini CLI** | Agente CLI de Google para ejecución de herramientas (Nota: ejecuta skills inline, por lo que la anti-compactación de contexto es limitada) |
 | **Antigravity** | Agente CLI con capacidades avanzadas de orquestación |
 
 El framework **no soporta editores pasivos/inline** (como VS Code, Cursor o Codex) dado que estos no ofrecen capacidad de sub-agentes reales necesarios para el paradigma SDD.

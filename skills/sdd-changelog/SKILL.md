@@ -21,9 +21,9 @@ Del orquestador:
 
 ## Execution and Persistence Contract
 
-Este sub-agente es responsable de la lectura directa en disco. El orquestador, opcionalmente, le provee el nombre del proyecto.
 
-- Escanea `openspec/changes/archive/` directamente en disco, lee los `proposal.md` de cada cambio archivado y genera el `CHANGELOG.md`.
+- Lee las convenciones base referenciadas en `skills/_shared/execution-contract.md` antes de proceder.
+
 
 ## Qué Hacer
 

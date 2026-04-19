@@ -22,7 +22,9 @@ Del orquestador:
 
 ## Execution and Persistence Contract
 
-- Recupera `proposal`, `spec`, `design` y `tasks` como dependencias usando las rutas proporcionadas. Actualiza `tasks.md` con marcas `[x]`.
+
+- Lee las convenciones base referenciadas en `skills/_shared/execution-contract.md` antes de proceder.
+
 
 ## Qué Hacer
 

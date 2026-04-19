@@ -22,7 +22,9 @@ Del orquestador:
 
 ## Execution and Persistence Contract
 
-Utiliza únicamente las rutas y el contexto que el orquestador te provea directamente. Esta skill escanea los archivos `state.yaml` activos, valida contra disco y repara discrepancias en sitio.
+
+- Lee las convenciones base referenciadas en `skills/_shared/execution-contract.md` antes de proceder.
+
 
 ## Qué Hacer
 

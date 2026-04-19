@@ -343,7 +343,7 @@ Agentify SDD soporta múltiples herramientas de IA:
 |------------|:-----------:|
 | Claude Code | ✅ |
 | OpenCode | ✅ |
-| Gemini CLI | ✅ |
+| Gemini CLI | ✅ (ejecuta skills inline, por lo que la anti-compactación de contexto es limitada) |
 | Antigravity | ✅ |
 
 La instalación varía según la herramienta. Ejecuta `scripts/install.sh` y selecciona tu herramienta.

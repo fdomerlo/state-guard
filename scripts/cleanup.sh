@@ -230,9 +230,18 @@ sys.exit(0)
             remove_directory "$(get_tool_path antigravity)" "Antigravity Skills"
             remove_injected_blocks "./.agent/rules/sdd-orchestrator.md" "Antigravity Local Config"
             ;;
-        project-local)
+project-local)
             echo -e "\n${BLUE}Limpiando locación del proyecto...${NC}"
-            remove_directory "$(get_tool_path project-local)" "Project-local Skills"
+            local target_dir
+            target_dir="$(get_tool_path project-local)"
+            
+            # GUARD CLAUSE: Prevenir auto-borrado del código fuente de Agentify
+            if [ "$PWD" = "$REPO_DIR" ]; then
+                print_warn "Ejecución detectada en la raíz del repositorio fuente ($REPO_DIR)."
+                print_error "Protección de seguridad: Se omite la eliminación de './skills' para no destruir el código del framework."
+            else
+                remove_directory "$target_dir" "Project-local Skills"
+            fi
             ;;
         all-global)
             clean_agent "claude-code"

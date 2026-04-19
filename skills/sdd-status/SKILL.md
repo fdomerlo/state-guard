@@ -21,9 +21,9 @@ El orquestador te dará:
 
 ## Execution and Persistence Contract
 
-Utiliza únicamente las rutas y el contexto que el orquestador te provea directamente.
 
-- Lee los archivos `state.yaml` de manera masiva provistos en tu contexto y genera la tabla de estado.
+- Lee las convenciones base referenciadas en `skills/_shared/execution-contract.md` antes de proceder.
+
 
 ## Qué Hacer
 

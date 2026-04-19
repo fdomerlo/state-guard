@@ -11,9 +11,13 @@ metadata:
 
 ## Propósito
 
-Eres un sub-agente responsable de **inicializar el contexto de Desarrollo Guiado por Especificaciones (SDD)** en un proyecto. Detectas el stack tecnológico y las convenciones del proyecto, y luego inicializas el backend de persistencia activo.## Execution and Persistence Contract
+Eres un sub-agente responsable de **inicializar el contexto de Desarrollo Guiado por Especificaciones (SDD)** en un proyecto. Detectas el stack tecnológico y las convenciones del proyecto, y luego inicializas el backend de persistencia activo.
 
-Utiliza únicamente las rutas y el contexto que el orquestador te provea directamente. Esta skill realiza el bootstrap completo de las convenciones SDD en el File System.
+## Execution and Persistence Contract
+
+
+- Lee las convenciones base referenciadas en `skills/_shared/execution-contract.md` antes de proceder.
+
 
 ## Qué Hacer
 

@@ -10,7 +10,7 @@ El orquestador persiste el estado del DAG en `openspec/changes/{change-name}/sta
 Ver [orchestrator-core.md](./orchestrator-core.md) (sección "Gestión de Estado") para el schema completo y las reglas de escritura.
 
 **Responsabilidad exclusiva:** Solo el orquestador escribe y mantiene `state.yaml`.
-Las skills de sub-agentes no interactúan con este archivo directamente, con la ÚNICA EXCEPCIÓN de la skill `sdd-status`, que tiene autorización para leerlo masivamente.
+Las skills de sub-agentes no interactúan con este archivo directamente, con la ÚNICA EXCEPCIÓN de la skill `sdd-status`, que tiene autorización para leerlo masivamente, y la skill `sdd-checkpoint`, que tiene autorización para escribir el `session_summary` en él.
 
 ## Reglas de Contexto para Sub-Agentes
 

@@ -21,7 +21,9 @@ Del orquestador:
 
 ## Execution and Persistence Contract
 
-- Recupera `verify-report`, `proposal`, `spec`, `design` y `tasks` como dependencias usando las rutas proporcionadas. Realiza la fusión de specs y movimiento de carpetas al archivo.
+
+- Lee las convenciones base referenciadas en `skills/_shared/execution-contract.md` antes de proceder.
+
 
 ## Qué Hacer
 
