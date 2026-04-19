@@ -1,27 +1,5 @@
 {
   "$schema": "https://opencode.ai/config.json",
-  "commands": {
-    "sdd-apply": "skills/sdd-apply/SKILL.md",
-    "sdd-archive": "skills/sdd-archive/SKILL.md",
-    "sdd-changelog": "skills/sdd-changelog/SKILL.md",
-    "sdd-checkpoint": "skills/sdd-checkpoint/SKILL.md",
-    "sdd-continue": "skills/sdd-continue/SKILL.md",
-    "sdd-design": "skills/sdd-design/SKILL.md",
-    "sdd-explore": "skills/sdd-explore/SKILL.md",
-    "sdd-ff": "skills/sdd-ff/SKILL.md",
-    "sdd-fix": "skills/sdd-fix/SKILL.md",
-    "sdd-init": "skills/sdd-init/SKILL.md",
-    "sdd-new": "skills/sdd-new/SKILL.md",
-    "sdd-propose": "skills/sdd-propose/SKILL.md",
-    "sdd-review": "skills/sdd-review/SKILL.md",
-    "sdd-rollback": "skills/sdd-rollback/SKILL.md",
-    "sdd-spec": "skills/sdd-spec/SKILL.md",
-    "sdd-split": "skills/sdd-split/SKILL.md",
-    "sdd-status": "skills/sdd-status/SKILL.md",
-    "sdd-tasks": "skills/sdd-tasks/SKILL.md",
-    "sdd-verify": "skills/sdd-verify/SKILL.md",
-    "skill-registry": "skills/skill-registry/SKILL.md"
-  },
   "agent": {
     "sdd-orchestrator": {
       "mode": "all",

@@ -216,22 +216,29 @@ test_opencode_skill_count() {
     assert_eq "20" "$count" "Expected exactly 20 skills for OpenCode"
 }
 
-test_opencode_commands_injected() {
+test_opencode_commands_folder() {
     bash "$INSTALL_SCRIPT" --agent opencode > /dev/null 2>&1
-    local config="$HOME/.config/opencode/opencode.json"
-    assert_file_exists "$config" || return 1
+    local commands_dir="$HOME/.config/opencode/commands"
+    assert_dir_exists "$commands_dir" || return 1
     local cmd_count
-    cmd_count=$(python3 -c "import json; d=json.load(open('$config')); print(len(d.get('commands', {})))" 2>/dev/null || echo "0")
-    assert_eq "20" "$cmd_count" "Expected 20 commands injected in opencode.json"
+    cmd_count=$(find "$commands_dir" -maxdepth 1 -name '*.md' | wc -l | tr -d ' ')
+    assert_eq "20" "$cmd_count" "Expected 20 command .md files in ~/.config/opencode/commands/"
 }
 
-test_opencode_commands_idempotent() {
+test_opencode_commands_path_substituted() {
     bash "$INSTALL_SCRIPT" --agent opencode > /dev/null 2>&1
-    bash "$INSTALL_SCRIPT" --agent opencode > /dev/null 2>&1
-    local config="$HOME/.config/opencode/opencode.json"
-    local cmd_count
-    cmd_count=$(python3 -c "import json; d=json.load(open('$config')); print(len(d.get('commands', {})))" 2>/dev/null || echo "0")
-    assert_eq "20" "$cmd_count" "Expected exactly 20 commands after double install (no duplicates)"
+    local cmd_file="$HOME/.config/opencode/commands/sdd-apply.md"
+    assert_file_exists "$cmd_file" || return 1
+    # The placeholder {{SKILLS_PATH}} must be replaced with the actual path
+    if grep -q '{{SKILLS_PATH}}' "$cmd_file"; then
+        echo "Placeholder {{SKILLS_PATH}} was NOT substituted in sdd-apply.md"
+        return 1
+    fi
+    # Must contain the actual skills path
+    grep -q '.config/opencode/skills' "$cmd_file" || {
+        echo "Expected .config/opencode/skills path in sdd-apply.md"
+        return 1
+    }
 }
 
 
@@ -532,8 +539,8 @@ echo ""
 echo -e "${BOLD}OpenCode${NC}"
 run_test "Installs all 20 skills to ~/.config/opencode/skills" test_install_opencode
 run_test "Exactly 20 SKILL.md files" test_opencode_skill_count
-run_test "20 commands injected in opencode.json" test_opencode_commands_injected
-run_test "Commands idempotent after double install" test_opencode_commands_idempotent
+run_test "20 command .md files in commands/ folder" test_opencode_commands_folder
+run_test "{{SKILLS_PATH}} placeholder substituted" test_opencode_commands_path_substituted
 echo ""
 
 echo -e "${BOLD}Gemini CLI${NC}"

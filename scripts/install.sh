@@ -257,11 +257,6 @@ else:
 if "agent" not in target: target["agent"] = {}
 target["agent"]["sdd-orchestrator"] = source["agent"]["sdd-orchestrator"]
 
-# Merge commands: preserve any existing user commands, add/overwrite source commands
-if "commands" not in target: target["commands"] = {}
-source_commands = source.get("commands", {})
-target["commands"].update(source_commands)
-
 with open(target_path, "w", encoding="utf-8") as f: json.dump(target, f, indent=2, ensure_ascii=False)
 sys.exit(0)
 ' "$target_config" "$source_config" "$core_file" "$tool_name" "$skills_path"
@@ -368,6 +363,40 @@ install_skills() {
 
 
 # ============================================================================
+# Install commands (OpenCode — markdown files)
+# ============================================================================
+
+install_opencode_commands() {
+    local skills_path="$1"
+    local commands_src="$REPO_DIR/integrations/opencode/commands"
+    local commands_target
+    if [ "$OS" = "windows" ]; then
+        commands_target="$USERPROFILE/.config/opencode/commands"
+    else
+        commands_target="$HOME/.config/opencode/commands"
+    fi
+
+    if [ ! -d "$commands_src" ]; then
+        print_warn "No se encontró integrations/opencode/commands/ en el repositorio"
+        return
+    fi
+
+    mkdir -p "$commands_target"
+    local count=0
+    for cmd_file in "$commands_src"/*.md; do
+        [ -f "$cmd_file" ] || continue
+        local cmd_name
+        cmd_name=$(basename "$cmd_file")
+        sed "s|{{SKILLS_PATH}}|$skills_path|g" "$cmd_file" > "$commands_target/$cmd_name"
+        count=$((count + 1))
+    done
+    if [ "$count" -gt 0 ]; then
+        print_skill "$count slash commands instalados → $commands_target"
+    fi
+}
+
+
+# ============================================================================
 # Agent install dispatcher
 # ============================================================================
 
@@ -382,6 +411,7 @@ install_for_agent() {
             ;;
         opencode)
             install_skills "$(get_tool_path opencode)" "OpenCode"
+            install_opencode_commands "$(get_tool_path opencode)"
             merge_opencode_config
             ;;
         gemini-cli)
@@ -405,6 +435,7 @@ install_for_agent() {
             compile_and_append_config "${USERPROFILE:-$HOME}/.claude/CLAUDE.md" "$REPO_DIR/integrations/claude-code/CLAUDE.md" "Claude Code" "$(get_tool_path claude-code)"
             
             install_skills "$(get_tool_path opencode)" "OpenCode"
+            install_opencode_commands "$(get_tool_path opencode)"
             merge_opencode_config
             
             install_skills "$(get_tool_path gemini-cli)" "Gemini CLI"
