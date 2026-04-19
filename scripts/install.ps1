@@ -412,28 +412,7 @@ function Install-Skills {
     Write-Host "  ${GREEN}${BOLD}$count skills installed${NC} → $TargetDir"
 }
 
-function Install-OpenCodeCommands {
-    $commandsSrc = Join-Path $RepoDir "integrations\opencode\commands"
-    $commandsTarget = Get-ToolPath "opencode-commands"
-    
-    Write-Host ""
-    Write-Host "${BLUE}Installing OpenCode commands...${NC}"
-    
-    if (-not (Test-Path $commandsTarget)) {
-        New-Item -ItemType Directory -Path $commandsTarget -Force | Out-Null
-    }
-    
-    $count = 0
-    foreach ($cmdFile in Get-ChildItem -Path $commandsSrc -Filter "sdd-*.md") {
-        $cmdName = $cmdFile.Name
-        Copy-Item -Path $cmdFile.FullName -Destination (Join-Path $commandsTarget $cmdName) -Force
-        Write-Skill $cmdName -replace ".md", ""
-        $count++
-    }
-    
-    Write-Host ""
-    Write-Host "  ${GREEN}${BOLD}$count commands installed${NC} → $commandsTarget"
-}
+
 
 # ============================================================================
 # Agent Install Dispatcher
@@ -455,7 +434,6 @@ function Install-ForAgent {
         "opencode" {
             $targetPath = Get-ToolPath "opencode"
             Install-Skills $targetPath "OpenCode"
-            Install-OpenCodeCommands
             Merge-OpenCodeConfig
         }
         "gemini-cli" {
@@ -490,7 +468,6 @@ function Install-ForAgent {
             # OpenCode
             $targetPath = Get-ToolPath "opencode"
             Install-Skills $targetPath "OpenCode"
-            Install-OpenCodeCommands
             Merge-OpenCodeConfig
             
             # Gemini CLI

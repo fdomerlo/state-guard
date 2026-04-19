@@ -360,26 +360,7 @@ install_skills() {
     echo -e "\n  ${GREEN}${BOLD}$count skills installed${NC} → $target_dir"
 }
 
-install_opencode_commands() {
-    local commands_src="$REPO_DIR/integrations/opencode/commands"
-    local commands_target
-    commands_target="$(get_tool_path opencode-commands)"
 
-    echo -e "\n${BLUE}Installing OpenCode commands...${NC}"
-
-    mkdir -p "$commands_target"
-
-    local count=0
-    for cmd_file in "$commands_src"/sdd-*.md; do
-        local cmd_name
-        cmd_name=$(basename "$cmd_file")
-        cp "$cmd_file" "$commands_target/$cmd_name"
-        print_skill "${cmd_name%.md}"
-        count=$((count + 1))
-    done
-
-    echo -e "\n  ${GREEN}${BOLD}$count commands installed${NC} → $commands_target"
-}
 
 # ============================================================================
 # Agent install dispatcher
@@ -396,7 +377,6 @@ install_for_agent() {
             ;;
         opencode)
             install_skills "$(get_tool_path opencode)" "OpenCode"
-            install_opencode_commands
             merge_opencode_config
             ;;
         gemini-cli)
@@ -420,7 +400,6 @@ install_for_agent() {
             compile_and_append_config "${USERPROFILE:-$HOME}/.claude/CLAUDE.md" "$REPO_DIR/integrations/claude-code/CLAUDE.md" "Claude Code" "$(get_tool_path claude-code)"
             
             install_skills "$(get_tool_path opencode)" "OpenCode"
-            install_opencode_commands
             merge_opencode_config
             
             install_skills "$(get_tool_path gemini-cli)" "Gemini CLI"
