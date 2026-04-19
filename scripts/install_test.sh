@@ -216,6 +216,24 @@ test_opencode_skill_count() {
     assert_eq "20" "$count" "Expected exactly 20 skills for OpenCode"
 }
 
+test_opencode_commands_injected() {
+    bash "$INSTALL_SCRIPT" --agent opencode > /dev/null 2>&1
+    local config="$HOME/.config/opencode/opencode.json"
+    assert_file_exists "$config" || return 1
+    local cmd_count
+    cmd_count=$(python3 -c "import json; d=json.load(open('$config')); print(len(d.get('commands', {})))" 2>/dev/null || echo "0")
+    assert_eq "20" "$cmd_count" "Expected 20 commands injected in opencode.json"
+}
+
+test_opencode_commands_idempotent() {
+    bash "$INSTALL_SCRIPT" --agent opencode > /dev/null 2>&1
+    bash "$INSTALL_SCRIPT" --agent opencode > /dev/null 2>&1
+    local config="$HOME/.config/opencode/opencode.json"
+    local cmd_count
+    cmd_count=$(python3 -c "import json; d=json.load(open('$config')); print(len(d.get('commands', {})))" 2>/dev/null || echo "0")
+    assert_eq "20" "$cmd_count" "Expected exactly 20 commands after double install (no duplicates)"
+}
+
 
 # ============================================================================
 # Tests — Gemini CLI
@@ -514,6 +532,8 @@ echo ""
 echo -e "${BOLD}OpenCode${NC}"
 run_test "Installs all 20 skills to ~/.config/opencode/skills" test_install_opencode
 run_test "Exactly 20 SKILL.md files" test_opencode_skill_count
+run_test "20 commands injected in opencode.json" test_opencode_commands_injected
+run_test "Commands idempotent after double install" test_opencode_commands_idempotent
 echo ""
 
 echo -e "${BOLD}Gemini CLI${NC}"

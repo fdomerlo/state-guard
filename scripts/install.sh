@@ -257,6 +257,11 @@ else:
 if "agent" not in target: target["agent"] = {}
 target["agent"]["sdd-orchestrator"] = source["agent"]["sdd-orchestrator"]
 
+# Merge commands: preserve any existing user commands, add/overwrite source commands
+if "commands" not in target: target["commands"] = {}
+source_commands = source.get("commands", {})
+target["commands"].update(source_commands)
+
 with open(target_path, "w", encoding="utf-8") as f: json.dump(target, f, indent=2, ensure_ascii=False)
 sys.exit(0)
 ' "$target_config" "$source_config" "$core_file" "$tool_name" "$skills_path"
