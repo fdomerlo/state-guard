@@ -26,9 +26,9 @@ powershell .\scripts\install.ps1
 | Comando | Descripción | Tipo |
 |---------|-------------|------|
 | `/sdd-init` | Inicializa el contexto SDD en el proyecto. Detecta el stack y crea la estructura `openspec/`. | Skill Directa |
-| `/sdd-new <nombre>` | Inicia un nuevo cambio. Delega exploración y propuesta a sub-agentes especializados. | **Meta-comando** |
-| `/sdd-continue` | Ejecuta la siguiente fase pendiente en el grafo de dependencias. | **Meta-comando** |
-| `/sdd-ff` | Fast-forward de planificación: ejecuta propuesta → specs → diseño → tareas sin intervención. | **Meta-comando** |
+| `/sdd-new <nombre>` | Inicia un nuevo cambio. Delega exploración y propuesta operando como skill universal. | Skill Directa |
+| `/sdd-continue` | Ejecuta la siguiente fase pendiente en el grafo de dependencias de forma determinista. | Skill Directa |
+| `/sdd-ff` | Fast-forward de planificación: ejecuta propuesta → specs → diseño → tareas guardando el estado estrictamente (anti-batching). | Skill Directa |
 | `/sdd-status` | Muestra el estado de todos los cambios activos mediante tabla con indicadores visuales. | Skill Directa |
 | `/sdd-fix` | Audita y repara estados corruptos en `state.yaml`. Detecta artefactos faltantes y retrocede fases. | Skill Directa |
 | `/sdd-changelog` | Genera un changelog automático a partir de los cambios archivados. | Skill Directa |

@@ -185,6 +185,16 @@ El comando `/sdd-split` analiza una proposal monolítica y la divide en sub-camb
 /sdd-split mi-cambio-grande
 ```
 
+### /sdd-ff — Avance Rápido (Fast-Forward)
+
+El comando `/sdd-ff` permite ejecutar secuencialmente y sin interrupción las fases de planificación (`propose`, `spec`, `design`, `tasks`).
+
+**Cuándo usarlo:**
+- Al iniciar un cambio nuevo bien definido donde no necesitas revisar manualmente cada artefacto intermedio.
+
+**Anti-Batching y Persistencia:**
+A diferencia de pedirle al LLM que "haga todas las fases de una vez" en un solo prompt (lo que corrompe el DAG), `/sdd-ff` es una meta-skill que itera paso a paso: delega, espera su finalización, escribe el `state.yaml` por cada transición e invoca a la siguiente, respetando estrictamente el principio ACID y la regla de **anti-batching**.
+
 ### /sdd-checkpoint — Guardado de Estado
 
 El comando `/sdd-checkpoint` genera un resumen del estado actual de la sesión y lo guarda en el archivo de estado del cambio, posibilitando una recuperación de contexto eficiente (**Warm-Boot**).
@@ -339,12 +349,12 @@ Las specs usan el formato **GIVEN/WHEN/THEN**:
 
 Agentify SDD soporta múltiples herramientas de IA:
 
-| Herramienta | Sub-agentes |
-|------------|:-----------:|
-| Claude Code | ✅ |
-| OpenCode | ✅ |
-| Gemini CLI | ✅ (ejecuta skills inline, por lo que la anti-compactación de contexto es limitada) |
-| Antigravity | ✅ |
+| Herramienta | Sub-agentes | Meta-comandos SDD |
+|------------|:-----------:|:-----------------:|
+| Claude Code | ✅ | ✅ |
+| OpenCode | ✅ | ✅ |
+| Gemini CLI | ✅ (ejecuta skills inline, por lo que la anti-compactación de contexto es limitada) | ✅ |
+| Antigravity | ✅ | ✅ |
 
 La instalación varía según la herramienta. Ejecuta `scripts/install.sh` y selecciona tu herramienta.
 
