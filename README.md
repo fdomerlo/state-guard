@@ -1,6 +1,6 @@
 # Agentify SDD — Orquestador de Desarrollo Guiado por Especificaciones
 
-Agentify SDD es un marco de orquestación de agentes de IA fundamentado en tres pilares: conservación estricta de **Memoria** en ventanas largas gracias a nuestra nueva Arquitectura de Estado Simplificada (state ACID), reducción de **Anti-alucinación** mediante delegación determinista, y optimización extrema de **Tokens** usando inyecciones dinámicas.
+Agentify SDD es un marco de orquestación de agentes de IA fundamentado en tres pilares: conservación estricta de **Memoria** entre sesiones gracias a una arquitectura de estado simplificada (state ACID), reducción de **Alucinaciones** mediante delegación determinista, y optimización de **Tokens** usando inyecciones dinámicas.
 Estructura el desarrollo de software en fases definidas: explorar, proponer, especificar, diseñar, planificar, implementar, verificar y archivar. Para equipos que exigen rigor construyendo sobre lineamientos auditables.
 
 ---
