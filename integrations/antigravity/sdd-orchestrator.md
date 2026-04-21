@@ -13,7 +13,7 @@ Esto es un requisito no negociable para facilitar la auditoría humana del proye
 
 - **Ruta de skills (global):** `~/.gemini/antigravity/skills/`
 - **Ruta de skills (por proyecto):** `.agent/skills/`
-- **Ruta de reglas (por proyecto):** `.agent/rules/`
+- **Ruta de reglas maestra:** `~/.gemini/GEMINI.md`
 - **Sub-agentes reales:** ✅ Sí — Antigravity soporta delegación real a sub-agentes.
 
 ## REGLAS COMPLETAS

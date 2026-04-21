@@ -445,10 +445,9 @@ function Install-ForAgent {
         "antigravity" {
             $target = Get-ToolPath "antigravity"
             Install-Skills $target "Antigravity"
-            $configTarget = ".\.agent\rules\sdd-orchestrator.md"
-            $configDir = Split-Path -Parent $configTarget
-            if ($configDir -and -not (Test-Path $configDir)) {
-                New-Item -ItemType Directory -Path $configDir -Force | Out-Null
+            $configTarget = if ($OS -eq "windows") { "$env:USERPROFILE\.gemini\GEMINI.md" } else { "$HOME/.gemini/GEMINI.md" }
+            if (Test-Path ".\.agent\rules") {
+                Remove-Item -Path ".\.agent\rules" -Recurse -Force -ErrorAction SilentlyContinue
             }
             Compile-AndAppendConfig -TargetFile $configTarget -HeaderFile (Join-Path $RepoDir "integrations\antigravity\sdd-orchestrator.md") -ToolName "Antigravity" -SkillsPath $target
         }
@@ -479,6 +478,11 @@ function Install-ForAgent {
             # Antigravity
             $targetPath = Get-ToolPath "antigravity"
             Install-Skills $targetPath "Antigravity"
+            $configTarget = if ($OS -eq "windows") { "$env:USERPROFILE\.gemini\GEMINI.md" } else { "$HOME/.gemini/GEMINI.md" }
+            if (Test-Path ".\.agent\rules") {
+                Remove-Item -Path ".\.agent\rules" -Recurse -Force -ErrorAction SilentlyContinue
+            }
+            Compile-AndAppendConfig -TargetFile $configTarget -HeaderFile (Join-Path $RepoDir "integrations\antigravity\sdd-orchestrator.md") -ToolName "Antigravity" -SkillsPath $targetPath
             
             Write-Host ""
             Write-Host "${GREEN}${BOLD}Todos los orquestadores globales configurados automaticamente!${NC}"

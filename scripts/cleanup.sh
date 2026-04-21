@@ -228,7 +228,7 @@ sys.exit(0)
         antigravity)
             echo -e "\n${BLUE}Limpiando Antigravity...${NC}"
             remove_directory "$(get_tool_path antigravity)" "Antigravity Skills"
-            remove_injected_blocks "./.agent/rules/sdd-orchestrator.md" "Antigravity Local Config"
+            remove_injected_blocks "${USERPROFILE:-$HOME}/.gemini/GEMINI.md" "Antigravity Global Config"
             ;;
 project-local)
             echo -e "\n${BLUE}Limpiando locación del proyecto...${NC}"

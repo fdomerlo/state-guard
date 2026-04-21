@@ -422,8 +422,8 @@ install_for_agent() {
         antigravity)
             local target="$(get_tool_path antigravity)"
             install_skills "$target" "Antigravity"
-            local config_target="./.agent/rules/sdd-orchestrator.md"
-            mkdir -p "./.agent/rules" 2>/dev/null || true
+            local config_target="${USERPROFILE:-$HOME}/.gemini/GEMINI.md"
+            rm -rf "./.agent/rules" 2>/dev/null || true
             compile_and_append_config "$config_target" "$REPO_DIR/integrations/antigravity/sdd-orchestrator.md" "Antigravity" "$target"
             ;;
         project-local)
@@ -444,8 +444,8 @@ install_for_agent() {
             local ag_target
             ag_target="$(get_tool_path antigravity)"
             install_skills "$ag_target" "Antigravity"
-            mkdir -p "./.agent/rules" 2>/dev/null || true
-            compile_and_append_config "./.agent/rules/sdd-orchestrator.md" "$REPO_DIR/integrations/antigravity/sdd-orchestrator.md" "Antigravity" "$ag_target"
+            rm -rf "./.agent/rules" 2>/dev/null || true
+            compile_and_append_config "${USERPROFILE:-$HOME}/.gemini/GEMINI.md" "$REPO_DIR/integrations/antigravity/sdd-orchestrator.md" "Antigravity" "$ag_target"
             
             echo -e "\n${GREEN}${BOLD}¡Todos los orquestadores globales configurados automáticamente!${NC}"
             ;;
