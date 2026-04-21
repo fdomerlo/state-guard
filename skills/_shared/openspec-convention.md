@@ -43,7 +43,12 @@ openspec/
 ## Schema de state.yaml
 
 El orquestador es el **único responsable** de escribir y mantener `state.yaml`.
-Las skills de sub-agentes **nunca** escriben ni leen este archivo directamente, con la ÚNICA EXCEPCIÓN de la skill `sdd-status`, que tiene autorización para leerlo masivamente.
+Las skills de sub-agentes **nunca** escriben ni leen este archivo directamente, con las ÚNICAS EXCEPCIONES de:
+- `sdd-status`: autorización para leerlo masivamente.
+- `sdd-checkpoint`: autorización para escribir el campo `session_summary`.
+- `sdd-fix`: autorización para reparar y migrar el archivo completo.
+
+El campo `lock_phase` es responsabilidad exclusiva del orquestador — ningún sub-agente lo escribe directamente.
 
 ```yaml
 # openspec/changes/{change-name}/state.yaml
@@ -51,7 +56,10 @@ Las skills de sub-agentes **nunca** escriben ni leen este archivo directamente, 
 change: {nombre-del-cambio}
 started_at: "YYYY-MM-DDTHH:MM:SS"   # ISO 8601 — se establece al crear, nunca se modifica
 last_updated: "YYYY-MM-DDTHH:MM:SS" # actualizar en cada transición de fase
-current_phase: {fase-actual}         # última fase completada exitosamente
+current_phase: {fase-actual}         # descriptivo: última fase completada exitosamente
+lock_phase: {fase-siguiente}         # prescriptivo: la ÚNICA fase autorizada a ejecutarse ahora
+                                     # Valores válidos: spec | design | tasks | apply | verify | archive
+                                     # Inicialización: primera fase de pending_phases al crear el cambio
 status: active                       # active | done | blocked (default: active)
 completed_phases:                    # lista ordenada, solo fases con status: ok
   - explore    # incluir solo si sdd-explore fue ejecutado
@@ -72,15 +80,43 @@ session_summary: |                  # resumen de sesión (máx 5 líneas) - recu
   - next_recommended: /sdd-{comando}
 ```
 
-**Valores válidos para `current_phase` y elementos de listas:**
+**Valores válidos para `current_phase`, `lock_phase` y elementos de listas:**
 `explore | propose | spec | design | tasks | apply | verify | archive`
 
 **Notas de transición:**
 
 - `spec` y `design` deben aparecer en orden secuencial estricto en `completed_phases` (no se ejecutan en paralelo).
-- `current_phase` refleja la fase específica actual en el flujo lineal.
-- Un cambio recién creado (solo `propose` completo) tiene `current_phase: propose`.
+- `current_phase` refleja la última fase completada (descriptivo/histórico).
+- `lock_phase` indica la única fase que puede ejecutarse en este momento (prescriptivo/restrictivo). Los orquestadores (`sdd-ff`, `sdd-continue`) DEBEN verificar `lock_phase` antes de delegar a cualquier sub-agente.
+- Un cambio recién creado (solo `propose` completo) tiene `current_phase: propose` y `lock_phase: spec`.
+- `sdd-new` DEBE inicializar `lock_phase` con el valor de la primera fase en `pending_phases`.
 - Al archivar exitosamente, el archivo se mueve — no hace falta actualizar `state.yaml`.
+
+**Tabla de transiciones de `lock_phase` (DAG estricto):**
+
+| `current_phase` completada | `lock_phase` resultante |
+|---------------------------|-------------------------|
+| `propose`                  | `spec`                  |
+| `spec`                     | `design`                |
+| `design`                   | `tasks`                 |
+| `tasks`                    | `apply`                 |
+| `apply`                    | `verify`                |
+| `verify`                   | `archive`               |
+
+**Semántica `lock_phase` vs `current_phase`:**
+
+| Campo | Rol | Quién lo escribe | Cuándo cambia |
+|-------|-----|-----------------|---------------|
+| `current_phase` | Descriptivo — última fase completada | Orquestador | Al completar una fase |
+| `lock_phase` | Prescriptivo — única fase ejecutable | Orquestador (a partir de `lock_phase_next` reportado por el sub-agente) | Al completar una fase |
+
+**Error de transición inválida:** Si un orquestador intenta ejecutar una fase distinta a `lock_phase`, DEBE detener la ejecución e informar:
+```
+ERROR: Transición inválida de lock semántico.
+  Fase solicitada : {fase_solicitada}
+  lock_phase actual: {lock_phase}
+  Ejecuta /sdd-fix para auditar y reparar el estado antes de continuar.
+```
 
 ## Lectura de Artefactos
 

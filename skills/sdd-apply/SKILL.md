@@ -175,6 +175,10 @@ Si ninguno, indicar "Ninguno."}
 
 ### Estado
 {N}/{total} tareas completas. {Listo para el siguiente lote / Listo para verificar / Bloqueado por X}
+
+### Lock Phase
+
+lock_phase_next: verify
 ```
 
 ## Reglas
@@ -190,3 +194,4 @@ Si ninguno, indicar "Ninguno."}
 - Aplicar cualquier `rules.apply` de `openspec/config.yaml`
 - Si se detecta modo TDD (Paso 2), SIEMPRE seguir el ciclo RED → GREEN → REFACTOR — nunca omitir RED (escribir el test fallido primero)
 - Al ejecutar tests en TDD, ejecutar SOLO el archivo/suite de tests relevante, no toda la suite (para mayor velocidad)
+- **LOCK PHASE**: la última sección del resumen de retorno, cuando TODAS las tareas asignadas están completas, SIEMPRE DEBE ser `### Lock Phase` con `lock_phase_next: verify`. Omitir esta sección si quedan tareas pendientes o si la skill falló.

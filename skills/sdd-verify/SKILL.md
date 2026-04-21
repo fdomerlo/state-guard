@@ -257,6 +257,10 @@ Devuelve al orquestador el mismo contenido que escribiste en `verify-report.md`:
 {APROBADO / APROBADO CON ADVERTENCIAS / RECHAZADO}
 
 {Resumen en una línea del estado general}
+
+### Lock Phase
+
+lock_phase_next: archive
 ```
 
 ## Reglas
@@ -272,3 +276,4 @@ Devuelve al orquestador el mismo contenido que escribiste en `verify-report.md`:
 - NO corregir ningún problema — solo reportarlos. El orquestador decide qué hacer.
 - SIEMPRE guardar el reporte en `openspec/changes/{nombre-del-cambio}/verify-report.md` — esto persiste la verificación para sdd-archive y el rastro de auditoría
 - Aplicar cualquier `rules.verify` de `openspec/config.yaml`
+- **LOCK PHASE**: la última sección del resumen de retorno SIEMPRE DEBE ser `### Lock Phase` con `lock_phase_next: archive`. Omitir esta sección SOLO si la verificación falló con errores CRITICAL irresolubles o si la skill no completó su trabajo.
