@@ -84,7 +84,8 @@ openspec/changes/{nombre-del-cambio}/state.yaml
 change: {nombre-del-cambio}
 started_at: "YYYY-MM-DDTHH:MM:SS"   # ISO 8601
 last_updated: "YYYY-MM-DDTHH:MM:SS" # Actualizado en cada transición
-current_phase: {fase-actual}        # explore|propose|spec|design|tasks|apply|verify|archive
+current_phase: {fase-actual}        # última fase completada exitosamente
+lock_phase: {fase-siguiente}        # única fase autorizada a ejecutarse ahora
 status: {estado}                    # active | done | blocked
 completed_phases:
   - explore
@@ -95,7 +96,15 @@ pending_phases:
   - apply
   - verify
   - archive
-blocked_reason: null                  # null o descripción del bloqueo (solo si status es blocked)
+blocked: false
+blocked_reason: null
+session_summary:                     # bloque YAML estructurado (ver openspec-convention.md)
+  archivos_modificados:
+    - ruta/al/archivo.ext            # máx 10 entradas
+  estado_tareas: "{X}/{Y} — última: [{ID}] {descripción breve}"
+  decisiones_clave:
+    - "{decisión clave}"
+  proxima_accion: "/sdd-{comando} {nombre-cambio}"
 ```
 
 ### Propiedades ACID
@@ -193,25 +202,28 @@ El comando `/sdd-ff` permite ejecutar secuencialmente y sin interrupción las fa
 - Al iniciar un cambio nuevo bien definido donde no necesitas revisar manualmente cada artefacto intermedio.
 
 **Anti-Batching y Persistencia:**
-A diferencia de pedirle al LLM que "haga todas las fases de una vez" en un solo prompt (lo que corrompe el DAG), `/sdd-ff` es una meta-skill que itera paso a paso: delega, espera su finalización, escribe el `state.yaml` por cada transición e invoca a la siguiente, respetando estrictamente el principio ACID y la regla de **anti-batching**.
+A diferencia de pedirle al LLM que "haga todas las fases de una vez" en un solo prompt (lo que corrompe el DAG), `/sdd-ff` es una meta-skill que itera paso a paso: verifica `lock_phase` antes de delegar cada fase, escribe el `state.yaml` por cada transición e invoca a la siguiente, respetando estrictamente el principio ACID y la regla de **anti-batching**.
 
-### /sdd-checkpoint — Guardado de Estado
+### /sdd-checkpoint — Guardado de Estado de Alta Fidelidad
 
-El comando `/sdd-checkpoint` genera un resumen del estado actual de la sesión y lo guarda en el archivo de estado del cambio, posibilitando una recuperación de contexto eficiente (**Warm-Boot**).
+El comando `/sdd-checkpoint` genera un **bloque YAML estructurado** analizando proactivamente
+`tasks.md` y `design.md` del cambio activo. El resultado se guarda en el campo `session_summary`
+de `state.yaml`, posibilitando una recuperación de contexto eficiente (**Warm-Boot**).
+
+El checkpoint es **agnóstico al DAG**: puede ejecutarse en cualquier momento sin modificar
+`lock_phase`, `current_phase` ni el flujo de fases activo.
 
 **Cuándo usarlo:**
 
 - Antes de realizar operaciones riesgosas
-- Para inyectar la constancia viva al parámetro `session_summary` del state.yaml
-- Al restablecer el contexto de trabajo forzando al LLM a recargar panorama
+- Al interrumpir un lote de `sdd-apply` para preservar el estado
+- Al restablecer el contexto de trabajo forzando al LLM a recargar el panorama
 
 **Ejemplo de uso:**
 
 ```text
 /sdd-checkpoint
 ```
-
-El archivo de estado asimila el texto consolidando resiliencia.
 
 ### /sdd-archive — Cierre de Cambios
 
@@ -222,7 +234,7 @@ El comando `/sdd-archive` cierra un cambio: fusiona las specs delta en las specs
 2. Realizar un `git commit` de todos los cambios de código y especificaciones.
 3. Ejecutar `/sdd-archive`.
 
-El comando realizará el **Paso 0** inhibitorio evaluando reportes previos, abortando en seco la compresión sin importar el `working tree` si este detecta resoluciones `CRITICAL`. Finalmente verificará el estado de Git y volverá a interrumpir si detecta diferencias dirty a comitear.
+El comando realizará el **Paso 0** inhibitorio evaluando reportes previos, abortando en seco la operación si detecta resoluciones `CRITICAL`. Verificará el árbol de trabajo git e interrumpirá si detecta diferencias con cambios sin commitear.
 
 ### /sdd-review — Auditoría Estática
 
