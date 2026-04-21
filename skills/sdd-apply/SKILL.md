@@ -176,10 +176,23 @@ Si ninguno, indicar "Ninguno."}
 ### Estado
 {N}/{total} tareas completas. {Listo para el siguiente lote / Listo para verificar / Bloqueado por X}
 
+### Checkpoint
+
+checkpoint_required: true   # SI quedan tareas [ ] pendientes en tasks.md
+# checkpoint_required: false  # SI todas las tareas fueron completadas en este lote
+
 ### Lock Phase
 
 lock_phase_next: verify
 ```
+
+> **Nota de uso del Checkpoint:**
+> - Si `checkpoint_required: true` → la sección `### Lock Phase` DEBE estar AUSENTE
+>   (el lock no avanza hasta que todas las tareas estén completas).
+> - Si `checkpoint_required: false` o no hay tareas pendientes → incluir `### Lock Phase`
+>   con `lock_phase_next: verify`.
+> - El orquestador que recibe `checkpoint_required: true` DEBE invocar `/sdd-checkpoint`
+>   antes de continuar con el siguiente lote de tareas.
 
 ## Reglas
 
@@ -195,3 +208,4 @@ lock_phase_next: verify
 - Si se detecta modo TDD (Paso 2), SIEMPRE seguir el ciclo RED → GREEN → REFACTOR — nunca omitir RED (escribir el test fallido primero)
 - Al ejecutar tests en TDD, ejecutar SOLO el archivo/suite de tests relevante, no toda la suite (para mayor velocidad)
 - **LOCK PHASE**: la última sección del resumen de retorno, cuando TODAS las tareas asignadas están completas, SIEMPRE DEBE ser `### Lock Phase` con `lock_phase_next: verify`. Omitir esta sección si quedan tareas pendientes o si la skill falló.
+- **CHECKPOINT AUTOMÁTICO**: Si quedan tareas pendientes (flujo batch), el resumen de retorno DEBE incluir `### Checkpoint` con `checkpoint_required: true` posicionado ANTES de `### Lock Phase`. El orquestador que reciba `checkpoint_required: true` invocará `/sdd-checkpoint` antes de continuar con el siguiente lote. NUNCA incluir `### Lock Phase` si `checkpoint_required: true`.

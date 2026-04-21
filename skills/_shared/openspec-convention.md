@@ -72,13 +72,29 @@ pending_phases:                      # fases que aún no se ejecutaron
   - archive
 blocked: false                       # true si status es blocked y verify reporta CRITICAL sin resolver
 blocked_reason: null                 # descripción del bloqueo, o null si blocked: false
-session_summary: |                  # resumen de sesión (máx 5 líneas) - recuperado tras reload
-  - Fase actual: {fase}
-  - Estado: {active|blocked|done}
-  - Progreso: {X/Y tareas completadas}
-  - Última acción: {descripción breve}
-  - next_recommended: /sdd-{comando}
+session_summary:                     # bloque YAML estructurado — límite total: 500 tokens
+  archivos_modificados:              # rutas exactas modificadas en el lote actual (máx 10 entradas)
+    - ruta/al/archivo.ext
+  estado_tareas: "{X}/{Y} — última: [{ID}] {descripción breve}"  # formato estricto
+  decisiones_clave:                  # máxixmo 2 decisiones técnicas para continuar
+    - "{decisión 1 (máx 100 chars)}"
+  proxima_accion: "/sdd-{comando} {nombre-cambio}"  # comando completo ejecutable
 ```
+
+**Límite de tokens en `session_summary`:** El bloque completo NO DEBE superar 500 tokens
+(~375 palabras). Si se alcanza el límite, truncar aplicando estas prioridades:
+1. `archivos_modificados` → listar solo los últimos 10 archivos.
+2. `decisiones_clave` → listar máximo 2 ítems, truncar cada uno a 100 caracteres.
+3. `estado_tareas` y `proxima_accion` son inamovibles — nunca se truncan.
+
+**Formatos obligatorios por subcampo:**
+
+| Subcampo | Tipo | Formato / Restricciones |
+|----------|------|--------------------------|
+| `archivos_modificados` | Lista YAML | Rutas relativas al root; `[]` si sin cambios; máx 10 |
+| `estado_tareas` | String | `"{X}/{Y} — última: [{ID}] {texto}"` o `"N/A"` si no hay tasks.md |
+| `decisiones_clave` | Lista YAML | Máx 2 ítems, cada uno ≤ 100 caracteres |
+| `proxima_accion` | String | Comando completo: `/sdd-{cmd} {nombre-cambio}` |
 
 **Valores válidos para `current_phase`, `lock_phase` y elementos de listas:**
 `explore | propose | spec | design | tasks | apply | verify | archive`
