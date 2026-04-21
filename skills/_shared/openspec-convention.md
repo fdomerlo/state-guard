@@ -43,7 +43,12 @@ openspec/
 ## Schema de state.yaml
 
 El orquestador es el **único responsable** de escribir y mantener `state.yaml`.
-Las skills de sub-agentes **nunca** escriben ni leen este archivo directamente, con la ÚNICA EXCEPCIÓN de la skill `sdd-status`, que tiene autorización para leerlo masivamente.
+Las skills de sub-agentes **nunca** escriben ni leen este archivo directamente, con las ÚNICAS EXCEPCIONES de:
+- `sdd-status`: autorización para leerlo masivamente.
+- `sdd-checkpoint`: autorización para escribir el campo `session_summary`.
+- `sdd-fix`: autorización para reparar y migrar el archivo completo.
+
+El campo `lock_phase` es responsabilidad exclusiva del orquestador — ningún sub-agente lo escribe directamente.
 
 ```yaml
 # openspec/changes/{change-name}/state.yaml
@@ -51,7 +56,10 @@ Las skills de sub-agentes **nunca** escriben ni leen este archivo directamente, 
 change: {nombre-del-cambio}
 started_at: "YYYY-MM-DDTHH:MM:SS"   # ISO 8601 — se establece al crear, nunca se modifica
 last_updated: "YYYY-MM-DDTHH:MM:SS" # actualizar en cada transición de fase
-current_phase: {fase-actual}         # última fase completada exitosamente
+current_phase: {fase-actual}         # descriptivo: última fase completada exitosamente
+lock_phase: {fase-siguiente}         # prescriptivo: la ÚNICA fase autorizada a ejecutarse ahora
+                                     # Valores válidos: spec | design | tasks | apply | verify | archive
+                                     # Inicialización: primera fase de pending_phases al crear el cambio
 status: active                       # active | done | blocked (default: active)
 completed_phases:                    # lista ordenada, solo fases con status: ok
   - explore    # incluir solo si sdd-explore fue ejecutado
@@ -64,23 +72,67 @@ pending_phases:                      # fases que aún no se ejecutaron
   - archive
 blocked: false                       # true si status es blocked y verify reporta CRITICAL sin resolver
 blocked_reason: null                 # descripción del bloqueo, o null si blocked: false
-session_summary: |                  # resumen de sesión (máx 5 líneas) - recuperado tras reload
-  - Fase actual: {fase}
-  - Estado: {active|blocked|done}
-  - Progreso: {X/Y tareas completadas}
-  - Última acción: {descripción breve}
-  - next_recommended: /sdd-{comando}
+session_summary:                     # bloque YAML estructurado — límite total: 500 tokens
+  archivos_modificados:              # rutas exactas modificadas en el lote actual (máx 10 entradas)
+    - ruta/al/archivo.ext
+  estado_tareas: "{X}/{Y} — última: [{ID}] {descripción breve}"  # formato estricto
+  decisiones_clave:                  # máxixmo 2 decisiones técnicas para continuar
+    - "{decisión 1 (máx 100 chars)}"
+  proxima_accion: "/sdd-{comando} {nombre-cambio}"  # comando completo ejecutable
 ```
 
-**Valores válidos para `current_phase` y elementos de listas:**
+**Límite de tokens en `session_summary`:** El bloque completo NO DEBE superar 500 tokens
+(~375 palabras). Si se alcanza el límite, truncar aplicando estas prioridades:
+1. `archivos_modificados` → listar solo los últimos 10 archivos.
+2. `decisiones_clave` → listar máximo 2 ítems, truncar cada uno a 100 caracteres.
+3. `estado_tareas` y `proxima_accion` son inamovibles — nunca se truncan.
+
+**Formatos obligatorios por subcampo:**
+
+| Subcampo | Tipo | Formato / Restricciones |
+|----------|------|--------------------------|
+| `archivos_modificados` | Lista YAML | Rutas relativas al root; `[]` si sin cambios; máx 10 |
+| `estado_tareas` | String | `"{X}/{Y} — última: [{ID}] {texto}"` o `"N/A"` si no hay tasks.md |
+| `decisiones_clave` | Lista YAML | Máx 2 ítems, cada uno ≤ 100 caracteres |
+| `proxima_accion` | String | Comando completo: `/sdd-{cmd} {nombre-cambio}` |
+
+**Valores válidos para `current_phase`, `lock_phase` y elementos de listas:**
 `explore | propose | spec | design | tasks | apply | verify | archive`
 
 **Notas de transición:**
 
 - `spec` y `design` deben aparecer en orden secuencial estricto en `completed_phases` (no se ejecutan en paralelo).
-- `current_phase` refleja la fase específica actual en el flujo lineal.
-- Un cambio recién creado (solo `propose` completo) tiene `current_phase: propose`.
+- `current_phase` refleja la última fase completada (descriptivo/histórico).
+- `lock_phase` indica la única fase que puede ejecutarse en este momento (prescriptivo/restrictivo). Los orquestadores (`sdd-ff`, `sdd-continue`) DEBEN verificar `lock_phase` antes de delegar a cualquier sub-agente.
+- Un cambio recién creado (solo `propose` completo) tiene `current_phase: propose` y `lock_phase: spec`.
+- `sdd-new` DEBE inicializar `lock_phase` con el valor de la primera fase en `pending_phases`.
 - Al archivar exitosamente, el archivo se mueve — no hace falta actualizar `state.yaml`.
+
+**Tabla de transiciones de `lock_phase` (DAG estricto):**
+
+| `current_phase` completada | `lock_phase` resultante |
+|---------------------------|-------------------------|
+| `propose`                  | `spec`                  |
+| `spec`                     | `design`                |
+| `design`                   | `tasks`                 |
+| `tasks`                    | `apply`                 |
+| `apply`                    | `verify`                |
+| `verify`                   | `archive`               |
+
+**Semántica `lock_phase` vs `current_phase`:**
+
+| Campo | Rol | Quién lo escribe | Cuándo cambia |
+|-------|-----|-----------------|---------------|
+| `current_phase` | Descriptivo — última fase completada | Orquestador | Al completar una fase |
+| `lock_phase` | Prescriptivo — única fase ejecutable | Orquestador (a partir de `lock_phase_next` reportado por el sub-agente) | Al completar una fase |
+
+**Error de transición inválida:** Si un orquestador intenta ejecutar una fase distinta a `lock_phase`, DEBE detener la ejecución e informar:
+```
+ERROR: Transición inválida de lock semántico.
+  Fase solicitada : {fase_solicitada}
+  lock_phase actual: {lock_phase}
+  Ejecuta /sdd-fix para auditar y reparar el estado antes de continuar.
+```
 
 ## Lectura de Artefactos
 

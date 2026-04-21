@@ -134,6 +134,10 @@ Devuelve al orquestador:
 
 ### Próximo Paso
 Listo para implementación (sdd-apply).
+
+### Lock Phase
+
+lock_phase_next: apply
 ```
 
 ## Reglas
@@ -146,6 +150,7 @@ Listo para implementación (sdd-apply).
 - NUNCA incluir tareas vagas como "implementar la funcionalidad" o "agregar tests"
 - Aplicar cualquier `rules.tasks` de `openspec/config.yaml`
 - Si el proyecto usa TDD, integrar tareas test-first: tarea RED (escribir test fallido) → tarea GREEN (hacerlo pasar) → tarea REFACTOR (limpiar)
+- **LOCK PHASE**: la última sección del resumen de retorno SIEMPRE DEBE ser `### Lock Phase` con `lock_phase_next: apply`. Omitir esta sección SOLO si la skill falló y no completó su trabajo.
 
 - ### Presupuesto de Tamaño
 

@@ -138,6 +138,10 @@ Devuelve al orquestador:
 
 ### Próximo Paso
 Listo para diseño (sdd-design). Si el diseño ya existe, listo para tareas (sdd-tasks).
+
+### Lock Phase
+
+lock_phase_next: design
 ```
 
 ## Reglas
@@ -151,6 +155,7 @@ Listo para diseño (sdd-design). Si el diseño ya existe, listo para tareas (sdd
 - Mantener los escenarios TESTEABLES — alguien debería poder escribir un test automatizado desde cada uno
 - NO incluir detalles de implementación en las specs — las specs describen QUÉ, no CÓMO
 - Aplicar cualquier `rules.specs` de `openspec/config.yaml`
+- **LOCK PHASE**: la última sección del resumen de retorno SIEMPRE DEBE ser `### Lock Phase` con `lock_phase_next: design`. Omitir esta sección SOLO si la skill falló y no completó su trabajo.
 
 - ### Presupuesto de Tamaño
 

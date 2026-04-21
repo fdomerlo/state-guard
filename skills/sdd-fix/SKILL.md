@@ -43,6 +43,9 @@ Ignora cambios archivados (los que estén bajo `openspec/changes/archive/`). No 
 Para cada `state.yaml` encontrado, verifica:
 
 - **Campo `current_phase`**: Debe existir y contener un valor válido de la lista: `explore`, `propose`, `spec`, `design`, `tasks`, `apply`, `verify`, `archive`.
+- **Campo `lock_phase`**: Debe existir y contener un valor válido de la misma lista. Diferenciá dos casos:
+  - **Ausente** → Marcar como `schema_migration_needed` (NO como CORRUPTO — puede ser un estado válido de versión anterior del schema). Proceder al Paso 2b para inyectarlo.
+  - **Presente pero con valor inválido** → Marcar como CORRUPTO y re-inferir desde artefactos.
 - **Campo `status`**: Debe existir y contener un valor válido de la lista: `active`, `done`, `blocked`.
 - **Campo `started_at`**: Debe existir y ser una fecha válida en formato ISO 8601.
 - **Campo `last_updated`**: Debe existir y ser una fecha válida ISO 8601 posterior o igual a `started_at`.
@@ -51,7 +54,30 @@ Para cada `state.yaml` encontrado, verifica:
 - **Campo `blocked` (Legacy)**: Si se encuentra como booleano y equivale a `true`, debe removerse y el campo `status` debe cambiarse a `blocked`. No debe ser requerido de forma estricta.
 - **Campo `blocked_reason`**: Debe existir en todos los schemas, conteniendo el literal del error (puede ser `null` si `status` no es `blocked`).
 
-Si falta algún campo obligatorio, marcá el cambio como **CORRUPTO** en el reporte.
+Si falta algún campo obligatorio (distinto de `lock_phase`), marcá el cambio como **CORRUPTO** en el reporte.
+
+### Paso 2b: Migrar `lock_phase` Ausente
+
+Si un `state.yaml` fue marcado como `schema_migration_needed` en el Paso 2, inferí el valor
+correcto de `lock_phase` inspeccionando los artefactos presentes en disco:
+
+| Condición (artefactos en disco) | `lock_phase` inferido |
+|---------------------------------|-----------------------|
+| Solo `proposal.md` existe | `spec` |
+| `proposal.md` + `specs/` (≥1 archivo) existen, pero NO `design.md` | `design` |
+| `proposal.md` + `specs/` + `design.md` existen, pero NO `tasks.md` | `tasks` |
+| `proposal.md` + `specs/` + `design.md` + `tasks.md` existen, pero NO `verify-report.md` | `apply` |
+| `proposal.md` + `specs/` + `design.md` + `tasks.md` + `verify-report.md` existen | `archive` |
+
+**Fallback conservador:** Si los artefactos no permiten inferencia clara, usar el valor de
+`pending_phases[0]` como fallback y registrar la razón en el reporte.
+
+Tras inferir el valor, escribir `lock_phase: {valor}` en el `state.yaml` reparado y registrar:
+```
+schema_migration: lock_phase inyectado (inferido: {valor})
+# o si se usó fallback:
+schema_migration: lock_phase inyectado (fallback desde pending_phases[0]: {valor})
+```
 
 ### Paso 3: Validar Coherencia en Disco
 
@@ -91,20 +117,28 @@ Si el schema está corrupto (campos faltantes), intentá reconstruir el `state.y
 
 ### executive_summary
 Se auditaron N cambios: X sanos, Y reparados, Z irrecuperables.
+(Si hubo migraciones de schema: M cambios recibieron `lock_phase` inyectado.)
 
 ### artifacts
-- `openspec/changes/{cambio}/state.yaml` — Repaired | Untouched | Reconstructed
+- `openspec/changes/{cambio}/state.yaml` — Repaired | Untouched | Reconstructed | Migrated
+
+### schema_migrations
+- `openspec/changes/{cambio}/state.yaml` — `lock_phase` inyectado (inferido: {valor})
+- `openspec/changes/{cambio}/state.yaml` — `lock_phase` inyectado (fallback desde pending_phases[0]: {valor})
+# Si no hubo migraciones: omitir esta sección o indicar "Ninguna"
 
 ### next_recommended
 /sdd-continue para retomar el cambio reparado
 
 ### risks
 - Cambios reparados pueden haber perdido progreso de fases intermedias
+- Cambios con `lock_phase` migrado por fallback deben revisarse manualmente
 
 ### detailed_report
-| Cambio | Fase Original | Fase Reparada | Problemas Encontrados |
-|--------|--------------|---------------|----------------------|
-| {nombre} | tasks | spec | Falta design.md, Falta tasks.md |
+| Cambio | Fase Original | Fase Reparada | lock_phase Resultante | Problemas Encontrados |
+|--------|--------------|---------------|----------------------|----------------------|
+| {nombre} | tasks | spec | design | Falta design.md, Falta tasks.md |
+| {nombre} | spec | spec | design | lock_phase ausente — inyectado por migración |
 ```
 
 ## Reglas

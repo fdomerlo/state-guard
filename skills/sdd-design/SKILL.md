@@ -133,6 +133,10 @@ Devuelve al orquestador:
 
 ### Próximo Paso
 Listo para tareas (sdd-tasks).
+
+### Lock Phase
+
+lock_phase_next: tasks
 ```
 
 ## Reglas
@@ -145,6 +149,7 @@ Listo para tareas (sdd-tasks).
 - Mantener los diagramas ASCII simples — claridad sobre estética
 - Aplicar cualquier `rules.design` de `openspec/config.yaml`
 - Si tenés preguntas abiertas que BLOQUEAN el diseño, decirlo claramente — no asumir
+- **LOCK PHASE**: la última sección del resumen de retorno SIEMPRE DEBE ser `### Lock Phase` con `lock_phase_next: tasks`. Omitir esta sección SOLO si la skill falló y no completó su trabajo.
 
 - ### Presupuesto de Tamaño
 
