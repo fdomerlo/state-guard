@@ -1,9 +1,9 @@
 #!/bin/sh
 # Skill Registry — Escáner POSIX
-# Escanea ./skills/ e identifica skills no-SDD para indexar.
-# Uso: sh skills/skill-registry/scan.sh [directorio-skills]
+# Escanea ./skills-addons/ e identifica skills de terceros para indexar.
+# Uso: sh skills/sdd-skill-registry/scan.sh [directorio-skills]
 
-SKILLS_DIR="${1:-./skills}"
+SKILLS_DIR="${1:-./skills-addons}"
 OUTPUT="./.agentify/skill-registry.md"
 
 # Crear directorio de salida si no existe
@@ -13,7 +13,7 @@ mkdir -p ./.agentify
 cat > "$OUTPUT" << 'HEADER'
 # Skill Registry
 
-Generado automáticamente por skill-registry/scan.sh
+Generado automáticamente por sdd-skill-registry/scan.sh
 
 | Nombre | Descripción | Trigger | Ubicación |
 |--------|-------------|---------|-----------|

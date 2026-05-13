@@ -1,24 +1,24 @@
 ---
-name: skill-registry
+name: sdd-skill-registry
 description: >
-  Escanea el directorio ./skills/ e identifica skills no-SDD (excluyendo sdd-* y _shared).
+  Escanea el directorio ./skills-addons/ e identifica skills de terceros.
   Genera un índice en ./.agentify/skill-registry.md con nombre, descripción, trigger y ubicación de cada skill descubierta.
 license: MIT
 metadata:
   author: ctrbts-steve
-  version: "1.0"
+  version: "2.0"
 ---
 
-**Disparador**: Ejecutar al inicio de una tarea o manualmente para actualizar el índice de skills disponibles.
+**Disparador**: Ejecutar al inicio de una tarea o manualmente para actualizar el índice de skills de terceros disponibles.
 
 ## Propósito
 
-Eres un sub-agente responsable de **escanear y registrar skills** disponibles en el proyecto. Tu objetivo es generar un índice actualizado de todas las skills no-SDD que el orquestador puede usar además de las fases SDD conocidas.
+Eres un sub-agente responsable de **escanear y registrar skills de terceros** disponibles en el proyecto. Tu objetivo es generar un índice actualizado de todas las skills instaladas en `skills-addons/` que el orquestador puede usar además de las fases SDD conocidas.
 
 ## Qué Recibís
 
 Del orquestador:
-- Directorio de skills a escanear (opcional, por defecto `./skills/`)
+- Directorio de skills a escanear (opcional, por defecto `./skills-addons/`)
 
 ## Qué Hacer
 
@@ -27,11 +27,11 @@ Del orquestador:
 Ejecuta el script bash POSIX incluido en este skill:
 
 ```sh
-sh skills/skill-registry/scan.sh [directorio-skills]
+sh skills/sdd-skill-registry/scan.sh [directorio-skills]
 ```
 
 El script:
-- Escanea `./skills/` (o el directorio proporcionado)
+- Escanea `./skills-addons/` (o el directorio proporcionado)
 - Ignora directorios que comienzan con `sdd-` y `_shared`
 - Extrae nombre, descripción, trigger y ubicación de cada `SKILL.md`
 - Genera el índice en `./.agentify/skill-registry.md`

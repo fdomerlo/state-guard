@@ -89,7 +89,7 @@ rules:
 
 ### Paso 4: Inicializar Registry de Skills
 
-Como paso final, ejecuta `skills/skill-registry/scan.sh` (o inicializa el archivo `.agentify/skill-registry.md` vacío) para habilitar el descubrimiento de skills.
+Como paso final, ejecuta `skills/sdd-skill-registry/scan.sh` (o inicializa el archivo `.agentify/skill-registry.md` vacío) para habilitar el descubrimiento de skills.
 
 ### Paso 5: Devolver Resumen
 

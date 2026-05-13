@@ -26,4 +26,4 @@ PROHIBIDO pre-cargar SKILL.md. Cargá cada skill en el momento exacto de uso.
 
 - `persistence-contract.md` — comportamiento de la persistencia.
 - `openspec-convention.md` — carpetas y rutas exactas.
-- `skill-registry.md` — skills no-SDD disponibles.
+- `sdd-skill-registry` — escanea skills de terceros en `skills-addons/`.
