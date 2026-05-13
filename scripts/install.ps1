@@ -200,12 +200,9 @@ function Show-Help {
 function Compile-AndAppendConfig {
     param(
         [string]$TargetFile,
-        [string]$HeaderFile,
-        [string]$ToolName,
-        [string]$SkillsPath
+        [string]$HeaderFile
     )
     
-    $CoreFile = Join-Path $RepoDir "skills\_shared\orchestrator-core.md"
     $MarkerBegin = "<!-- BEGIN SDD ORCHESTRATOR -->"
     $MarkerEnd = "<!-- END SDD ORCHESTRATOR -->"
     
@@ -230,18 +227,6 @@ function Compile-AndAppendConfig {
     # Add specific header (e.g., original CLAUDE.md)
     if (Test-Path $HeaderFile) {
         Get-Content $HeaderFile | Add-Content -Path $TargetFile
-        Add-Content -Path $TargetFile -Value ""
-    }
-    
-    # Inject compiled core
-    if (Test-Path $CoreFile) {
-        $coreContent = Get-Content $CoreFile -Raw
-        $coreContent = $coreContent -replace "{{TOOL_NAME}}", $ToolName
-        $coreContent = $coreContent -replace "{{SKILLS_PATH}}", $SkillsPath
-        $coreContent = $coreContent -replace "{{EXTRA_LANGUAGE_RULE}}", ""
-        Add-Content -Path $TargetFile -Value $coreContent
-    } else {
-        Write-Warn "No se encontró orchestrator-core.md en $CoreFile"
     }
     
     Add-Content -Path $TargetFile -Value ""
@@ -254,10 +239,6 @@ function Merge-OpenCodeConfig {
     $configDir = if ($OS -eq "windows") { "$env:USERPROFILE\.config\opencode" } else { "$HOME/.config/opencode" }
     $targetConfig = Join-Path $configDir "opencode.json"
     $sourceConfig = Join-Path $RepoDir "integrations\opencode\opencode.json"
-    $coreFile = Join-Path $RepoDir "skills\_shared\orchestrator-core.md"
-    
-    $toolName = "OpenCode"
-    $skillsPath = Get-ToolPath "opencode"
     
     if (-not (Test-Path $configDir)) {
         New-Item -ItemType Directory -Path $configDir -Force | Out-Null
@@ -268,25 +249,13 @@ function Merge-OpenCodeConfig {
     if ($pythonCmd) {
         $pythonScript = @"
 import json, sys, os
-target_path, source_path, core_path, tool_name, skills_path = sys.argv[1:]
+target_path, source_path = sys.argv[1:3]
 
 # Read source JSON (header)
 try:
     with open(source_path, "r", encoding="utf-8") as f: source = json.load(f)
 except Exception:
     sys.exit(1)
-
-# Compile core in memory
-core_text = ""
-if os.path.exists(core_path):
-    with open(core_path, "r", encoding="utf-8") as f: core_text = f.read()
-    core_text = core_text.replace("{{TOOL_NAME}}", tool_name)
-    core_text = core_text.replace("{{SKILLS_PATH}}", skills_path)
-    core_text = core_text.replace("{{EXTRA_LANGUAGE_RULE}}", "")
-
-# Join OpenCode prompt with core
-original_prompt = source["agent"]["sdd-orchestrator"].get("prompt", "")
-source["agent"]["sdd-orchestrator"]["prompt"] = original_prompt + "\n\n" + core_text
 
 # Apply to user JSON
 if os.path.exists(target_path):
@@ -307,7 +276,7 @@ sys.exit(0)
         Set-Content -Path $tempScript -Value $pythonScript -Encoding UTF8
         
         try {
-            & python $tempScript $targetConfig $sourceConfig $coreFile $toolName $skillsPath 2>&1 | Out-Null
+            & python $tempScript $targetConfig $sourceConfig 2>&1 | Out-Null
             if ($LASTEXITCODE -eq 0) {
                 Write-Skill "sdd-orchestrator compilado e inyectado en opencode.json"
             } else {
@@ -432,7 +401,7 @@ function Install-ForAgent {
             if (-not $configTarget.Contains("$env:USERPROFILE")) {
                 $configTarget = "$HOME\.claude\CLAUDE.md"
             }
-            Compile-AndAppendConfig -TargetFile $configTarget -HeaderFile (Join-Path $RepoDir "integrations\claude-code\CLAUDE.md") -ToolName "Claude Code" -SkillsPath $targetPath
+            Compile-AndAppendConfig -TargetFile $configTarget -HeaderFile (Join-Path $RepoDir "integrations\claude-code\CLAUDE.md")
         }
         "opencode" {
             $targetPath = Get-ToolPath "opencode"
@@ -443,7 +412,7 @@ function Install-ForAgent {
             $targetPath = Get-ToolPath "gemini-cli"
             Install-Skills $targetPath "Gemini CLI"
             $configTarget = if ($OS -eq "windows") { "$env:USERPROFILE\.gemini\GEMINI.md" } else { "$HOME/.gemini/GEMINI.md" }
-            Compile-AndAppendConfig -TargetFile $configTarget -HeaderFile (Join-Path $RepoDir "integrations\gemini-cli\GEMINI.md") -ToolName "Gemini CLI" -SkillsPath $targetPath
+            Compile-AndAppendConfig -TargetFile $configTarget -HeaderFile (Join-Path $RepoDir "integrations\gemini-cli\GEMINI.md")
         }
         "antigravity" {
             $target = Get-ToolPath "antigravity"
@@ -452,7 +421,7 @@ function Install-ForAgent {
             if (Test-Path ".\.agent\rules") {
                 Remove-Item -Path ".\.agent\rules" -Recurse -Force -ErrorAction SilentlyContinue
             }
-            Compile-AndAppendConfig -TargetFile $configTarget -HeaderFile (Join-Path $RepoDir "integrations\antigravity\sdd-orchestrator.md") -ToolName "Antigravity" -SkillsPath $target
+            Compile-AndAppendConfig -TargetFile $configTarget -HeaderFile (Join-Path $RepoDir "integrations\antigravity\sdd-orchestrator.md")
         }
         "project-local" {
             $targetPath = Get-ToolPath "project-local"
@@ -465,7 +434,7 @@ function Install-ForAgent {
             $targetPath = Get-ToolPath "claude-code"
             Install-Skills $targetPath "Claude Code"
             $configTarget = if ($OS -eq "windows") { "$env:USERPROFILE\.claude\CLAUDE.md" } else { "$HOME/.claude/CLAUDE.md" }
-            Compile-AndAppendConfig -TargetFile $configTarget -HeaderFile (Join-Path $RepoDir "integrations\claude-code\CLAUDE.md") -ToolName "Claude Code" -SkillsPath $targetPath
+            Compile-AndAppendConfig -TargetFile $configTarget -HeaderFile (Join-Path $RepoDir "integrations\claude-code\CLAUDE.md")
             
             # OpenCode
             $targetPath = Get-ToolPath "opencode"
@@ -476,7 +445,7 @@ function Install-ForAgent {
             $targetPath = Get-ToolPath "gemini-cli"
             Install-Skills $targetPath "Gemini CLI"
             $configTarget = if ($OS -eq "windows") { "$env:USERPROFILE\.gemini\GEMINI.md" } else { "$HOME/.gemini/GEMINI.md" }
-            Compile-AndAppendConfig -TargetFile $configTarget -HeaderFile (Join-Path $RepoDir "integrations\gemini-cli\GEMINI.md") -ToolName "Gemini CLI" -SkillsPath $targetPath
+            Compile-AndAppendConfig -TargetFile $configTarget -HeaderFile (Join-Path $RepoDir "integrations\gemini-cli\GEMINI.md")
             
             # Antigravity
             $targetPath = Get-ToolPath "antigravity"
@@ -485,7 +454,7 @@ function Install-ForAgent {
             if (Test-Path ".\.agent\rules") {
                 Remove-Item -Path ".\.agent\rules" -Recurse -Force -ErrorAction SilentlyContinue
             }
-            Compile-AndAppendConfig -TargetFile $configTarget -HeaderFile (Join-Path $RepoDir "integrations\antigravity\sdd-orchestrator.md") -ToolName "Antigravity" -SkillsPath $targetPath
+            Compile-AndAppendConfig -TargetFile $configTarget -HeaderFile (Join-Path $RepoDir "integrations\antigravity\sdd-orchestrator.md")
             
             Write-Host ""
             Write-Host "${GREEN}${BOLD}Todos los orquestadores globales configurados automaticamente!${NC}"

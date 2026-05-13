@@ -167,9 +167,6 @@ show_help() {
 compile_and_append_config() {
     local target_file="$1"
     local header_file="$2"
-    local tool_name="$3"
-    local skills_path="$4"
-    local core_file="$REPO_DIR/skills/_shared/orchestrator-core.md"
     local marker_begin="<!-- BEGIN SDD ORCHESTRATOR -->"
     local marker_end="<!-- END SDD ORCHESTRATOR -->"
 
@@ -189,20 +186,7 @@ compile_and_append_config() {
     # 1. Agregar el header específico (ej. CLAUDE.md original)
     if [ -f "$header_file" ]; then
         cat "$header_file" >> "$target_file"
-        echo "" >> "$target_file"
     fi
-
-    # 2. Inyectar el core compilado
-    if [ -f "$core_file" ]; then
-        sed -e "s|{{TOOL_NAME}}|$tool_name|g" \
-            -e "s|{{SKILLS_PATH}}|$skills_path|g" \
-            -e "s|{{EXTRA_LANGUAGE_RULE}}||g" \
-            "$core_file" >> "$target_file"
-    else
-        print_warn "No se encontró orchestrator-core.md en $core_file"
-    fi
-
-    echo "" >> "$target_file"
     echo "$marker_end" >> "$target_file"
     
     print_skill "Orquestador inyectado/actualizado exitosamente en $(basename "$target_file")"
@@ -217,10 +201,6 @@ merge_opencode_config() {
     fi
     local target_config="$config_dir/opencode.json"
     local source_config="$REPO_DIR/integrations/opencode/opencode.json"
-    local core_file="$REPO_DIR/skills/_shared/orchestrator-core.md"
-    
-    local tool_name="OpenCode"
-    local skills_path="$(get_tool_path opencode)"
 
     mkdir -p "$config_dir"
 
@@ -228,25 +208,13 @@ merge_opencode_config() {
     if command -v python3 >/dev/null 2>&1; then
         python3 -c '
 import json, sys, os
-target_path, source_path, core_path, tool_name, skills_path = sys.argv[1:6]
+target_path, source_path = sys.argv[1:3]
 
 # Leer el source JSON (header)
 try:
     with open(source_path, "r", encoding="utf-8") as f: source = json.load(f)
 except Exception:
     sys.exit(1)
-
-# Compilar el core en memoria
-core_text = ""
-if os.path.exists(core_path):
-    with open(core_path, "r", encoding="utf-8") as f: core_text = f.read()
-    core_text = core_text.replace("{{TOOL_NAME}}", tool_name)
-    core_text = core_text.replace("{{SKILLS_PATH}}", skills_path)
-    core_text = core_text.replace("{{EXTRA_LANGUAGE_RULE}}", "")
-
-# Unir el prompt de opencode.json con el core
-original_prompt = source["agent"]["sdd-orchestrator"].get("prompt", "")
-source["agent"]["sdd-orchestrator"]["prompt"] = original_prompt + "\n\n" + core_text
 
 # Aplicar al JSON del usuario
 if os.path.exists(target_path):
@@ -262,7 +230,7 @@ target["agent"]["sdd-orchestrator"] = source["agent"]["sdd-orchestrator"]
 
 with open(target_path, "w", encoding="utf-8") as f: json.dump(target, f, indent=2, ensure_ascii=False)
 sys.exit(0)
-' "$target_config" "$source_config" "$core_file" "$tool_name" "$skills_path"
+' "$target_config" "$source_config"
         
         if [ $? -eq 0 ]; then
             print_skill "sdd-orchestrator compilado e inyectado en opencode.json"
@@ -410,7 +378,7 @@ install_for_agent() {
         claude-code)
             install_skills "$(get_tool_path claude-code)" "Claude Code"
             local config_target="${USERPROFILE:-$HOME}/.claude/CLAUDE.md"
-            compile_and_append_config "$config_target" "$REPO_DIR/integrations/claude-code/CLAUDE.md" "Claude Code" "$(get_tool_path claude-code)"
+            compile_and_append_config "$config_target" "$REPO_DIR/integrations/claude-code/CLAUDE.md"
             ;;
         opencode)
             install_skills "$(get_tool_path opencode)" "OpenCode"
@@ -420,14 +388,14 @@ install_for_agent() {
         gemini-cli)
             install_skills "$(get_tool_path gemini-cli)" "Gemini CLI"
             local config_target="${USERPROFILE:-$HOME}/.gemini/GEMINI.md"
-            compile_and_append_config "$config_target" "$REPO_DIR/integrations/gemini-cli/GEMINI.md" "Gemini CLI" "$(get_tool_path gemini-cli)"
+            compile_and_append_config "$config_target" "$REPO_DIR/integrations/gemini-cli/GEMINI.md"
             ;;
         antigravity)
             local target="$(get_tool_path antigravity)"
             install_skills "$target" "Antigravity"
             local config_target="${USERPROFILE:-$HOME}/.gemini/GEMINI.md"
             rm -rf "./.agent/rules" 2>/dev/null || true
-            compile_and_append_config "$config_target" "$REPO_DIR/integrations/antigravity/sdd-orchestrator.md" "Antigravity" "$target"
+            compile_and_append_config "$config_target" "$REPO_DIR/integrations/antigravity/sdd-orchestrator.md"
             ;;
         project-local)
             install_skills "$(get_tool_path project-local)" "Project-local"
@@ -435,20 +403,20 @@ install_for_agent() {
             ;;
         all-global)
             install_skills "$(get_tool_path claude-code)" "Claude Code"
-            compile_and_append_config "${USERPROFILE:-$HOME}/.claude/CLAUDE.md" "$REPO_DIR/integrations/claude-code/CLAUDE.md" "Claude Code" "$(get_tool_path claude-code)"
+            compile_and_append_config "${USERPROFILE:-$HOME}/.claude/CLAUDE.md" "$REPO_DIR/integrations/claude-code/CLAUDE.md"
             
             install_skills "$(get_tool_path opencode)" "OpenCode"
             install_opencode_commands "$(get_tool_path opencode)"
             merge_opencode_config
             
             install_skills "$(get_tool_path gemini-cli)" "Gemini CLI"
-            compile_and_append_config "${USERPROFILE:-$HOME}/.gemini/GEMINI.md" "$REPO_DIR/integrations/gemini-cli/GEMINI.md" "Gemini CLI" "$(get_tool_path gemini-cli)"
+            compile_and_append_config "${USERPROFILE:-$HOME}/.gemini/GEMINI.md" "$REPO_DIR/integrations/gemini-cli/GEMINI.md"
             
             local ag_target
             ag_target="$(get_tool_path antigravity)"
             install_skills "$ag_target" "Antigravity"
             rm -rf "./.agent/rules" 2>/dev/null || true
-            compile_and_append_config "${USERPROFILE:-$HOME}/.gemini/GEMINI.md" "$REPO_DIR/integrations/antigravity/sdd-orchestrator.md" "Antigravity" "$ag_target"
+            compile_and_append_config "${USERPROFILE:-$HOME}/.gemini/GEMINI.md" "$REPO_DIR/integrations/antigravity/sdd-orchestrator.md"
             
             echo -e "\n${GREEN}${BOLD}¡Todos los orquestadores globales configurados automáticamente!${NC}"
             ;;
