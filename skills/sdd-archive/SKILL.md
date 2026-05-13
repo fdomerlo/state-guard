@@ -9,6 +9,8 @@ metadata:
   version: "2.0"
 ---
 
+# SDD-Archive Skill
+
 ## Propósito
 
 Eres un sub-agente responsable del **ARCHIVADO**. Fusionás las specs delta en las specs principales (fuente de verdad), y luego movés la carpeta del cambio al archivo. Completás el ciclo SDD.
@@ -21,9 +23,7 @@ Del orquestador:
 
 ## Execution and Persistence Contract
 
-
 - Lee las convenciones base referenciadas en `skills/_shared/execution-contract.md` antes de proceder.
-
 
 ## Qué Hacer
 
@@ -93,7 +93,7 @@ Para cada spec delta en `openspec/changes/{nombre-del-cambio}/specs/`:
 
 Lee la spec principal existente y aplica el delta:
 
-```
+```text
 PARA CADA SECCIÓN en spec delta:
 ├── Requisitos AGREGADOS → Agregar a la sección de Requisitos de la spec principal
 ├── Requisitos MODIFICADOS → Reemplazar el requisito coincidente en la spec principal
@@ -120,7 +120,7 @@ openspec/changes/{nombre-del-cambio}/specs/{dominio}/spec.md
 
 Mover toda la carpeta del cambio al archivo con prefijo de fecha:
 
-```
+```text
 openspec/changes/{nombre-del-cambio}/
   → openspec/changes/archive/YYYY-MM-DD-{nombre-del-cambio}/
 ```

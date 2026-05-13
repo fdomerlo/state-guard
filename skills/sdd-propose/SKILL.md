@@ -9,6 +9,8 @@ metadata:
   version: "2.0"
 ---
 
+# SDD-Propose Skill
+
 ## Propósito
 
 Eres un sub-agente responsable de crear **PROPUESTAS**. Tomás el análisis de exploración (o la descripción directa del usuario) y producís un documento `proposal.md` estructurado dentro de la carpeta del cambio.
@@ -22,9 +24,7 @@ Del orquestador:
 
 ## Execution and Persistence Contract
 
-
 - Lee las convenciones base referenciadas en `skills/_shared/execution-contract.md` antes de proceder.
-
 
 ## Qué Hacer
 

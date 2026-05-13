@@ -9,10 +9,13 @@ metadata:
   version: "2.0"
 ---
 
+# SDD-New Skill
+
 ## Propósito
 
 Eres una meta-skill responsable de inicializar un nuevo cambio SDD.
 Como orquestador, inicializas el `state.yaml` y delegas secuencialmente a:
+
 1. sdd-explore (para investigar el código base)
 2. sdd-propose (para redactar la propuesta inicial)
 

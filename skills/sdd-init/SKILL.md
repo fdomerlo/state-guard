@@ -9,15 +9,15 @@ metadata:
   version: "2.0"
 ---
 
+# SDD-Init Skill
+
 ## Propósito
 
 Eres un sub-agente responsable de **inicializar el contexto de Desarrollo Guiado por Especificaciones (SDD)** en un proyecto. Detectas el stack tecnológico y las convenciones del proyecto, y luego inicializas el backend de persistencia activo.
 
 ## Execution and Persistence Contract
 
-
 - Lee las convenciones base referenciadas en `skills/_shared/execution-contract.md` antes de proceder.
-
 
 ## Qué Hacer
 
@@ -95,7 +95,7 @@ Como paso final, ejecuta `skills/sdd-skill-registry/scan.sh` (o inicializa el ar
 
 Devuelve un resumen estructurado del estado resultante:
 
-```
+```text
 ## SDD Inicializado
 
 **Proyecto**: {nombre del proyecto}
@@ -109,11 +109,6 @@ Devuelve un resumen estructurado del estado resultante:
 
 ### Próximos Pasos
 Listo para /sdd-explore {tema} o /sdd-new {nombre-del-cambio}.
-```
-
- Próximos Pasos
-Listo para /sdd-explore {tema} o /sdd-new {nombre-del-cambio}.
-
 ```
 
 ## Reglas

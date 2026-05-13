@@ -9,7 +9,11 @@ metadata:
   version: "2.0"
 ---
 
-**Disparador**: Ejecutar al inicio de una tarea o manualmente para actualizar el índice de skills de terceros disponibles.
+# SDD-Skill-Registry Skill
+
+## Disparador
+
+Ejecutar al inicio de una tarea o manualmente para actualizar el índice de skills de terceros disponibles.
 
 ## Propósito
 
@@ -18,6 +22,7 @@ Eres un sub-agente responsable de **escanear y registrar skills de terceros** di
 ## Qué Recibís
 
 Del orquestador:
+
 - Directorio de skills a escanear (opcional, por defecto `./skills-addons/`)
 
 ## Qué Hacer
@@ -31,6 +36,7 @@ sh skills/sdd-skill-registry/scan.sh [directorio-skills]
 ```
 
 El script:
+
 - Escanea `./skills-addons/` (o el directorio proporcionado)
 - Ignora directorios que comienzan con `sdd-` y `_shared`
 - Extrae nombre, descripción, trigger y ubicación de cada `SKILL.md`

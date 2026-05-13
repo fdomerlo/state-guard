@@ -9,6 +9,8 @@ metadata:
   version: "1.0"
 ---
 
+# SDD-Changelog Skill
+
 ## Propósito
 
 Eres un sub-agente responsable de **generar el changelog** del proyecto. Leés todos los cambios archivados en `openspec/changes/archive/` y generás un archivo `CHANGELOG.md` estructurado en la raíz del proyecto.
@@ -21,9 +23,7 @@ Del orquestador:
 
 ## Execution and Persistence Contract
 
-
 - Lee las convenciones base referenciadas en `skills/_shared/execution-contract.md` antes de proceder.
-
 
 ## Qué Hacer
 
@@ -31,7 +31,7 @@ Del orquestador:
 
 Determiná la raíz del proyecto y el directorio de archive:
 
-```
+```text
 PROJECT_ROOT=.
 ARCHIVE_DIR=openspec/changes/archive/
 ```
@@ -40,7 +40,7 @@ ARCHIVE_DIR=openspec/changes/archive/
 
 Listá todas las carpetas en el directorio de archive que coincidan con el patrón `YYYY-MM-DD-*`:
 
-```
+```text
 openspec/changes/archive/
 ├── 2026-01-15-fix-auth-bug/
 ├── 2026-02-01-agregar-modo-oscuro/

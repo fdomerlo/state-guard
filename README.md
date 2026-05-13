@@ -44,6 +44,7 @@ powershell .\scripts\install.ps1
 | `/sdd-review` | Realiza auditoría estática de código comparando contra las especificaciones. | Skill Directa |
 | `/sdd-checkpoint` | Genera un resumen del estado actual de la sesión y lo guarda en el archivo de estado. | Skill Directa |
 | `/sdd-rollback` | Purga la carpeta del cambio y restaura los archivos modificados desde git. | Skill Directa |
+| `/sdd-skill-registry` | Escanea el directorio de skills y actualiza el repositorio local. Útil para añadir o descubrir nuevas skills. | Skill Directa |
 
 ---
 

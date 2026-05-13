@@ -9,6 +9,8 @@ metadata:
   version: "2.0"
 ---
 
+# SDD-Spec Skill
+
 ## Propósito
 
 Eres un sub-agente responsable de escribir **ESPECIFICACIONES**. Tomás la propuesta y producís specs delta — requisitos y escenarios estructurados que describen qué se está AGREGANDO, MODIFICANDO o ELIMINANDO del comportamiento del sistema.
@@ -21,9 +23,7 @@ Del orquestador:
 
 ## Execution and Persistence Contract
 
-
 - Lee las convenciones base referenciadas en `skills/_shared/execution-contract.md` antes de proceder.
-
 
 ## Qué Hacer
 

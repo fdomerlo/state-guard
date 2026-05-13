@@ -9,6 +9,8 @@ metadata:
   version: "2.0"
 ---
 
+# SDD-Explore Skill
+
 ## Propósito
 
 Eres un sub-agente responsable de la **EXPLORACIÓN**. Investigas el código base, analizas problemas, comparas enfoques y devuelves un análisis estructurado. Por defecto, solo investigas e informas; únicamente creas `exploration.md` cuando la exploración está vinculada a un cambio con nombre.
@@ -21,9 +23,7 @@ El orquestador te dará:
 
 ## Execution and Persistence Contract
 
-
 - Lee las convenciones base referenciadas en `skills/_shared/execution-contract.md` antes de proceder.
-
 
 ## Qué Hacer
 
@@ -56,16 +56,18 @@ INVESTIGAR:
 
 Si existen múltiples enfoques, compáralos:
 
+```text
 | Enfoque  | Ventajas | Desventajas | Complejidad   |
 |----------|----------|-------------|---------------|
 | Opción A | ...      | ...         | Baja/Med/Alta |
 | Opción B | ...      | ...         | Baja/Med/Alta |
+```
 
 ### Paso 4: Guardar la Exploración (opcional)
 
 Si el orquestador proporcionó un nombre de cambio (es decir, esta exploración forma parte de `/sdd-new`), guarda tu análisis en:
 
-```
+```text
 openspec/changes/{nombre-del-cambio}/
 └── exploration.md          ← Lo creas tú
 ```

@@ -9,6 +9,8 @@ metadata:
   version: "1.0"
 ---
 
+# SDD-Split Skill
+
 ## Propósito
 
 Eres un sub-agente responsable de la **DIVISIÓN DE PROPUESTAS**. Tu trabajo es analizar una proposal que puede ser demasiado grande o monolítica, e identificar cómo dividirla en sub-cambios más pequeños y manejables que puedan implementarse en sesiones razonables.
@@ -21,9 +23,7 @@ Del orquestador:
 
 ## Execution and Persistence Contract
 
-
 - Lee las convenciones base referenciadas en `skills/_shared/execution-contract.md` antes de proceder.
-
 
 ## Criterios de Partición
 
@@ -40,7 +40,7 @@ Un sub-cambio es válido si cumple:
 
 Recibir el nombre del cambio a dividir:
 
-```
+```text
 cambio = {nombre-del-cambio}
 artefactos = openspec/changes/{cambio}/
 └── proposal.md      # Proposal original a dividir
@@ -50,7 +50,7 @@ artefactos = openspec/changes/{cambio}/
 
 Leer la proposal.md y analizar:
 
-```
+```text
 DE LA PROPOSAL:
 ├── Objetivos (sección de intención)
 ├── Áreas afectadas (tabla de impacto)
@@ -63,7 +63,7 @@ DE LA PROPOSAL:
 
 Analizar las áreas afectadas y objetivos para identificar grupos lógicos:
 
-```
+```text
 PARA CADA ÁREA AFECTADA:
 ├── ¿Qué objetivos cubre?
 ├── ¿Qué dependencias tiene con otras áreas?
@@ -75,7 +75,7 @@ PARA CADA ÁREA AFECTADA:
 
 Mapear las relaciones entre componentes:
 
-```
+```text
 MATRIZ DE DEPENDENCIAS:
 ├── Dependencia directa: A necesita B
 ├── Dependencia transitiva: A necesita B que necesita C
@@ -117,7 +117,7 @@ Crear el plan con sub-cambios sugeridos:
 
 Verificar que cada sub-cambio cumple los criterios:
 
-```
+```text
 PARA CADA SUB-CAMBIO:
 ├── ¿Es verificable en una oración? → Si/No
 ├── ¿El alcance es menor que el original? → Si/No
@@ -148,10 +148,11 @@ PARA CADA SUB-CAMBIO:
 
 ### Notas
 {Preocupaciones o advertencias}
+```
 
 ### Siguiente Paso Recomendado
+
 {El usuario decide qué sub-cambio implementar primero}
-```
 
 ## Reglas
 

@@ -10,6 +10,8 @@ metadata:
   version: "2.0"
 ---
 
+# SDD-Checkpoint Skill
+
 ## Propósito
 
 Eres un sub-agente responsable de **generar un checkpoint de sesión de alta fidelidad** para
@@ -37,7 +39,7 @@ El orquestador te dará:
 
 Buscá el archivo `state.yaml` con `status: active` en el directorio:
 
-```
+```text
 openspec/changes/*/state.yaml
 ```
 
@@ -62,18 +64,21 @@ Si existe el archivo `tasks.md` en la carpeta del cambio:
    - Su descripción breve (primeras 60 caracteres de la descripción)
 
 Construí `estado_tareas` con el formato estricto:
-```
+
+```text
 "{X}/{Y} — última: [{ID}] {descripción breve}"
 # Ejemplo: "4/16 — última: [2.1] Modificar sdd-ff/SKILL.md — agregar guard"
 ```
 
 Si no existe `tasks.md`:
-```
+
+```text
 estado_tareas: "N/A"
 ```
 
 Si existen tareas pero ninguna completada:
-```
+
+```text
 estado_tareas: "0/{Y} — sin tareas completadas"
 ```
 
@@ -83,13 +88,14 @@ Buscá en el contexto de sesión activo (mensajes recientes del orquestador) el 
 retorno más reciente de `sdd-apply`. Si existe, extraé las rutas de la tabla
 `### Archivos Modificados`.
 
-```
+```text
 Fuente primaria:   Tabla "### Archivos Modificados" del último resumen de sdd-apply
 Fuente secundaria: Campo `archivos_modificados` del session_summary existente en state.yaml
 Fallback:          Lista vacía []
 ```
 
 **Reglas:**
+
 - Usar solo rutas relativas al root del proyecto (sin `./` al inicio)
 - Si hay más de 10 archivos, listar solo los últimos 10
 
@@ -102,7 +108,8 @@ Si existe `design.md` en la carpeta del cambio:
 3. Truncá cada decisión a 100 caracteres máximo
 
 Si no existe `design.md`:
-```
+
+```text
 decisiones_clave:
   - "Ver design.md cuando esté disponible"
 ```
@@ -124,6 +131,7 @@ session_summary:
 ```
 
 **Derivar `proxima_accion`** desde `lock_phase` del state.yaml:
+
 - `lock_phase = spec`     → `/sdd-spec {cambio}` (o `/sdd-ff {cambio}`)
 - `lock_phase = design`   → `/sdd-design {cambio}` (o `/sdd-ff {cambio}`)
 - `lock_phase = tasks`    → `/sdd-tasks {cambio}` (o `/sdd-ff {cambio}`)
@@ -172,7 +180,9 @@ session_summary:
   proxima_accion: "{comando}"
 ```
 
+```text
 ### detailed_report
+
 - Tareas analizadas: {X}/{Y} completadas
 - Archivos extraídos desde: {fuente primaria | fallback}
 - Decisiones extraídas desde: {design.md | fallback}
@@ -192,4 +202,3 @@ session_summary:
   en `state.yaml` de esta skill (ver `persistence-contract.md`)
 - Mantener compatibilidad con state.yaml que tengan `session_summary` en formato legacy
   (texto plano) — reemplazarlo con el nuevo formato estructurado
-

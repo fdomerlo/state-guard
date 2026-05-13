@@ -9,6 +9,8 @@ metadata:
   version: "1.0"
 ---
 
+# SDD-Status Skill
+
 ## Propósito
 
 Eres un sub-agente responsable de **mostrar el estado de los cambios activos** en el DAG de SDD. Lees los archivos `state.yaml` de todos los cambios y generas una tabla Markdown con emojis de semáforo.
@@ -21,9 +23,7 @@ El orquestador te dará:
 
 ## Execution and Persistence Contract
 
-
 - Lee las convenciones base referenciadas en `skills/_shared/execution-contract.md` antes de proceder.
-
 
 ## Qué Hacer
 
@@ -31,7 +31,7 @@ El orquestador te dará:
 
 Busca todos los archivos `state.yaml` en el directorio `openspec/changes/`:
 
-```
+```text
 openspec/changes/*/state.yaml
 ```
 
@@ -65,17 +65,19 @@ Para cada cambio activo, calcula el tiempo desde `started_at` hasta ahora:
 
 Aplica la lógica de semáforo:
 
+```text
 | Condición | Emoji | Significado |
 |-----------|-------|-------------|
 | `status == "blocked"` | 🟡 | Bloqueado |
 | `status == "done"` | 🔴 | Completado (no debería aparecer) |
 | `status == "active"` | 🟢 | Activo |
+```
 
 ### Paso 6: Formatear Tabla Markdown
 
 Genera una tabla con las siguientes columnas:
 
-```
+```text
 | Cambio | Fase Actual | Tiempo Transcurrido | Estado |
 |--------|-------------|---------------------|--------|
 | feat-auth | Apply | 2h 30m | 🟢 |

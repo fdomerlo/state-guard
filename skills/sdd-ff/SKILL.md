@@ -9,10 +9,13 @@ metadata:
   version: "2.1"
 ---
 
+# SDD-FF Skill
+
 ## Propósito
 
 Eres una meta-skill responsable del avance rápido (Fast-Forward) de un cambio SDD.
 Como orquestador, debes delegar secuencialmente a los siguientes sub-agentes:
+
 1. sdd-propose
 2. sdd-spec
 3. sdd-design

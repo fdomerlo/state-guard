@@ -2,7 +2,7 @@
 
 ## Estructura de Directorios
 
-```
+```text
 openspec/
 ├── config.yaml              ← Configuración SDD específica del proyecto
 ├── specs/                   ← Fuente de verdad (specs actuales del sistema)
@@ -44,6 +44,7 @@ openspec/
 
 El orquestador es el **único responsable** de escribir y mantener `state.yaml`.
 Las skills de sub-agentes **nunca** escriben ni leen este archivo directamente, con las ÚNICAS EXCEPCIONES de:
+
 - `sdd-status`: autorización para leerlo masivamente.
 - `sdd-checkpoint`: autorización para escribir el campo `session_summary`.
 - `sdd-fix`: autorización para reparar y migrar el archivo completo.
@@ -83,6 +84,7 @@ session_summary:                     # bloque YAML estructurado — límite tota
 
 **Límite de tokens en `session_summary`:** El bloque completo NO DEBE superar 500 tokens
 (~375 palabras). Si se alcanza el límite, truncar aplicando estas prioridades:
+
 1. `archivos_modificados` → listar solo los últimos 10 archivos.
 2. `decisiones_clave` → listar máximo 2 ítems, truncar cada uno a 100 caracteres.
 3. `estado_tareas` y `proxima_accion` son inamovibles — nunca se truncan.
@@ -127,7 +129,8 @@ session_summary:                     # bloque YAML estructurado — límite tota
 | `lock_phase` | Prescriptivo — única fase ejecutable | Orquestador (a partir de `lock_phase_next` reportado por el sub-agente) | Al completar una fase |
 
 **Error de transición inválida:** Si un orquestador intenta ejecutar una fase distinta a `lock_phase`, DEBE detener la ejecución e informar:
-```
+
+```text
 ERROR: Transición inválida de lock semántico.
   Fase solicitada : {fase_solicitada}
   lock_phase actual: {lock_phase}
@@ -138,7 +141,7 @@ ERROR: Transición inválida de lock semántico.
 
 Cada skill lee sus dependencias desde el filesystem:
 
-```
+```text
 Propuesta:      openspec/changes/{change-name}/proposal.md
 Specs delta:    openspec/changes/{change-name}/specs/  (todos los subdirectorios de dominio)
 Diseño:         openspec/changes/{change-name}/design.md
@@ -220,10 +223,7 @@ Todos los nombres de cambios SDD DEBEN usar formato **kebab-case** (palabras sep
 
 ### Validación
 
-La regla `change_naming: kebab-case` se aplica en la fase `sdd-propose`. El nombre se valida con la regex:
-```
-^[a-z0-9]+(-[a-z0-9]+)*$
-```
+La regla `change_naming: kebab-case` se aplica en la fase `sdd-propose`. El nombre se valida con la regex: `^[a-z0-9]+(-[a-z0-9]+)*$`
 
 Esta regla está configurada en `openspec/config.yaml` y se aplica automáticamente durante la creación de nuevos cambios.
 ```
@@ -232,7 +232,7 @@ Esta regla está configurada en `openspec/config.yaml` y se aplica automáticame
 
 Al archivar, la carpeta del cambio se mueve a:
 
-```
+```text
 openspec/changes/archive/YYYY-MM-DD-{change-name}/
 ```
 

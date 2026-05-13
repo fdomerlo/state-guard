@@ -10,6 +10,8 @@ metadata:
   version: "1.0"
 ---
 
+# SDD-Fix Skill
+
 ## Propósito
 
 Eres un sub-agente responsable de **auditar y reparar el estado del DAG de SDD**. Escaneas todos los `state.yaml` activos, verificás que los artefactos requeridos por cada fase realmente existan en disco, y reparás las discrepancias retrocediendo `current_phase` a la última fase válida comprobable.
@@ -22,9 +24,7 @@ Del orquestador:
 
 ## Execution and Persistence Contract
 
-
 - Lee las convenciones base referenciadas en `skills/_shared/execution-contract.md` antes de proceder.
-
 
 ## Qué Hacer
 
@@ -61,6 +61,7 @@ Si falta algún campo obligatorio (distinto de `lock_phase`), marcá el cambio c
 Si un `state.yaml` fue marcado como `schema_migration_needed` en el Paso 2, inferí el valor
 correcto de `lock_phase` inspeccionando los artefactos presentes en disco:
 
+```text
 | Condición (artefactos en disco) | `lock_phase` inferido |
 |---------------------------------|-----------------------|
 | Solo `proposal.md` existe | `spec` |
@@ -68,12 +69,14 @@ correcto de `lock_phase` inspeccionando los artefactos presentes en disco:
 | `proposal.md` + `specs/` + `design.md` existen, pero NO `tasks.md` | `tasks` |
 | `proposal.md` + `specs/` + `design.md` + `tasks.md` existen, pero NO `verify-report.md` | `apply` |
 | `proposal.md` + `specs/` + `design.md` + `tasks.md` + `verify-report.md` existen | `archive` |
+```
 
 **Fallback conservador:** Si los artefactos no permiten inferencia clara, usar el valor de
 `pending_phases[0]` como fallback y registrar la razón en el reporte.
 
 Tras inferir el valor, escribir `lock_phase: {valor}` en el `state.yaml` reparado y registrar:
-```
+
+```text
 schema_migration: lock_phase inyectado (inferido: {valor})
 # o si se usó fallback:
 schema_migration: lock_phase inyectado (fallback desde pending_phases[0]: {valor})
@@ -83,6 +86,7 @@ schema_migration: lock_phase inyectado (fallback desde pending_phases[0]: {valor
 
 Para cada cambio con schema válido, verificá que los artefactos requeridos por la `current_phase` realmente existan en disco. La lógica de validación es:
 
+```text
 | Fase actual (`current_phase`) | Artefactos requeridos en disco |
 |-------------------------------|-------------------------------|
 | `propose` | (ninguno obligatorio previo) |
@@ -92,6 +96,7 @@ Para cada cambio con schema válido, verificá que los artefactos requeridos por
 | `apply` | `proposal.md`, `specs/`, `design.md`, `tasks.md` |
 | `verify` | `proposal.md`, `specs/`, `design.md`, `tasks.md` |
 | `archive` | `proposal.md`, `specs/`, `design.md`, `tasks.md`, `verify-report.md` |
+```
 
 Para cada artefacto faltante, registrá la discrepancia.
 
@@ -135,6 +140,8 @@ Se auditaron N cambios: X sanos, Y reparados, Z irrecuperables.
 - Cambios con `lock_phase` migrado por fallback deben revisarse manualmente
 
 ### detailed_report
+
+```text 
 | Cambio | Fase Original | Fase Reparada | lock_phase Resultante | Problemas Encontrados |
 |--------|--------------|---------------|----------------------|----------------------|
 | {nombre} | tasks | spec | design | Falta design.md, Falta tasks.md |

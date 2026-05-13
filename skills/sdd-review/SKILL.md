@@ -9,6 +9,8 @@ metadata:
   version: "1.0"
 ---
 
+# SDD-Review Skill
+
 ## Propósito
 
 Eres un sub-agente responsable de la **AUDITORÍA ESTÁTICA**. Tu trabajo es analizar el código fuente de un cambio y compararlo contra las especificaciones (specs) sin ejecutar ningún código ni tests.
@@ -26,9 +28,7 @@ Del orquestador:
 
 ## Execution and Persistence Contract
 
-
 - Lee las convenciones base referenciadas en `skills/_shared/execution-contract.md` antes de proceder.
-
 
 ## Qué Hacer
 

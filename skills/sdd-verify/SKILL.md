@@ -9,6 +9,8 @@ metadata:
   version: "2.0"
 ---
 
+# SDD-Verify Skill
+
 ## Propósito
 
 Eres un sub-agente responsable de la **VERIFICACIÓN**. Eres la puerta de calidad. Tu trabajo es demostrar —con evidencia de ejecución real— que la implementación está completa, es correcta y cumple conductualmente con las specs.
@@ -23,9 +25,7 @@ Del orquestador:
 
 ## Execution and Persistence Contract
 
-
 - Lee las convenciones base referenciadas en `skills/_shared/execution-contract.md` antes de proceder.
-
 
 ## Qué Hacer
 
@@ -193,17 +193,14 @@ Devuelve al orquestador el mismo contenido que escribiste en `verify-report.md`:
 ### Ejecución de Build y Tests
 
 **Build**: ✅ Pasó / ❌ Falló
-```
-
+```text
 {salida del comando de build o error si falló}
-
 ```
 
 **Tests**: ✅ {N} pasaron / ❌ {N} fallaron / ⚠️ {N} omitidos
-```
 
+```text
 {nombres de tests fallidos y errores si los hay}
-
 ```
 
 **Cobertura**: {N}% / umbral: {N}% → ✅ Por encima del umbral / ⚠️ Por debajo del umbral / ➖ No configurado
@@ -212,31 +209,39 @@ Devuelve al orquestador el mismo contenido que escribiste en `verify-report.md`:
 
 ### Matriz de Cumplimiento de Specs
 
+```text
 | Requisito         | Escenario         | Test                              | Resultado       |
 |-------------------|-------------------|-----------------------------------|-----------------|
 | {REQ-01: nombre}  | {Nombre escenario}| `{archivo test} > {nombre test}`  | ✅ CUMPLE        |
 | {REQ-01: nombre}  | {Nombre escenario}| `{archivo test} > {nombre test}`  | ❌ FALLANDO      |
 | {REQ-02: nombre}  | {Nombre escenario}| (ninguno encontrado)              | ❌ SIN TEST      |
 | {REQ-02: nombre}  | {Nombre escenario}| `{archivo test} > {nombre test}`  | ⚠️ PARCIAL      |
+```
 
 **Resumen de cumplimiento**: {N}/{total} escenarios cumplen
 
 ---
 
 ### Corrección (Estático — Evidencia Estructural)
+
+```text
 | Requisito       | Estado              | Notas                    |
 |-----------------|---------------------|--------------------------|
 | {Nombre req}    | ✅ Implementado      | {nota breve}             |
 | {Nombre req}    | ⚠️ Parcial          | {qué falta}              |
 | {Nombre req}    | ❌ Faltante          | {no implementado}        |
+```
 
 ---
 
 ### Coherencia (Diseño)
+
+```text
 | Decisión           | ¿Seguida? | Notas                  |
 |--------------------|-----------|------------------------|
 | {Nombre decisión}  | ✅ Sí     |                        |
 | {Nombre decisión}  | ⚠️ Desviación | {cómo y por qué}   |
+```
 
 ---
 
@@ -254,6 +259,7 @@ Devuelve al orquestador el mismo contenido que escribiste en `verify-report.md`:
 ---
 
 ### Veredicto
+
 {APROBADO / APROBADO CON ADVERTENCIAS / RECHAZADO}
 
 {Resumen en una línea del estado general}
@@ -261,7 +267,8 @@ Devuelve al orquestador el mismo contenido que escribiste en `verify-report.md`:
 ### Lock Phase
 
 lock_phase_next: archive
-```
+
+---
 
 ## Reglas
 

@@ -9,6 +9,8 @@ metadata:
   version: "1.0"
 ---
 
+# SDD-Rollback Skill
+
 ## Propósito
 
 Eres un sub-agente responsable de **revertir completamente un cambio activo** en el DAG de SDD. Este es un skill de emergencia que purga la carpeta del cambio y restaura el entorno git a su estado anterior.
@@ -16,13 +18,12 @@ Eres un sub-agente responsable de **revertir completamente un cambio activo** en
 ## Qué Recibís
 
 El orquestador te dará:
+
 - El nombre del cambio a revertir (opcional, usa el activo por defecto)
 
 ## Execution and Persistence Contract
 
-
 - Lee las convenciones base referenciadas en `skills/_shared/execution-contract.md` antes de proceder.
-
 
 ## Qué Hacer
 
@@ -30,7 +31,7 @@ El orquestador te dará:
 
 Buscá el archivo `state.yaml` con `status: active` en el directorio:
 
-```
+```text
 openspec/changes/*/state.yaml
 ```
 
@@ -44,7 +45,7 @@ Extrae el nombre del cambio desde el campo `change` del `state.yaml` activo.
 
 Mostrá el siguiente mensaje de confirmación:
 
-```
+```text
 ⚠️ ¿Estás seguro de revertir el cambio "{nombre}"?
 Esta acción es destructiva y eliminará:
 - La carpeta openspec/changes/{nombre}/
@@ -59,7 +60,7 @@ Si el usuario no confirma, cancelá la operación y salí sin acción.
 
 Eliminá el directorio:
 
-```
+```text
 openspec/changes/{nombre}/
 ```
 

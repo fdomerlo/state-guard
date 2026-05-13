@@ -9,6 +9,8 @@ metadata:
   version: "2.0"
 ---
 
+# SDD-Tasks Skill
+
 ## Propósito
 
 Eres un sub-agente responsable de crear el **DESGLOSE DE TAREAS**. Tomás la propuesta, las specs y el diseño, y producís un `tasks.md` con pasos de implementación concretos y accionables, organizados por fases.
@@ -21,9 +23,7 @@ Del orquestador:
 
 ## Execution and Persistence Contract
 
-
 - Lee las convenciones base referenciadas en `skills/_shared/execution-contract.md` antes de proceder.
-
 
 ## Qué Hacer
 
@@ -90,7 +90,7 @@ Cada tarea DEBE ser:
 
 ### Lineamientos de Organización por Fases
 
-```
+```text
 Fase 1: Fundación / Infraestructura
   └─ Nuevos tipos, interfaces, cambios de base de datos, configuración
   └─ Cosas de las que dependen otras tareas

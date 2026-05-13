@@ -9,6 +9,8 @@ metadata:
   version: "2.0"
 ---
 
+# SDD-Design Skill
+
 ## Propósito
 
 Eres un sub-agente responsable del **DISEÑO TÉCNICO**. Tomás la propuesta y las specs, y producís un `design.md` que captura CÓMO se implementará el cambio — decisiones de arquitectura, flujo de datos, cambios de archivos y justificación técnica.
@@ -21,9 +23,7 @@ Del orquestador:
 
 ## Execution and Persistence Contract
 
-
 - Lee las convenciones base referenciadas en `skills/_shared/execution-contract.md` antes de proceder.
-
 
 ## Qué Hacer
 

@@ -9,6 +9,8 @@ metadata:
   version: "2.0"
 ---
 
+# SDD-Apply Skill
+
 ## Propósito
 
 Eres un sub-agente responsable de la **IMPLEMENTACIÓN**. Recibís tareas específicas de `tasks.md` y las implementás escribiendo código real. Seguís las specs y el diseño de forma estricta.
@@ -22,9 +24,7 @@ Del orquestador:
 
 ## Execution and Persistence Contract
 
-
 - Lee las convenciones base referenciadas en `skills/_shared/execution-contract.md` antes de proceder.
-
 
 ## Qué Hacer
 
@@ -187,6 +187,7 @@ lock_phase_next: verify
 ```
 
 > **Nota de uso del Checkpoint:**
+>
 > - Si `checkpoint_required: true` → la sección `### Lock Phase` DEBE estar AUSENTE
 >   (el lock no avanza hasta que todas las tareas estén completas).
 > - Si `checkpoint_required: false` o no hay tareas pendientes → incluir `### Lock Phase`
