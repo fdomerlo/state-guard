@@ -60,11 +60,11 @@ Estos límites están definidos en la sección "Reglas" de cada skill y aseguran
 
 El sistema incluye un **registry dinámico de skills** que permite el descubrimiento automático de herramientas:
 
-- Script bash POSIX en `skills/skill-registry/scan.sh`
+- Script bash POSIX en `skills/sdd-skill-registry/scan.sh`
 - Índice generado en `.agentify/skill-registry.md`
 - El orquestador lee este índice al iniciar para conocer las herramientas disponibles
 
-El registry escanea el directorio `skills/` ignorando `sdd-*` y `_shared`, extrayendo nombre, descripción, trigger y ubicación de cada SKILL.md.
+El registry escanea exclusivamente el directorio `skills-addons/`, extrayendo nombre, descripción, trigger y ubicación de cada SKILL.md.
 
 ---
 
@@ -199,6 +199,7 @@ El comando `/sdd-split` analiza una proposal monolítica y la divide en sub-camb
 El comando `/sdd-ff` permite ejecutar secuencialmente y sin interrupción las fases de planificación (`propose`, `spec`, `design`, `tasks`).
 
 **Cuándo usarlo:**
+
 - Al iniciar un cambio nuevo bien definido donde no necesitas revisar manualmente cada artefacto intermedio.
 
 **Anti-Batching y Persistencia:**
@@ -227,9 +228,10 @@ El checkpoint es **agnóstico al DAG**: puede ejecutarse en cualquier momento si
 
 ### /sdd-archive — Cierre de Cambios
 
-El comando `/sdd-archive` cierra un cambio: fusiona las specs delta en las specs principales y mueve el cambio al archivo. 
+El comando `/sdd-archive` cierra un cambio: fusiona las specs delta en las specs principales y mueve el cambio al archivo.
 
 **Flujo Obligatorio:**
+
 1. Ejecutar `/sdd-verify` y asegurar que todo es correcto.
 2. Realizar un `git commit` de todos los cambios de código y especificaciones.
 3. Ejecutar `/sdd-archive`.
@@ -377,23 +379,30 @@ La instalación varía según la herramienta. Ejecuta `scripts/install.sh` y sel
 El framework SDD es extensible mediante "Custom Skills", permitiendo integrar sub-agentes especializados que no son partes nativas del orquestador SDD (por ejemplo, herramientas de desarrollo frontend, diseño o base de datos).
 
 ### 1. Ubicación Física
-Toda nueva skill debe residir en su propio directorio dentro de la carpeta `skills/`.
-**Regla:** Asegúrate de nombrar la carpeta de forma representativa (por ejemplo, `skills/frontend-design/`) y evita usar el prefijo `sdd-` o colisionar con la carpeta interna compartida `_shared/`.
+
+Toda nueva skill personalizada o de terceros debe residir en su propio directorio dentro de la carpeta `skills-addons/`.
+**Regla:** Asegúrate de nombrar la carpeta de forma representativa (por ejemplo, `skills-addons/frontend-design/`).
 
 ### 2. Archivo de Contrato (`SKILL.md`)
+
 Toda skill **DEBE** contener un archivo `SKILL.md` en su raíz. Este archivo actúa como el contrato de integración, las instrucciones directas (System Prompt) generadas para la herramienta y los metadatos necesarios. Sin este archivo, el skill no existirá.
 
 ### 3. Indexación (`skill-registry`)
+
 Una vez añadida la skill, el desarrollador (o el sistema) debe registrarla para que pueda ser descubierta. Para esto, ejecuta la skill interna de indexación o corre su script directamente:
+
 ```bash
-./skills/skill-registry/scan.sh
+./skills/sdd-skill-registry/scan.sh
 ```
+
 Esto escaneará las carpetas y actualizará el archivo de repositorio local en `.agentify/skill-registry.md`.
 
 ### 4. Uso por el Orquestador
+
 El orquestador SDD lee `.agentify/skill-registry.md` al inicializar contexto y mapea cada entrada como una herramienta delegable válida. Al analizar la necesidad de un usuario, se basará en atributos declarados como `name` y `description` para delegar proactivamente el trabajo de sub-agentes no nativos.
 
 ### Ejemplo Boilerplate (`frontend-design/SKILL.md`)
+
 ```markdown
 ---
 name: frontend-design
