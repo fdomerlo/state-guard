@@ -11,6 +11,9 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_DIR="$(dirname "$SCRIPT_DIR")"
 SKILLS_SRC="$REPO_DIR/skills"
 
+# Ensure global custom skills directory exists
+mkdir -p "$HOME/.skills-custom"
+
 # ============================================================================
 # OS Detection
 # ============================================================================

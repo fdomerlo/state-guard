@@ -27,6 +27,9 @@ $ScriptDir = Split-Path -Parent $MyInvocation.MyCommand.Path
 $RepoDir = Split-Path -Parent $ScriptDir
 $SkillsSrc = Join-Path $RepoDir "skills"
 
+# Ensure global custom skills directory exists
+New-Item -ItemType Directory -Force -Path "$env:USERPROFILE\.skills-custom" -ErrorAction SilentlyContinue | Out-Null
+
 # ============================================================================
 # OS Detection
 # ============================================================================

@@ -1,9 +1,10 @@
 #!/bin/sh
 # Skill Registry — Escáner POSIX
-# Escanea ./skills-addons/ e identifica skills de terceros para indexar.
-# Uso: sh skills/sdd-skill-registry/scan.sh [directorio-skills]
+# Escanea $HOME/.skills-custom y ./skills-custom e identifica skills personalizadas para indexar.
+# Uso: sh skills/sdd-skill-registry/scan.sh
 
-SKILLS_DIR="${1:-./skills-addons}"
+GLOBAL_DIR="$HOME/.skills-custom"
+LOCAL_DIR="./skills-custom"
 OUTPUT="./.agentify/skill-registry.md"
 
 # Crear directorio de salida si no existe
@@ -21,11 +22,16 @@ HEADER
 
 found=0
 
-for dir in "$SKILLS_DIR"/*/; do
-  # Verificar que el directorio existe
-  [ -d "$dir" ] || continue
+for SKILLS_DIR in "$GLOBAL_DIR" "$LOCAL_DIR"; do
+  # Verificar que el directorio base existe
+  [ -d "$SKILLS_DIR" ] || continue
 
-  name=$(basename "$dir")
+  # Iterar sobre cada subdirectorio de skills
+  for dir in "$SKILLS_DIR"/*/; do
+    # Verificar que el directorio de la skill existe (por si está vacío)
+    [ -d "$dir" ] || continue
+
+    name=$(basename "$dir")
 
   # Ignorar directorios sdd-* y _*
   case "$name" in
@@ -87,6 +93,7 @@ for dir in "$SKILLS_DIR"/*/; do
   # Escribir entrada al índice
   echo "| **$name** | $desc | $trigger | \`$clean_path\` |" >> "$OUTPUT"
   found=1
+  done
 done
 
 # Si no se encontraron skills, indicar vacío

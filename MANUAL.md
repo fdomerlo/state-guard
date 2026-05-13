@@ -64,7 +64,7 @@ El sistema incluye un **registry dinámico de skills** que permite el descubrimi
 - Índice generado en `.agentify/skill-registry.md`
 - El orquestador lee este índice al iniciar para conocer las herramientas disponibles
 
-El registry escanea exclusivamente el directorio `skills-addons/`, extrayendo nombre, descripción, trigger y ubicación de cada SKILL.md.
+El registry escanea los directorios global (`$HOME/.skills-custom`) y local (`./skills-custom`), extrayendo nombre, descripción, trigger y ubicación de cada SKILL.md.
 
 ---
 
@@ -380,8 +380,11 @@ El framework SDD es extensible mediante "Custom Skills", permitiendo integrar su
 
 ### 1. Ubicación Física
 
-Toda nueva skill personalizada o de terceros debe residir en su propio directorio dentro de la carpeta `skills-addons/`.
-**Regla:** Asegúrate de nombrar la carpeta de forma representativa (por ejemplo, `skills-addons/frontend-design/`).
+Toda nueva skill personalizada o de terceros debe residir en su propio directorio siguiendo la convención de alcance dual:
+- **Global:** `$HOME/.skills-custom/` para herramientas transversales a todos los proyectos.
+- **Local:** `./skills-custom/` para herramientas específicas del proyecto en curso.
+
+**Regla:** Asegúrate de nombrar la carpeta de forma representativa (por ejemplo, `./skills-custom/frontend-design/`).
 
 ### 2. Archivo de Contrato (`SKILL.md`)
 
@@ -389,13 +392,13 @@ Toda skill **DEBE** contener un archivo `SKILL.md` en su raíz. Este archivo act
 
 ### 3. Indexación (`skill-registry`)
 
-Una vez añadida la skill, el desarrollador (o el sistema) debe registrarla para que pueda ser descubierta. Para esto, ejecuta la skill interna de indexación o corre su script directamente:
+Una vez añadida la skill, el desarrollador (o el sistema) debe registrarla para que pueda ser descubierta. Para esto, ejecuta el meta-comando del orquestador o corre el script directamente:
 
-```bash
-./skills/sdd-skill-registry/scan.sh
+```text
+/sdd-skill-registry
 ```
 
-Esto escaneará las carpetas y actualizará el archivo de repositorio local en `.agentify/skill-registry.md`.
+Esto escaneará las rutas global y local, y actualizará el archivo de repositorio local en `.agentify/skill-registry.md`.
 
 ### 4. Uso por el Orquestador
 

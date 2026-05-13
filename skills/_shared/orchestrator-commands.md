@@ -28,7 +28,7 @@ Los siguientes comandos ejecutan **skills individuales** que puedes invocar dire
 - `/sdd-status` → ejecuta `sdd-status` (muestra el estado de todos los cambios activos).
 - `/sdd-checkpoint` → ejecuta `sdd-checkpoint` (guarda resumen de sesión en state.yaml).
 - `/sdd-rollback` → ejecuta `sdd-rollback` (revierte cambio activo y restaura entorno).
-- `/sdd-skill-registry` → ejecuta `sdd-skill-registry` (escanea `skills-addons/` y actualiza el índice de herramientas de terceros en `.agentify/skill-registry.md`).
+- `/sdd-skill-registry` → ejecuta `sdd-skill-registry` (escanea las rutas globales y locales y actualiza el índice de herramientas personalizadas en `.agentify/skill-registry.md`).
 
 ## Grafo de Dependencias
 
