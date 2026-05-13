@@ -48,7 +48,7 @@ EXPECTED_SKILLS=(
     sdd-status
     sdd-tasks
     sdd-verify
-    skill-registry
+    sdd-skill-registry
 )
 
 # ============================================================================
