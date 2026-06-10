@@ -2,7 +2,7 @@
 set -euo pipefail
 
 # ============================================================================
-# Agentify: SDD Orchestrator — Install Script Tests
+# Agentify: SDD Memory Guard — Install Script Tests
 # Run: bash scripts/install_test.sh
 # ============================================================================
 
@@ -330,7 +330,7 @@ test_all_global() {
 
 test_all_global_total_skill_count() {
     bash "$INSTALL_SCRIPT" --agent all-global > /dev/null 2>&1
-    # 4 targets × 20 skills = 68 SKILL.md files
+    # 4 targets × 20 skills = 80 SKILL.md files
     local total=0
     for dir in \
         "$HOME/.claude/skills" \
@@ -520,7 +520,7 @@ test_nested_custom_path() {
 
 echo ""
 echo -e "${CYAN}${BOLD}╔══════════════════════════════════════════╗${NC}"
-echo -e "${CYAN}${BOLD}║    Agentify: SDD Orchestrator — Install Script Tests        ║${NC}"
+echo -e "${CYAN}${BOLD}║    Agentify: SDD Memory Guard — Install Script Tests        ║${NC}"
 echo -e "${CYAN}${BOLD}╚══════════════════════════════════════════╝${NC}"
 echo ""
 

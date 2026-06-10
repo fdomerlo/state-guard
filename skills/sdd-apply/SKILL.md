@@ -5,7 +5,7 @@ description: >
   Disparador: Cuando el usuario ejecuta /sdd-apply para implementar tareas.
 license: MIT
 metadata:
-  author: ctrbts-steve
+  author: fdomerlo-steve
   version: "3.0"
 ---
 

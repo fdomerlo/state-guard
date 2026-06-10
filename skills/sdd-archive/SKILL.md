@@ -5,7 +5,7 @@ description: >
   Disparador: Cuando el usuario ejecuta /sdd-archive para archivar un cambio después de la implementación y verificación.
 license: MIT
 metadata:
-  author: ctrbts-steve
+  author: fdomerlo-steve
   version: "3.0"
 ---
 

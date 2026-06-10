@@ -7,7 +7,7 @@ description: >
   Disparador: Cuando el usuario ejecuta /sdd-fix, o el Memory Guard detecta un estado inválido.
 license: MIT
 metadata:
-  author: ctrbts-steve
+  author: fdomerlo-steve
   version: "2.0"
 ---
 
@@ -85,13 +85,13 @@ Para cada cambio con schema válido, verificar que los artefactos requeridos exi
 
 | Fase actual (`current_phase`) | Artefactos requeridos en disco |
 |-------------------------------|-------------------------------|
-| `propose` | (ninguno obligatorio previo) |
-| `spec` | `proposal.md` |
-| `design` | `proposal.md` |
-| `tasks` | `proposal.md`, `specs/` (≥1 archivo), `design.md` |
-| `apply` | `proposal.md`, `specs/`, `design.md`, `tasks.md` |
-| `verify` | `proposal.md`, `specs/`, `design.md`, `tasks.md` |
-| `archive` | `proposal.md`, `specs/`, `design.md`, `tasks.md`, `verify-report.md` |
+| `propose` | `proposal.md` |
+| `spec` | `proposal.md`, `specs/` (≥1 archivo) |
+| `design` | `proposal.md`, `specs/` (≥1 archivo), `design.md` |
+| `tasks` | `proposal.md`, `specs/` (≥1 archivo), `design.md`, `tasks.md` |
+| `apply` | `proposal.md`, `specs/` (≥1 archivo), `design.md`, `tasks.md` |
+| `verify` | `proposal.md`, `specs/` (≥1 archivo), `design.md`, `tasks.md`, `verify-report.md` |
+| `archive` | `proposal.md`, `specs/` (≥1 archivo), `design.md`, `tasks.md`, `verify-report.md` |
 
 ### Paso 5: Reparar Discrepancias
 

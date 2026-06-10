@@ -41,6 +41,7 @@ Los contratos compartidos residen en `skills/_shared/`:
 | `persistence-contract.md` | Contrato de persistencia: inline vs delegada, protocolo de comunicación |
 | `openspec-convention.md` | Convención de filesystem, schema state.yaml v2, tabla de transiciones de lock_phase |
 | `sdd-phase-common.md` | Protocolo de transacción común a todas las skills de fase |
+| `test-runner-detection.md` | Pseudocódigo para la detección automática del test runner del proyecto |
 
 ### Ejecución Inline vs Delegada
 
@@ -192,6 +193,12 @@ rules:
     - Usar rutas en kebab-case para nombres de cambios
     - Los nombres de archivos de skills también usan kebab-case
 ```
+
+### Scripts de Mantenimiento y Desarrollo
+
+El directorio `scripts/` incluye herramientas adicionales de soporte:
+- `cleanup.sh`: Desinstala stubs y limpia los datos temporales del framework en los diferentes agentes de IA. Soporta el flag `--hard` para purgar históricos.
+- `install_test.sh`: Suite de tests unitarios y de integración para validar el correcto funcionamiento del script de instalación en diferentes entornos.
 
 ### Parámetro test_command
 

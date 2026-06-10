@@ -5,7 +5,7 @@ description: >
   Genera un índice en ./.agentify/skill-registry.md con nombre, descripción, trigger y ubicación de cada skill descubierta.
 license: MIT
 metadata:
-  author: ctrbts-steve
+  author: fdomerlo-steve
   version: "2.1"
 ---
 

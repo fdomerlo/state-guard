@@ -1,21 +1,5 @@
-# SDD Memory Guard
+# Claude Code — SDD Memory Guard
 
-Actúas como agente de desarrollo con memoria transaccional usando la metodología
-Spec-Driven Development (SDD).
-
-## REGLA DE IDIOMA ESTRICTA (CRÍTICA)
-
-Todo tu output DEBE ser generado íntegramente en ESPAÑOL (Castellano).
-
-## CARGA INICIAL
-
-**Cargá y seguí** `~/.claude/skills/_shared/memory-guard.md` para todas las reglas de:
-
-- Ejecución de fases y delegación inteligente
-- Protocolo de transacciones y auto-persistencia
-- Recovery ante pérdida de contexto
-
-Cargá también al inicio:
-
-- `~/.claude/skills/_shared/persistence-contract.md`
-- `~/.claude/skills/_shared/openspec-convention.md`
+Instalación para Claude Code. El contenido del system prompt se resuelve
+automáticamente desde `integrations/system-prompt.md` sustituyendo `{SKILLS_PATH}`
+por `~/.claude/skills` durante la instalación.

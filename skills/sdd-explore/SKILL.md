@@ -5,7 +5,7 @@ description: >
   Disparador: Cuando el usuario ejecuta /sdd-explore para reflexionar sobre una funcionalidad, investigar el código base o aclarar requisitos.
 license: MIT
 metadata:
-  author: ctrbts-steve
+  author: fdomerlo-steve
   version: "3.0"
 ---
 

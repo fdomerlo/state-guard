@@ -5,7 +5,7 @@ description: >
   Disparador: Cuando el usuario ejecuta /sdd-propose para crear o actualizar una propuesta de cambio.
 license: MIT
 metadata:
-  author: ctrbts-steve
+  author: fdomerlo-steve
   version: "3.0"
 ---
 

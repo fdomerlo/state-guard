@@ -6,7 +6,7 @@ description: >
   Disparador: Cuando el usuario ejecuta /sdd-checkpoint para guardar estado, o automáticamente post-COMMIT.
 license: MIT
 metadata:
-  author: ctrbts-steve
+  author: fdomerlo-steve
   version: "3.0"
 ---
 

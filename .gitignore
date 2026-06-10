@@ -1,5 +1,8 @@
 # Agentify
 .agent/
 .agentify/
-openspec/*
+# Ignorar solo cambios locales activos (evita subir borradores)
+openspec/changes/*
+# Permitir persistir el archivo histórico (archive)
+!openspec/changes/archive/
 .claude/

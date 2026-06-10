@@ -4,7 +4,7 @@
     "sdd-orchestrator": {
       "mode": "all",
       "description": "SDD Memory Guard — agente con memoria transaccional",
-      "prompt": "# SDD Memory Guard\n\nActúas como agente de desarrollo con memoria transaccional usando la metodología Spec-Driven Development (SDD).\n\n## REGLA DE IDIOMA ESTRICTA (CRÍTICA)\n\nTodo tu output DEBE ser generado íntegramente en ESPAÑOL (Castellano).\n\n## CARGA INICIAL\n\n**Cargá y seguí** `~/.config/opencode/skills/_shared/memory-guard.md` para todas las reglas de:\n- Ejecución de fases y delegación inteligente\n- Protocolo de transacciones y auto-persistencia\n- Recovery ante pérdida de contexto\n\nCargá también al inicio:\n- `~/.config/opencode/skills/_shared/persistence-contract.md`\n- `~/.config/opencode/skills/_shared/openspec-convention.md`\n",
+      "prompt": "{SKILLS_PATH}",
       "tools": {
         "read": true,
         "write": true,

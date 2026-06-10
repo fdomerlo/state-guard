@@ -119,7 +119,7 @@ graph TB
         D --> T[Tasks]
         T --> A[Apply]
         A --> V[Verify]
-        V --> R[Archive]
+        V --> ARC[Archive]
     end
 
     subgraph "Almacenamiento"
@@ -130,7 +130,7 @@ graph TB
     MG --> CAP
     MG -.-> E
     TXN -.-> O
-    E & P & S & D & A & V -.-> O
+    E & P & S & D & T & A & V & ARC -.-> O
 ```
 
 El **Memory Guard** es el contrato central que el agente carga al iniciar. Define cómo ejecutar fases (inline por defecto, delegadas solo cuando es necesario), cómo persistir estado (transacciones atómicas con BEGIN/COMMIT/ROLLBACK), y cómo recuperarse de pérdida de contexto.

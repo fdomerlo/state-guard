@@ -5,7 +5,7 @@ description: >
   Disparador: Cuando el usuario quiere inicializar SDD en un proyecto, o dice "sdd init", "iniciar sdd", "openspec init".
 license: MIT
 metadata:
-  author: ctrbts-steve
+  author: fdomerlo-steve
   version: "2.0"
 ---
 

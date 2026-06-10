@@ -5,7 +5,7 @@ description: >
   restaurar el entorno git al estado anterior. Disparador: Cuando el usuario ejecuta /sdd-rollback para revertir un cambio.
 license: MIT
 metadata:
-  author: ctrbts-steve
+  author: fdomerlo-steve
   version: "2.0"
 ---
 

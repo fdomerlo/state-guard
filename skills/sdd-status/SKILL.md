@@ -5,7 +5,7 @@ description: >
   Disparador: Cuando el orquestador te lanza para mostrar el estado de cambios activos, o el usuario ejecuta /sdd-status.
 license: MIT
 metadata:
-  author: ctrbts-steve
+  author: fdomerlo-steve
   version: "2.0"
 ---
 

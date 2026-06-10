@@ -2,7 +2,7 @@
 set -euo pipefail
 
 # ============================================================================
-# Agentify: SDD Orchestrator— Install Script
+# Agentify: SDD Memory Guard — Install Script
 # Copies skills to your AI coding assistant's skill directory
 # Cross-platform: macOS, Linux, Windows (Git Bash / WSL)
 # ============================================================================
@@ -120,10 +120,10 @@ make_writable() {
 
 print_header() {
     echo ""
-    echo -e "${CYAN}${BOLD}╔══════════════════════════════════════════╗${NC}"
-    echo -e "${CYAN}${BOLD}║     Agentify: SDD Memory Guard — Installer    ║${NC}"
-    echo -e "${CYAN}${BOLD}║   Spec-Driven Development for AI Agents  ║${NC}"
-    echo -e "${CYAN}${BOLD}╚══════════════════════════════════════════╝${NC}"
+    echo -e "${CYAN}${BOLD}╔═════════════════════════════════════════════════╗${NC}"
+    echo -e "${CYAN}${BOLD}║     Agentify: SDD Memory Guard — Installer      ║${NC}"
+    echo -e "${CYAN}${BOLD}║   Spec-Driven Development for AI Agents 00000   ║${NC}"
+    echo -e "${CYAN}${BOLD}╚═════════════════════════════════════════════════╝${NC}"
     echo ""
     echo -e "  ${BOLD}Detected:${NC} $(os_label)"
     echo ""
@@ -140,14 +140,6 @@ print_warn() {
 print_error() {
     echo -e "  ${RED}✗${NC} $1"
 }
-
-print_next_step() {
-    local config_file="$1"
-    local example_file="$2"
-    echo -e "\n${YELLOW}Next step:${NC} Add the orchestrator to your ${BOLD}$config_file${NC}"
-    echo -e "  See: ${CYAN}$example_file${NC}"
-}
-
 
 show_help() {
     echo "Usage: install.sh [OPTIONS]"
@@ -166,7 +158,8 @@ show_help() {
 
 compile_and_append_config() {
     local target_file="$1"
-    local header_file="$2"
+    local skills_path="$2"
+    local system_prompt="$REPO_DIR/integrations/system-prompt.md"
     local marker_begin="<!-- BEGIN SDD MEMORY GUARD -->"
     local marker_end="<!-- END SDD MEMORY GUARD -->"
 
@@ -179,13 +172,11 @@ compile_and_append_config() {
         print_skill "Bloque anterior del Memory Guard purgado en $(basename "$target_file")"
     fi
 
-    # Ensamblar y compilar el nuevo bloque
+    # Ensamblar y compilar el nuevo bloque desde system-prompt.md
     echo "" >> "$target_file"
     echo "$marker_begin" >> "$target_file"
-    
-    # 1. Agregar el header específico (ej. CLAUDE.md original)
-    if [ -f "$header_file" ]; then
-        cat "$header_file" >> "$target_file"
+    if [ -f "$system_prompt" ]; then
+        sed "s|{SKILLS_PATH}|$skills_path|g" "$system_prompt" >> "$target_file"
     fi
     echo "$marker_end" >> "$target_file"
     
@@ -201,16 +192,24 @@ merge_opencode_config() {
     fi
     local target_config="$config_dir/opencode.json"
     local source_config="$REPO_DIR/integrations/opencode/opencode.json"
+    local system_prompt="$REPO_DIR/integrations/system-prompt.md"
+    local skills_path
+    skills_path="$(get_tool_path opencode)"
 
     mkdir -p "$config_dir"
 
-    # Usamos Python para hacer un merge seguro del JSON y compilar el prompt
+    # Usamos Python para leer system-prompt.md, compilar y mergear
     if command -v python3 >/dev/null 2>&1; then
         python3 -c '
 import json, sys, os
-target_path, source_path = sys.argv[1:3]
+target_path, source_path, prompt_path, skills_path = sys.argv[1:5]
 
-# Leer el source JSON (header)
+# Leer y compilar el system prompt
+with open(prompt_path, "r", encoding="utf-8") as f:
+    prompt = f.read()
+prompt = prompt.replace("{SKILLS_PATH}", skills_path)
+
+# Leer el source JSON (config template)
 try:
     with open(source_path, "r", encoding="utf-8") as f: source = json.load(f)
 except Exception:
@@ -227,10 +226,11 @@ else:
     
 if "agent" not in target: target["agent"] = {}
 target["agent"]["sdd-orchestrator"] = source["agent"]["sdd-orchestrator"]
+target["agent"]["sdd-orchestrator"]["prompt"] = prompt
 
 with open(target_path, "w", encoding="utf-8") as f: json.dump(target, f, indent=2, ensure_ascii=False)
 sys.exit(0)
-' "$target_config" "$source_config"
+' "$target_config" "$source_config" "$system_prompt" "$skills_path"
         
         if [ $? -eq 0 ]; then
             print_skill "sdd-orchestrator compilado e inyectado en opencode.json"
@@ -265,7 +265,7 @@ validate_source() {
     fi
     if [ "$missing" -gt 0 ]; then
         echo -e "\n${RED}${BOLD}Source validation failed.${NC} Is this a complete clone of the repository?"
-        echo -e "  Try: ${CYAN}git clone https://github.com/ctrbts/agentify-sdd.git${NC}\n"
+        echo -e "  Try: ${CYAN}git clone https://github.com/TU_USUARIO/agentify-sdd.git${NC}\n"
         exit 1
     fi
 }
@@ -378,7 +378,7 @@ install_for_agent() {
         claude-code)
             install_skills "$(get_tool_path claude-code)" "Claude Code"
             local config_target="${USERPROFILE:-$HOME}/.claude/CLAUDE.md"
-            compile_and_append_config "$config_target" "$REPO_DIR/integrations/claude-code/CLAUDE.md"
+            compile_and_append_config "$config_target" "$(get_tool_path claude-code)"
             ;;
         opencode)
             install_skills "$(get_tool_path opencode)" "OpenCode"
@@ -388,14 +388,14 @@ install_for_agent() {
         gemini-cli)
             install_skills "$(get_tool_path gemini-cli)" "Gemini CLI"
             local config_target="${USERPROFILE:-$HOME}/.gemini/GEMINI.md"
-            compile_and_append_config "$config_target" "$REPO_DIR/integrations/gemini-cli/GEMINI.md"
+            compile_and_append_config "$config_target" "$(get_tool_path gemini-cli)"
             ;;
         antigravity)
             local target="$(get_tool_path antigravity)"
             install_skills "$target" "Antigravity"
             local config_target="${USERPROFILE:-$HOME}/.gemini/GEMINI.md"
             rm -rf "./.agent/rules" 2>/dev/null || true
-            compile_and_append_config "$config_target" "$REPO_DIR/integrations/antigravity/sdd-orchestrator.md"
+            compile_and_append_config "$config_target" "$(get_tool_path antigravity)"
             ;;
         project-local)
             install_skills "$(get_tool_path project-local)" "Project-local"
@@ -403,20 +403,20 @@ install_for_agent() {
             ;;
         all-global)
             install_skills "$(get_tool_path claude-code)" "Claude Code"
-            compile_and_append_config "${USERPROFILE:-$HOME}/.claude/CLAUDE.md" "$REPO_DIR/integrations/claude-code/CLAUDE.md"
+            compile_and_append_config "${USERPROFILE:-$HOME}/.claude/CLAUDE.md" "$(get_tool_path claude-code)"
             
             install_skills "$(get_tool_path opencode)" "OpenCode"
             install_opencode_commands "$(get_tool_path opencode)"
             merge_opencode_config
             
             install_skills "$(get_tool_path gemini-cli)" "Gemini CLI"
-            compile_and_append_config "${USERPROFILE:-$HOME}/.gemini/GEMINI.md" "$REPO_DIR/integrations/gemini-cli/GEMINI.md"
+            compile_and_append_config "${USERPROFILE:-$HOME}/.gemini/GEMINI.md" "$(get_tool_path gemini-cli)"
             
             local ag_target
             ag_target="$(get_tool_path antigravity)"
             install_skills "$ag_target" "Antigravity"
             rm -rf "./.agent/rules" 2>/dev/null || true
-            compile_and_append_config "${USERPROFILE:-$HOME}/.gemini/GEMINI.md" "$REPO_DIR/integrations/antigravity/sdd-orchestrator.md"
+            compile_and_append_config "${USERPROFILE:-$HOME}/.gemini/GEMINI.md" "$(get_tool_path antigravity)"
             
             echo -e "\n${GREEN}${BOLD}¡Todos los orquestadores globales configurados automáticamente!${NC}"
             ;;
