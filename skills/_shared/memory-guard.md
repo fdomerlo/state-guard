@@ -63,6 +63,11 @@ Cuando delegás a sub-agente:
 
 Antes de delegar, preguntate: "¿Puedo ejecutar esto inline sin exceder mi ventana de contexto?" Si la respuesta es SÍ → ejecutá inline. Solo delegá cuando hay una razón concreta de peso (demasiadas tareas, fase destructiva que necesita aislamiento).
 
+## Limpieza de Contexto Post-Commit (Sesiones Interactivas)
+
+- **Regla de Mitigación de Saturación:** Inmediatamente después de cada `COMMIT` transaccional exitoso de una fase, DEBÉS emitir una advertencia explícita o instrucción al usuario indicando que limpie o reinicie la ventana del chat interactivo (o invocar una purga nativa de contexto si la API del Harness host lo soporta).
+- **Propósito:** Esto previene la fuga conversacional (*context leakage*) y la acumulación de instrucciones obsoletas de fases previas dentro de la ventana de atención de la nueva transacción activa, eliminando alucinaciones cruzadas.
+
 ## Recovery Protocol
 
 1. Leé `openspec/changes/*/state.yaml`.
