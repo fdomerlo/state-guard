@@ -40,29 +40,31 @@ openspec/
 | sdd-archive | Mueve | `openspec/changes/{change-name}/` → `openspec/changes/archive/YYYY-MM-DD-{change-name}/` |
 | sdd-archive | Actualiza | `openspec/specs/{dominio}/spec.md` (fusiona deltas en specs principales) |
 
-## Schema de state.yaml
+## Schema de state.yaml (v2)
 
-El orquestador es el **único responsable** de escribir y mantener `state.yaml`.
-Las skills de sub-agentes **nunca** escriben ni leen este archivo directamente, con las ÚNICAS EXCEPCIONES de:
+El **Memory Guard** es el único responsable de escribir y mantener `state.yaml` a través del protocolo de transacciones (ver `transaction-protocol.md`).
+
+Las skills tienen estas autorizaciones de acceso:
 
 - `sdd-status`: autorización para leerlo masivamente.
 - `sdd-checkpoint`: autorización para escribir el campo `session_summary`.
 - `sdd-fix`: autorización para reparar y migrar el archivo completo.
 
-El campo `lock_phase` es responsabilidad exclusiva del orquestador — ningún sub-agente lo escribe directamente.
+Los campos `lock_phase`, `current_phase`, `completed_phases` y `pending_phases` se actualizan exclusivamente mediante COMMIT transaccional.
 
 ```yaml
-# openspec/changes/{change-name}/state.yaml
+# openspec/changes/{change-name}/state.yaml (v2)
 
+schema_version: 2                    # versión del schema (para migración automática)
 change: {nombre-del-cambio}
 started_at: "YYYY-MM-DDTHH:MM:SS"   # ISO 8601 — se establece al crear, nunca se modifica
-last_updated: "YYYY-MM-DDTHH:MM:SS" # actualizar en cada transición de fase
+last_updated: "YYYY-MM-DDTHH:MM:SS" # actualizar en cada COMMIT de transacción
 current_phase: {fase-actual}         # descriptivo: última fase completada exitosamente
 lock_phase: {fase-siguiente}         # prescriptivo: la ÚNICA fase autorizada a ejecutarse ahora
-                                     # Valores válidos: spec | design | tasks | apply | verify | archive
+                                     # Valores válidos: propose | spec | design | tasks | apply | verify | archive
                                      # Inicialización: primera fase de pending_phases al crear el cambio
 status: active                       # active | done | blocked (default: active)
-completed_phases:                    # lista ordenada, solo fases con status: ok
+completed_phases:                    # lista ordenada, solo fases completadas exitosamente
   - explore    # incluir solo si sdd-explore fue ejecutado
   - propose
   # agregar fases a medida que se completan
@@ -73,11 +75,17 @@ pending_phases:                      # fases que aún no se ejecutaron
   - archive
 blocked: false                       # true si status es blocked y verify reporta CRITICAL sin resolver
 blocked_reason: null                 # descripción del bloqueo, o null si blocked: false
+
+# --- Campos transaccionales (v2) ---
+txn_status: idle                     # idle | in_progress | failed
+txn_phase: null                      # fase en ejecución, o null si txn_status == idle
+txn_started_at: null                 # ISO 8601 de inicio de transacción, o null
+
 session_summary:                     # bloque YAML estructurado — límite total: 500 tokens
   archivos_modificados:              # rutas exactas modificadas en el lote actual (máx 10 entradas)
     - ruta/al/archivo.ext
   estado_tareas: "{X}/{Y} — última: [{ID}] {descripción breve}"  # formato estricto
-  decisiones_clave:                  # máxixmo 2 decisiones técnicas para continuar
+  decisiones_clave:                  # máximo 2 decisiones técnicas para continuar
     - "{decisión 1 (máx 100 chars)}"
   proxima_accion: "/sdd-{comando} {nombre-cambio}"  # comando completo ejecutable
 ```
@@ -105,30 +113,31 @@ session_summary:                     # bloque YAML estructurado — límite tota
 
 - `spec` y `design` deben aparecer en orden secuencial estricto en `completed_phases` (no se ejecutan en paralelo).
 - `current_phase` refleja la última fase completada (descriptivo/histórico).
-- `lock_phase` indica la única fase que puede ejecutarse en este momento (prescriptivo/restrictivo). Los orquestadores (`sdd-ff`, `sdd-continue`) DEBEN verificar `lock_phase` antes de delegar a cualquier sub-agente.
+- `lock_phase` indica la única fase que puede ejecutarse en este momento (prescriptivo/restrictivo). Se actualiza exclusivamente durante el COMMIT de una transacción.
 - Un cambio recién creado (solo `propose` completo) tiene `current_phase: propose` y `lock_phase: spec`.
 - `sdd-new` DEBE inicializar `lock_phase` con el valor de la primera fase en `pending_phases`.
 - Al archivar exitosamente, el archivo se mueve — no hace falta actualizar `state.yaml`.
 
 **Tabla de transiciones de `lock_phase` (DAG estricto):**
 
-| `current_phase` completada | `lock_phase` resultante |
-|---------------------------|-------------------------|
-| `propose`                  | `spec`                  |
-| `spec`                     | `design`                |
-| `design`                   | `tasks`                 |
-| `tasks`                    | `apply`                 |
-| `apply`                    | `verify`                |
-| `verify`                   | `archive`               |
+| Fase completada | `lock_phase` resultante |
+|-----------------|-------------------------|
+| `explore`        | `propose`               |
+| `propose`        | `spec`                  |
+| `spec`           | `design`                |
+| `design`         | `tasks`                 |
+| `tasks`          | `apply`                 |
+| `apply`          | `verify`                |
+| `verify`         | `archive`               |
 
 **Semántica `lock_phase` vs `current_phase`:**
 
-| Campo | Rol | Quién lo escribe | Cuándo cambia |
-|-------|-----|-----------------|---------------|
-| `current_phase` | Descriptivo — última fase completada | Orquestador | Al completar una fase |
-| `lock_phase` | Prescriptivo — única fase ejecutable | Orquestador (a partir de `lock_phase_next` reportado por el sub-agente) | Al completar una fase |
+| Campo | Rol | Cuándo cambia |
+|-------|-----|---------------|
+| `current_phase` | Descriptivo — última fase completada | Al ejecutar COMMIT de transacción |
+| `lock_phase` | Prescriptivo — única fase ejecutable | Al ejecutar COMMIT de transacción (según tabla de transiciones) |
 
-**Error de transición inválida:** Si un orquestador intenta ejecutar una fase distinta a `lock_phase`, DEBE detener la ejecución e informar:
+**Error de transición inválida:** Si se intenta ejecutar una fase distinta a `lock_phase`, DEBE detenerse la ejecución e informar:
 
 ```text
 ERROR: Transición inválida de lock semántico.
@@ -136,6 +145,8 @@ ERROR: Transición inválida de lock semántico.
   lock_phase actual: {lock_phase}
   Ejecuta /sdd-fix para auditar y reparar el estado antes de continuar.
 ```
+
+**Migración v1 → v2:** Los `state.yaml` sin campo `schema_version` se consideran v1 y se migran automáticamente (ver `transaction-protocol.md`).
 
 ## Lectura de Artefactos
 

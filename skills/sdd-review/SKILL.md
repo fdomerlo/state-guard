@@ -26,9 +26,9 @@ Del orquestador:
 
 - Nombre del cambio
 
-## Execution and Persistence Contract
+## Referencia
 
-- Lee las convenciones base referenciadas en `skills/_shared/execution-contract.md` antes de proceder.
+Consultar `skills/_shared/openspec-convention.md` para el schema de `state.yaml` (v2).
 
 ## Qué Hacer
 

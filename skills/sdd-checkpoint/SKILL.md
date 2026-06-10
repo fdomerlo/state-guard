@@ -3,163 +3,80 @@ name: sdd-checkpoint
 description: >
   Genera un resumen de alta fidelidad del estado del cambio activo y lo guarda en el campo
   session_summary del state.yaml. Permite recuperación rápida de sesión tras reload del IDE.
-  Disparador: Cuando el usuario ejecuta /sdd-checkpoint para guardar estado.
+  Disparador: Cuando el usuario ejecuta /sdd-checkpoint para guardar estado, o automáticamente post-COMMIT.
 license: MIT
 metadata:
   author: ctrbts-steve
-  version: "2.0"
+  version: "3.0"
 ---
 
 # SDD-Checkpoint Skill
 
 ## Propósito
 
-Eres un sub-agente responsable de **generar un checkpoint de sesión de alta fidelidad** para
-el orquestador SDD. Detectás el cambio activo, ejecutás un análisis proactivo de sus
-artefactos (`tasks.md`, `design.md`) y del contexto de sesión actual, y guardás un bloque
-YAML estructurado en el campo `session_summary` del `state.yaml`.
+Skill responsable de **generar un checkpoint de sesión de alta fidelidad**. Detecta el cambio activo, ejecuta un análisis proactivo de sus artefactos (`tasks.md`, `design.md`) y del contexto actual, y guarda un bloque YAML estructurado en el campo `session_summary` del `state.yaml`.
 
-**Sos agnóstico al DAG de fases**: no verificás ni modificás `lock_phase`, `current_phase`,
-`completed_phases` ni `pending_phases`. Tu única autorización de escritura en `state.yaml`
-es el campo `session_summary` y el campo `last_updated`.
+**Dos modos de operación:**
 
-## Qué Recibís
+1. **Automático** (post-COMMIT): El protocolo de transacción genera un `session_summary` compacto después de cada COMMIT. Esto es suficiente para la mayoría de los casos.
+2. **Manual** (`/sdd-checkpoint`): Genera un checkpoint de alta fidelidad con análisis proactivo de todos los artefactos. Útil antes de operaciones riesgosas o para refrescar el contexto.
 
-El orquestador te dará:
-
-- La ruta al directorio de cambios activos
-
-## Execution and Persistence Contract
-
-- Lee las convenciones base referenciadas en `skills/_shared/execution-contract.md` antes de proceder.
+**Agnosticismo de DAG**: no verifica ni modifica `lock_phase`, `current_phase`, `completed_phases` ni `pending_phases`. Opera transversalmente al DAG de fases.
 
 ## Qué Hacer
 
 ### Paso 1: Detectar Cambio Activo
 
-Buscá el archivo `state.yaml` con `status: active` en el directorio:
+Buscar `state.yaml` con `status: active` en `openspec/changes/*/state.yaml`.
 
-```text
-openspec/changes/*/state.yaml
-```
+### Paso 2: Leer Estado Base
 
-Si no existe ningún cambio activo, devolvé un error indicando que no hay cambio activo.
-
-### Paso 2: Leer Estado Base del state.yaml
-
-Leé el archivo `state.yaml` del cambio activo y extraé:
-
-- `current_phase`: fase actual del cambio
-- `status`: estado actual (active | blocked | done)
-- `lock_phase`: valor actual (solo para informarlo en el resultado — NO modificar)
+Extraer de `state.yaml`: `current_phase`, `status`, `lock_phase` (solo para informar — NO modificar).
 
 ### Paso 3a: Analizar tasks.md → estado_tareas
 
-Si existe el archivo `tasks.md` en la carpeta del cambio:
+Si existe `tasks.md`:
 
-1. Contá el total de tareas (líneas que contienen `- [ ]` o `- [x]`)
-2. Contá las tareas completadas (líneas con `- [x]`)
-3. Identificá la **última** tarea completada: la última línea `- [x]` en el archivo, extrayendo:
-   - Su ID (formato `N.N` si existe al inicio de la descripción)
-   - Su descripción breve (primeras 60 caracteres de la descripción)
+1. Contar total de tareas (`- [ ]` y `- [x]`)
+2. Contar completadas (`- [x]`)
+3. Identificar la última tarea completada
 
-Construí `estado_tareas` con el formato estricto:
+Formato: `"{X}/{Y} — última: [{ID}] {descripción breve}"`
 
-```text
-"{X}/{Y} — última: [{ID}] {descripción breve}"
-# Ejemplo: "4/16 — última: [2.1] Modificar sdd-ff/SKILL.md — agregar guard"
-```
+Si no existe: `estado_tareas: "N/A"`
 
-Si no existe `tasks.md`:
-
-```text
-estado_tareas: "N/A"
-```
-
-Si existen tareas pero ninguna completada:
-
-```text
-estado_tareas: "0/{Y} — sin tareas completadas"
-```
-
-### Paso 3b: Extraer archivos_modificados del contexto de sesión
-
-Buscá en el contexto de sesión activo (mensajes recientes del orquestador) el resumen de
-retorno más reciente de `sdd-apply`. Si existe, extraé las rutas de la tabla
-`### Archivos Modificados`.
+### Paso 3b: Extraer archivos_modificados
 
 ```text
 Fuente primaria:   Tabla "### Archivos Modificados" del último resumen de sdd-apply
-Fuente secundaria: Campo `archivos_modificados` del session_summary existente en state.yaml
+Fuente secundaria: Campo `archivos_modificados` del session_summary existente
 Fallback:          Lista vacía []
 ```
 
-**Reglas:**
-
-- Usar solo rutas relativas al root del proyecto (sin `./` al inicio)
-- Si hay más de 10 archivos, listar solo los últimos 10
+Máximo 10 archivos, rutas relativas al root.
 
 ### Paso 3c: Extraer decisiones_clave del design.md
 
-Si existe `design.md` en la carpeta del cambio:
+Si existe `design.md`: extraer las primeras 2 decisiones de la sección `## Decisiones de Arquitectura`, truncar a 100 chars cada una.
 
-1. Buscá la sección `## Decisiones de Arquitectura`
-2. Extraé las primeras 2 subsecciones o ítems de decisión listados
-3. Truncá cada decisión a 100 caracteres máximo
+### Paso 3d: Construir y Guardar
 
-Si no existe `design.md`:
-
-```text
-decisiones_clave:
-  - "Ver design.md cuando esté disponible"
-```
-
-### Paso 3d: Construir bloque YAML estructurado
-
-Con los datos de los pasos 3a, 3b y 3c, construí el bloque YAML:
+Escribir **ÚNICAMENTE** `session_summary` y `last_updated` en `state.yaml`:
 
 ```yaml
 session_summary:
   archivos_modificados:
-    - ruta/exacta/archivo1.ext
-    - ruta/exacta/archivo2.ext
-  estado_tareas: "{X}/{Y} — última: [{ID}] {descripción breve}"
+    - ruta/exacta/archivo.ext
+  estado_tareas: "{X}/{Y} — última: [{ID}] {texto}"
   decisiones_clave:
-    - "{decisión 1 ≤ 100 chars}"
-    - "{decisión 2 ≤ 100 chars}"
-  proxima_accion: "/sdd-{siguiente-comando} {nombre-del-cambio}"
+    - "{decisión ≤ 100 chars}"
+  proxima_accion: "/sdd-{siguiente} {nombre-cambio}"
+last_updated: "YYYY-MM-DDTHH:MM:SS"
 ```
 
-**Derivar `proxima_accion`** desde `lock_phase` del state.yaml:
+**NO modificar ningún otro campo.** `lock_phase`, `current_phase`, `completed_phases`, `pending_phases`, `status`, `blocked`, `blocked_reason`, `started_at` y campos `txn_*` son intocables.
 
-- `lock_phase = spec`     → `/sdd-spec {cambio}` (o `/sdd-ff {cambio}`)
-- `lock_phase = design`   → `/sdd-design {cambio}` (o `/sdd-ff {cambio}`)
-- `lock_phase = tasks`    → `/sdd-tasks {cambio}` (o `/sdd-ff {cambio}`)
-- `lock_phase = apply`    → `/sdd-apply {cambio}`
-- `lock_phase = verify`   → `/sdd-verify {cambio}`
-- `lock_phase = archive`  → `/sdd-archive {cambio}`
-
-**Límite total: 500 tokens (~375 palabras).** Aplicar truncamientos si se excede.
-
-### Paso 4: Guardar Resumen en state.yaml
-
-Escribí **ÚNICAMENTE** los siguientes campos en el `state.yaml`:
-
-```yaml
-session_summary:
-  archivos_modificados: [...]
-  estado_tareas: "..."
-  decisiones_clave: [...]
-  proxima_accion: "..."
-last_updated: "YYYY-MM-DDTHH:MM:SS±HH:MM"  # timestamp ISO 8601 actual
-```
-
-**NO modificar ningún otro campo.** `lock_phase`, `current_phase`, `completed_phases`,
-`pending_phases`, `status`, `blocked`, `blocked_reason` y `started_at` son intocables.
-
-### Paso 5: Devolver Resultado
-
-Devolvé el resultado en el formato:
+### Paso 4: Reportar
 
 ```markdown
 ## Resultado del Checkpoint
@@ -169,36 +86,15 @@ Devolvé el resultado en el formato:
 **lock_phase actual**: {valor} (no modificado)
 
 ### session_summary generado
-
-```yaml
-session_summary:
-  archivos_modificados:
-    - {rutas}
-  estado_tareas: "{X}/{Y} — última: [{ID}] {texto}"
-  decisiones_clave:
-    - "{decisión}"
-  proxima_accion: "{comando}"
-```
-
-```text
-### detailed_report
-
-- Tareas analizadas: {X}/{Y} completadas
-- Archivos extraídos desde: {fuente primaria | fallback}
-- Decisiones extraídas desde: {design.md | fallback}
-- Ubicación: openspec/changes/{nombre}/state.yaml
+{bloque YAML generado}
 ```
 
 ## Reglas
 
-- Si no hay cambio activo, mostrar error "No hay cambio activo"
+- Si no hay cambio activo, mostrar error
 - Si no existe `tasks.md`, usar `estado_tareas: "N/A"`
-- Siempre actualizar `last_updated` al guardar el resumen
-- El bloque `session_summary` NO debe superar 500 tokens — aplicar truncamientos si es necesario
-- **AGNOSTICISMO DE LOCK**: `sdd-checkpoint` NUNCA lee para validar, verifica ni modifica
-  `lock_phase`, `current_phase`, `completed_phases` ni `pending_phases`. Opera
-  transversalmente al DAG de fases sin requerir ni alterar el estado de avance.
-- Los campos `session_summary` y `last_updated` son la única autorización de escritura
-  en `state.yaml` de esta skill (ver `persistence-contract.md`)
-- Mantener compatibilidad con state.yaml que tengan `session_summary` en formato legacy
-  (texto plano) — reemplazarlo con el nuevo formato estructurado
+- Siempre actualizar `last_updated` al guardar
+- El bloque `session_summary` NO debe superar 500 tokens
+- **AGNOSTICISMO DE LOCK**: NUNCA modifica campos del DAG
+- `session_summary` y `last_updated` son la única autorización de escritura
+- Mantener compatibilidad con state.yaml legacy (reemplazar formato antiguo)

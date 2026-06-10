@@ -2,28 +2,26 @@
 name: sdd-spec
 description: >
   Escribe especificaciones con requisitos y escenarios (especificaciones delta para cambios).
-  Disparador: Cuando el orquestador te lanza para escribir o actualizar especificaciones de un cambio.
+  Disparador: Cuando el usuario ejecuta /sdd-spec para escribir o actualizar especificaciones de un cambio.
 license: MIT
 metadata:
   author: ctrbts-steve
-  version: "2.0"
+  version: "3.0"
 ---
 
 # SDD-Spec Skill
 
 ## Propósito
 
-Eres un sub-agente responsable de escribir **ESPECIFICACIONES**. Tomás la propuesta y producís specs delta — requisitos y escenarios estructurados que describen qué se está AGREGANDO, MODIFICANDO o ELIMINANDO del comportamiento del sistema.
+Skill responsable de escribir **ESPECIFICACIONES**. Toma la propuesta y produce specs delta — requisitos y escenarios estructurados que describen qué se está AGREGANDO, MODIFICANDO o ELIMINANDO del comportamiento del sistema.
 
-## Qué Recibís
+## Transacción
 
-Del orquestador:
+Seguí el protocolo de transacción definido en `skills/_shared/sdd-phase-common.md`:
 
-- Nombre del cambio
-
-## Execution and Persistence Contract
-
-- Lee las convenciones base referenciadas en `skills/_shared/execution-contract.md` antes de proceder.
+- **BEGIN**: `txn_status: in_progress`, `txn_phase: spec`
+- **COMMIT**: `current_phase: spec`, `lock_phase: design`
+- **ROLLBACK**: Si falla, restaurar `txn_status: failed` sin modificar phases
 
 ## Qué Hacer
 
@@ -117,9 +115,9 @@ El sistema {MUST/SHALL/SHOULD} {comportamiento}.
 - THEN {resultado}
 ```
 
-### Paso 4: Devolver Resumen
+### Paso 4: Persistir y Reportar
 
-Devuelve al orquestador:
+Ejecutá COMMIT en `state.yaml` y reportá al usuario:
 
 ```markdown
 ## Specs Creadas
@@ -137,11 +135,7 @@ Devuelve al orquestador:
 - Estados de error: {cubiertos/faltantes}
 
 ### Próximo Paso
-Listo para diseño (sdd-design). Si el diseño ya existe, listo para tareas (sdd-tasks).
-
-### Lock Phase
-
-lock_phase_next: design
+Listo para diseño (`/sdd-design`).
 ```
 
 ## Reglas
@@ -155,11 +149,6 @@ lock_phase_next: design
 - Mantener los escenarios TESTEABLES — alguien debería poder escribir un test automatizado desde cada uno
 - NO incluir detalles de implementación en las specs — las specs describen QUÉ, no CÓMO
 - Aplicar cualquier `rules.specs` de `openspec/config.yaml`
-- **LOCK PHASE**: la última sección del resumen de retorno SIEMPRE DEBE ser `### Lock Phase` con `lock_phase_next: design`. Omitir esta sección SOLO si la skill falló y no completó su trabajo.
-
-- ### Presupuesto de Tamaño
-
-  - Tu output NO DEBE exceder 650 palabras.
 
 ## Referencia Rápida de Palabras Clave RFC 2119
 

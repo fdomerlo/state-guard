@@ -1,39 +1,36 @@
 ---
 name: sdd-tasks
 description: >
-  Desglosa un cambio en una lista de tareas de implementación.
-  Disparador: Cuando el orquestador te lanza para crear o actualizar el desglose de tareas de un cambio.
+  Desglosa un cambio en tareas de implementación con numeración jerárquica.
+  Disparador: Cuando el usuario ejecuta /sdd-tasks para crear el checklist de tareas.
 license: MIT
 metadata:
   author: ctrbts-steve
-  version: "2.0"
+  version: "3.0"
 ---
 
 # SDD-Tasks Skill
 
 ## Propósito
 
-Eres un sub-agente responsable de crear el **DESGLOSE DE TAREAS**. Tomás la propuesta, las specs y el diseño, y producís un `tasks.md` con pasos de implementación concretos y accionables, organizados por fases.
+Skill responsable del **DESGLOSE EN TAREAS**. Toma las specs y el diseño, y produce un `tasks.md` con tareas concretas, atómicas y agrupadas por fase.
 
-## Qué Recibís
+## Transacción
 
-Del orquestador:
+Seguí el protocolo de transacción definido en `skills/_shared/sdd-phase-common.md`:
 
-- Nombre del cambio
-
-## Execution and Persistence Contract
-
-- Lee las convenciones base referenciadas en `skills/_shared/execution-contract.md` antes de proceder.
+- **BEGIN**: `txn_status: in_progress`, `txn_phase: tasks`
+- **COMMIT**: `current_phase: tasks`, `lock_phase: apply`
+- **ROLLBACK**: Si falla, restaurar `txn_status: failed` sin modificar phases
 
 ## Qué Hacer
 
-### Paso 1: Analizar el Diseño
+### Paso 1: Leer Dependencias
 
-Del documento de diseño, identificar:
+Lee los artefactos del cambio:
 
-- Todos los archivos que necesitan crearse/modificarse/eliminarse
-- El orden de dependencias (qué debe ir primero)
-- Requisitos de testing por componente
+1. **Specs delta** — `openspec/changes/{nombre-del-cambio}/specs/`
+2. **Diseño** — `openspec/changes/{nombre-del-cambio}/design.md`
 
 ### Paso 2: Escribir tasks.md
 
@@ -44,114 +41,55 @@ openspec/changes/{nombre-del-cambio}/
 ├── proposal.md
 ├── specs/
 ├── design.md
-└── tasks.md               ← Lo creas tú
+└── tasks.md              ← Lo creas tú
 ```
 
-#### Formato del Archivo de Tareas
+#### Formato
 
 ```markdown
 # Tareas: {Título del Cambio}
 
-## Fase 1: {Nombre de Fase} (ej: Infraestructura / Fundación)
+## Fase 1: {Nombre de la Fase} (ej: Infraestructura)
 
-- [ ] 1.1 {Acción concreta — qué archivo, qué cambio}
-- [ ] 1.2 {Acción concreta}
-- [ ] 1.3 {Acción concreta}
+- [ ] 1.1 {Tarea atómica con ruta de archivo específica}
+- [ ] 1.2 {Tarea atómica}
 
-## Fase 2: {Nombre de Fase} (ej: Implementación Central)
+## Fase 2: {Nombre de la Fase} (ej: Implementación Core)
 
-- [ ] 2.1 {Acción concreta}
-- [ ] 2.2 {Acción concreta}
-- [ ] 2.3 {Acción concreta}
-- [ ] 2.4 {Acción concreta}
+- [ ] 2.1 {Tarea atómica}
+- [ ] 2.2 {Tarea atómica}
+- [ ] 2.3 {Tarea atómica}
 
-## Fase 3: {Nombre de Fase} (ej: Testing / Verificación)
+## Fase 3: {Nombre de la Fase} (ej: Testing)
 
-- [ ] 3.1 {Escribir tests para ...}
-- [ ] 3.2 {Escribir tests para ...}
-- [ ] 3.3 {Verificar integración entre ...}
-
-## Fase 4: {Nombre de Fase} (ej: Limpieza / Documentación)
-
-- [ ] 4.1 {Actualizar docs/comentarios}
-- [ ] 4.2 {Eliminar código temporal}
+- [ ] 3.1 {Tarea atómica}
 ```
 
-### Reglas de Redacción de Tareas
+### Paso 3: Persistir y Reportar
 
-Cada tarea DEBE ser:
-
-| Criterio        | Ejemplo ✅                                                    | Contra-ejemplo ❌          |
-|-----------------|---------------------------------------------------------------|----------------------------|
-| **Específica**  | "Crear `internal/auth/middleware.go` con validación JWT"      | "Agregar auth"             |
-| **Accionable**  | "Agregar método `ValidateToken()` a `AuthService`"            | "Manejar tokens"           |
-| **Verificable** | "Test: `POST /login` devuelve 401 sin token"                  | "Asegurarse de que funcione" |
-| **Pequeña**     | Un archivo o una unidad lógica de trabajo                     | "Implementar la funcionalidad" |
-
-### Lineamientos de Organización por Fases
-
-```text
-Fase 1: Fundación / Infraestructura
-  └─ Nuevos tipos, interfaces, cambios de base de datos, configuración
-  └─ Cosas de las que dependen otras tareas
-
-Fase 2: Implementación Central
-  └─ Lógica principal, reglas de negocio, comportamiento core
-  └─ El núcleo del cambio
-
-Fase 3: Integración / Conexión
-  └─ Conectar componentes, rutas, wiring de UI
-  └─ Hacer que todo funcione junto
-
-Fase 4: Testing
-  └─ Tests unitarios, de integración, e2e
-  └─ Verificar contra los escenarios de spec
-
-Fase 5: Limpieza (si es necesario)
-  └─ Documentación, eliminar código muerto, pulido
-```
-
-### Paso 3: Devolver Resumen
-
-Devuelve al orquestador:
+Ejecutá COMMIT en `state.yaml` y reportá al usuario:
 
 ```markdown
 ## Tareas Creadas
 
 **Cambio**: {nombre-del-cambio}
-**Ubicación**: openspec/changes/{nombre-del-cambio}/tasks.md
+**Total**: {N} tareas en {M} fases
 
-### Desglose
-| Fase    | Tareas | Enfoque          |
-|---------|--------|------------------|
-| Fase 1  | {N}    | {Nombre de fase} |
-| Fase 2  | {N}    | {Nombre de fase} |
-| Fase 3  | {N}    | {Nombre de fase} |
-| Total   | {N}    |                  |
-
-### Orden de Implementación
-{Descripción breve del orden recomendado y por qué}
+### Resumen por Fase
+| Fase | Tareas | Enfoque |
+|------|--------|---------|
+| {nombre} | {N} | {descripción breve} |
 
 ### Próximo Paso
-Listo para implementación (sdd-apply).
-
-### Lock Phase
-
-lock_phase_next: apply
+Listo para implementar (`/sdd-apply`).
 ```
 
 ## Reglas
 
-- SIEMPRE referenciar rutas de archivos concretas en las tareas
-- Las tareas DEBEN estar ordenadas por dependencia — las tareas de Fase 1 no deben depender de las de Fase 2
-- Las tareas de testing deben referenciar escenarios específicos de las specs
-- Cada tarea debe ser completable en UNA sesión (si una tarea parece muy grande, dividirla)
-- Usar numeración jerárquica: 1.1, 1.2, 2.1, 2.2, etc.
-- NUNCA incluir tareas vagas como "implementar la funcionalidad" o "agregar tests"
+- Agrupar tareas por fase (infraestructura, implementación, testing)
+- Usar numeración jerárquica (1.1, 1.2, etc.)
+- Cada tarea DEBE ser lo suficientemente pequeña para implementarse en un solo archivo o módulo lógico — evitar "tareas monstruo"
+- Cada tarea DEBE incluir rutas de archivos concretas cuando sea posible
+- Las tareas deben ser completables en una sesión
+- Referenciar escenarios de spec específicos como criterios de aceptación
 - Aplicar cualquier `rules.tasks` de `openspec/config.yaml`
-- Si el proyecto usa TDD, integrar tareas test-first: tarea RED (escribir test fallido) → tarea GREEN (hacerlo pasar) → tarea REFACTOR (limpiar)
-- **LOCK PHASE**: la última sección del resumen de retorno SIEMPRE DEBE ser `### Lock Phase` con `lock_phase_next: apply`. Omitir esta sección SOLO si la skill falló y no completó su trabajo.
-
-- ### Presupuesto de Tamaño
-
-  - Tu output NO DEBE exceder 530 palabras.

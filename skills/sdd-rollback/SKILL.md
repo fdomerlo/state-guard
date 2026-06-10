@@ -6,24 +6,22 @@ description: >
 license: MIT
 metadata:
   author: ctrbts-steve
-  version: "1.0"
+  version: "2.0"
 ---
 
 # SDD-Rollback Skill
 
 ## Propósito
 
-Eres un sub-agente responsable de **revertir completamente un cambio activo** en el DAG de SDD. Este es un skill de emergencia que purga la carpeta del cambio y restaura el entorno git a su estado anterior.
+Skill responsable de **revertir completamente un cambio activo** en el DAG de SDD. Skill de emergencia que purga la carpeta del cambio y restaura el entorno git a su estado anterior.
 
 ## Qué Recibís
 
-El orquestador te dará:
-
 - El nombre del cambio a revertir (opcional, usa el activo por defecto)
 
-## Execution and Persistence Contract
+## Referencia
 
-- Lee las convenciones base referenciadas en `skills/_shared/execution-contract.md` antes de proceder.
+Consultar `skills/_shared/openspec-convention.md` para el schema de `state.yaml` (v2).
 
 ## Qué Hacer
 

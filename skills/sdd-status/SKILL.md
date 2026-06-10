@@ -6,7 +6,7 @@ description: >
 license: MIT
 metadata:
   author: ctrbts-steve
-  version: "1.0"
+  version: "2.0"
 ---
 
 # SDD-Status Skill
@@ -21,9 +21,9 @@ El orquestador te dará:
 
 - Referencias a los archivos `state.yaml` activos
 
-## Execution and Persistence Contract
+## Referencia
 
-- Lee las convenciones base referenciadas en `skills/_shared/execution-contract.md` antes de proceder.
+Consultar `skills/_shared/openspec-convention.md` para el schema de `state.yaml` (v2).
 
 ## Qué Hacer
 
@@ -45,6 +45,7 @@ Para cada archivo encontrado, extrae los siguientes campos:
 - `started_at`: Fecha de inicio en formato ISO 8601
 - `pending_phases`: Lista de fases pendientes
 - `blocked_reason`: Razón del bloqueo (si aplica)
+- `txn_status`: Estado de transacción (idle, in_progress, failed)
 
 ### Paso 3: Filtrar Cambios Archivados
 
@@ -71,6 +72,8 @@ Aplica la lógica de semáforo:
 | `status == "blocked"` | 🟡 | Bloqueado |
 | `status == "done"` | 🔴 | Completado (no debería aparecer) |
 | `status == "active"` | 🟢 | Activo |
+| `txn_status == "in_progress"` | 🔵 | Transacción en vuelo |
+| `txn_status == "failed"` | 🟠 | Transacción fallida |
 ```
 
 ### Paso 6: Formatear Tabla Markdown
@@ -78,9 +81,9 @@ Aplica la lógica de semáforo:
 Genera una tabla con las siguientes columnas:
 
 ```text
-| Cambio | Fase Actual | Tiempo Transcurrido | Estado |
-|--------|-------------|---------------------|--------|
-| feat-auth | Apply | 2h 30m | 🟢 |
+| Cambio | Fase Actual | Tiempo Transcurrido | Estado | Txn |
+|--------|-------------|---------------------|--------|-----|
+| feat-auth | Apply | 2h 30m | 🟢 | idle |
 ```
 
 - **Cambio**: Nombre del cambio (de `change`)

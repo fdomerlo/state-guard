@@ -2,29 +2,28 @@
 name: sdd-apply
 description: >
   Implementa tareas de un cambio, escribiendo código real siguiendo las especificaciones y el diseño.
-  Disparador: Cuando el orquestador te lanza para implementar una o más tareas de un cambio.
+  Disparador: Cuando el usuario ejecuta /sdd-apply para implementar tareas.
 license: MIT
 metadata:
   author: ctrbts-steve
-  version: "2.0"
+  version: "3.0"
 ---
 
 # SDD-Apply Skill
 
 ## Propósito
 
-Eres un sub-agente responsable de la **IMPLEMENTACIÓN**. Recibís tareas específicas de `tasks.md` y las implementás escribiendo código real. Seguís las specs y el diseño de forma estricta.
+Skill responsable de la **IMPLEMENTACIÓN**. Recibe tareas específicas de `tasks.md` y las implementa escribiendo código real. Sigue las specs y el diseño de forma estricta.
 
-## Qué Recibís
+## Transacción
 
-Del orquestador:
+Seguí el protocolo de transacción definido en `skills/_shared/sdd-phase-common.md`:
 
-- Nombre del cambio
-- Las tareas específicas a implementar (ej: "Fase 1, tareas 1.1-1.3")
+- **BEGIN**: `txn_status: in_progress`, `txn_phase: apply`
+- **COMMIT**: `current_phase: apply`, `lock_phase: verify` (solo cuando TODAS las tareas estén completas)
+- **ROLLBACK**: Si falla, restaurar `txn_status: failed` sin modificar phases
 
-## Execution and Persistence Contract
-
-- Lee las convenciones base referenciadas en `skills/_shared/execution-contract.md` antes de proceder.
+**Nota sobre batching**: Si hay muchas tareas, se procesan en lotes. El COMMIT solo avanza `lock_phase` a `verify` cuando la última tarea se completa. Hasta entonces, cada lote ejecuta BEGIN → trabajo → guardado parcial de `state.yaml` (actualizando `session_summary` y `last_updated` sin mover `lock_phase`).
 
 ## Qué Hacer
 
@@ -40,19 +39,13 @@ Antes de escribir CUALQUIER código, leé las dependencias del cambio actual:
 
 **NOTA:** SOLO leer specs delta del cambio actual. NUNCA leer `specs/` completo del proyecto.
 
-### Paso 1b: Batching de Tareas
+### Paso 1b: Selección de Lote
 
-El orquestador es responsable de:
-
-1. Leer `tasks.md` del cambio actual
-2. Extraer solo las próximas 3 tareas pendientes (no completadas)
-3. Pasarlas como texto inline al sub-agente (no el archivo completo)
-
-El sub-agente recibe las tareas como texto inline, no como referencia a archivo.
+Identificá las próximas 3 tareas pendientes (no completadas) de `tasks.md`. Si ejecutás inline, podés ajustar el tamaño del lote según tu contexto disponible.
 
 ### Paso 2: Detectar el Modo de Implementación
 
-Antes de escribir código, determina si el proyecto usa TDD:
+Determina si el proyecto usa TDD:
 
 ```text
 Detectar modo TDD (en orden de prioridad):
@@ -85,7 +78,7 @@ PARA CADA TAREA:
 │   └── Si el test pasa inmediatamente → el comportamiento ya existe o el test es incorrecto
 │
 ├── 3. GREEN — Escribir el código mínimo para pasar
-│   ├── Implementar SOLO lo necesario para que los tests fallen pasen
+│   ├── Implementar SOLO lo necesario para que los tests pasen
 │   ├── Ejecutar tests — confirmar que PASAN
 │   └── NO agregar funcionalidad extra más allá de lo que el test requiere
 │
@@ -98,11 +91,7 @@ PARA CADA TAREA:
 └── 6. Anotar cualquier problema o desviación
 ```
 
-Detecta el test runner para la ejecución:
-
-Consultar `skills/_shared/test-runner-detection.md` con parámetro `{fase}=apply` para la lógica de detección.
-
-**Importante**: Si hay skills de codificación instaladas (ej: `tdd/SKILL.md`, `pytest/SKILL.md`, `vitest/SKILL.md`), leer y seguir esos patrones para escribir tests.
+Detecta el test runner consultando `skills/_shared/test-runner-detection.md` con parámetro `{fase}=apply`.
 
 ### Paso 2b: Implementar Tareas (Flujo Estándar)
 
@@ -121,21 +110,12 @@ PARA CADA TAREA:
 
 ### Paso 3: Marcar Tareas como Completas
 
-**El sub-agente ejecutante** es el ÚNICO responsable de actualizar de forma directa `tasks.md` — cambiar `- [ ]` por `- [x]` para las tareas completadas.
+Actualiza directamente `tasks.md` — cambiar `- [ ]` por `- [x]` para las tareas completadas.
 
-El sub-agente DEBE realizar las modificaciones sobre el archivo de tareas (usando herramientas de escritura directa), reflejando así el estado y documentando su labor.
+### Paso 4: Persistir y Reportar
 
-```markdown
-## Fase 1: Fundación
-
-- [x] 1.1 Crear `internal/auth/middleware.go` con validación JWT  ← MARCAS TÚ tras completarlo
-- [x] 1.2 Agregar struct `AuthConfig` a `internal/config/config.go`  ← MARCAS TÚ tras completarlo
-- [ ] 1.3 Agregar rutas de auth a `internal/server/server.go`  ← aún pendiente
-```
-
-### Paso 4: Devolver Resumen
-
-Devuelve al orquestador:
+Si TODAS las tareas están completas → ejecutá COMMIT (`lock_phase: verify`).
+Si quedan tareas pendientes → actualizá `session_summary` en `state.yaml` sin mover `lock_phase`, y reportá progreso.
 
 ```markdown
 ## Progreso de Implementación
@@ -151,62 +131,27 @@ Devuelve al orquestador:
 | Archivo                 | Acción    | Qué se hizo           |
 |-------------------------|-----------|-----------------------|
 | `ruta/al/archivo.ext`   | Creado    | {descripción breve}   |
-| `ruta/a/otro.ext`       | Modificado| {descripción breve}   |
-
-### Tests (solo modo TDD)
-| Tarea | Archivo de Test       | RED (falla)           | GREEN (pasa)          | REFACTOR   |
-|-------|-----------------------|-----------------------|-----------------------|------------|
-| 1.1   | `ruta/al/test.ext`    | ✅ Falló como esperado | ✅ Pasó               | ✅ Limpio   |
-| 1.2   | `ruta/al/test.ext`    | ✅ Falló como esperado | ✅ Pasó               | ✅ Limpio   |
-
-{Omitir esta sección si se usó el modo estándar.}
 
 ### Desviaciones del Diseño
-{Lista de lugares donde la implementación se desvió de design.md y por qué.
-Si ninguna, indicar "Ninguna — la implementación coincide con el diseño."}
+{Lista o "Ninguna — la implementación coincide con el diseño."}
 
 ### Problemas Encontrados
-{Lista de problemas descubiertos durante la implementación.
-Si ninguno, indicar "Ninguno."}
-
-### Tareas Restantes
-- [ ] {próxima tarea}
-- [ ] {próxima tarea}
+{Lista o "Ninguno."}
 
 ### Estado
-{N}/{total} tareas completas. {Listo para el siguiente lote / Listo para verificar / Bloqueado por X}
-
-### Checkpoint
-
-checkpoint_required: true   # SI quedan tareas [ ] pendientes en tasks.md
-# checkpoint_required: false  # SI todas las tareas fueron completadas en este lote
-
-### Lock Phase
-
-lock_phase_next: verify
+{N}/{total} tareas completas. {Listo para verificar / Siguiente lote pendiente}
 ```
-
-> **Nota de uso del Checkpoint:**
->
-> - Si `checkpoint_required: true` → la sección `### Lock Phase` DEBE estar AUSENTE
->   (el lock no avanza hasta que todas las tareas estén completas).
-> - Si `checkpoint_required: false` o no hay tareas pendientes → incluir `### Lock Phase`
->   con `lock_phase_next: verify`.
-> - El orquestador que recibe `checkpoint_required: true` DEBE invocar `/sdd-checkpoint`
->   antes de continuar con el siguiente lote de tareas.
 
 ## Reglas
 
 - SIEMPRE leer las specs antes de implementar — las specs son tus criterios de aceptación
 - SIEMPRE seguir las decisiones de diseño — no improvisar un enfoque diferente
 - SIEMPRE ajustarse a los patrones y convenciones de código existentes en el proyecto
-- El sub-agente es el encargado de marcar en `tasks.md` las tareas al momento de declararlas cerradas. Adicionalmente, reportará en el resumen el progreso.
-- Si descubrís que el diseño es incorrecto o incompleto, ANOTARLO en tu resumen de retorno — no desviarse en silencio
+- Marcar las tareas completadas en `tasks.md` al momento de cerrarlas
+- Si descubrís que el diseño es incorrecto o incompleto, ANOTARLO — no desviarse en silencio
 - Si una tarea está bloqueada por algo inesperado, DETENERSE y reportar
 - NUNCA implementar tareas que no te fueron asignadas
-- Cargar y seguir cualquier skill de codificación relevante para el stack del proyecto (ej: react-19, typescript, django-drf, tdd, pytest, vitest) si está disponible en las skills del usuario
+- Cargar y seguir cualquier skill de codificación relevante para el stack del proyecto
 - Aplicar cualquier `rules.apply` de `openspec/config.yaml`
-- Si se detecta modo TDD (Paso 2), SIEMPRE seguir el ciclo RED → GREEN → REFACTOR — nunca omitir RED (escribir el test fallido primero)
-- Al ejecutar tests en TDD, ejecutar SOLO el archivo/suite de tests relevante, no toda la suite (para mayor velocidad)
-- **LOCK PHASE**: la última sección del resumen de retorno, cuando TODAS las tareas asignadas están completas, SIEMPRE DEBE ser `### Lock Phase` con `lock_phase_next: verify`. Omitir esta sección si quedan tareas pendientes o si la skill falló.
-- **CHECKPOINT AUTOMÁTICO**: Si quedan tareas pendientes (flujo batch), el resumen de retorno DEBE incluir `### Checkpoint` con `checkpoint_required: true` posicionado ANTES de `### Lock Phase`. El orquestador que reciba `checkpoint_required: true` invocará `/sdd-checkpoint` antes de continuar con el siguiente lote. NUNCA incluir `### Lock Phase` si `checkpoint_required: true`.
+- Si se detecta modo TDD, SIEMPRE seguir el ciclo RED → GREEN → REFACTOR
+- Al ejecutar tests en TDD, ejecutar SOLO el archivo/suite de tests relevante

@@ -121,7 +121,7 @@ make_writable() {
 print_header() {
     echo ""
     echo -e "${CYAN}${BOLD}╔══════════════════════════════════════════╗${NC}"
-    echo -e "${CYAN}${BOLD}║       Agentify: SDD Orchestrator— Installer     ║${NC}"
+    echo -e "${CYAN}${BOLD}║     Agentify: SDD Memory Guard — Installer    ║${NC}"
     echo -e "${CYAN}${BOLD}║   Spec-Driven Development for AI Agents  ║${NC}"
     echo -e "${CYAN}${BOLD}╚══════════════════════════════════════════╝${NC}"
     echo ""
@@ -167,8 +167,8 @@ show_help() {
 compile_and_append_config() {
     local target_file="$1"
     local header_file="$2"
-    local marker_begin="<!-- BEGIN SDD ORCHESTRATOR -->"
-    local marker_end="<!-- END SDD ORCHESTRATOR -->"
+    local marker_begin="<!-- BEGIN SDD MEMORY GUARD -->"
+    local marker_end="<!-- END SDD MEMORY GUARD -->"
 
     mkdir -p "$(dirname "$target_file")" 2>/dev/null || true
 
@@ -176,7 +176,7 @@ compile_and_append_config() {
     if [ -f "$target_file" ] && grep -q "$marker_begin" "$target_file"; then
         awk "/$marker_begin/{flag=1} /$marker_end/{flag=0; next} !flag" "$target_file" > "${target_file}.tmp"
         mv "${target_file}.tmp" "$target_file"
-        print_skill "Bloque anterior del orquestador purgado en $(basename "$target_file")"
+        print_skill "Bloque anterior del Memory Guard purgado en $(basename "$target_file")"
     fi
 
     # Ensamblar y compilar el nuevo bloque
@@ -189,7 +189,7 @@ compile_and_append_config() {
     fi
     echo "$marker_end" >> "$target_file"
     
-    print_skill "Orquestador inyectado/actualizado exitosamente en $(basename "$target_file")"
+    print_skill "Memory Guard inyectado/actualizado exitosamente en $(basename "$target_file")"
 }
 
 merge_opencode_config() {

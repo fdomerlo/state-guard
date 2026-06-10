@@ -7,9 +7,35 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-### Changed
-- **Arquitectura de Meta-Skills**: Universalización de los comandos de gestión de SDD (`/sdd-new`, `/sdd-continue`, `/sdd-ff`). Extraídos desde el namespace legado de OpenCode hacia `skills/` estándar como herramientas de primera clase deterministas compatibles con **todos** los agentes (Claude Code, Gemini CLI, OpenCode, Antigravity).
-- **Anti-Batching Consolidado**: `/sdd-ff` ahora integra soporte de persistencia ACID explícito para garantizar que el DAG no se corrompe por alucinaciones o consolidación forzosa en un solo prompt del LLM.
+### Changed — Arquitectura: De Despachador CLI a Harness de Memoria Transaccional
 
-### Fixed
-- **Suite de Pruebas Dinámica**: Reparado `scripts/install_test.sh` y eliminado dependencias estáticas de aserciones legacy. Ahora la CI soporta dinámicamente las 20 skills universales sin fallar por rutas inexistentes.
+- **Memory Guard**: Nuevo contrato unificado (`_shared/memory-guard.md`) que reemplaza a `orchestrator-core.md`, `orchestrator-delegation.md` y `orchestrator-state.md`. El agente ahora ejecuta fases inline con delegación inteligente en lugar de despachar todo a sub-agentes CLI.
+- **Transaction Protocol**: Nuevo protocolo de transacciones (`_shared/transaction-protocol.md`) con ciclo BEGIN → EXECUTE → COMMIT/ROLLBACK. Reemplaza el Return Envelope (`### Lock Phase`) por escritura directa en `state.yaml`.
+- **state.yaml v2**: Schema extendido con campos transaccionales (`schema_version`, `txn_status`, `txn_phase`, `txn_started_at`). Migración automática v1→v2 vía `sdd-fix`.
+- **Capabilities Adapter**: Nuevo módulo unificado (`_shared/capabilities.md`) que reemplaza las 4 integraciones separadas con detección automática del agente host.
+- **Context Injection**: Simplificado `orchestrator-context.md` → `context-injection.md` eliminando la distinción orquestador/sub-agente.
+- **Presupuestos de tokens flexibles**: Eliminados los límites rígidos de palabras por fase (400 proposal, 650 spec, 800 design, 530 tasks).
+- **Todas las skills de fase** (explore, propose, spec, design, tasks, apply, verify, archive): Refactorizadas con sección de Transacción integrada, sin Return Envelope, sin dependencia del orquestador.
+- **Meta-skills** (sdd-new, sdd-continue, sdd-ff): Refactorizadas para ejecución inline directa con transacciones secuenciales.
+- **sdd-checkpoint**: Ahora opera en modo dual (automático post-COMMIT + manual bajo demanda).
+- **sdd-fix**: Añadida migración v1→v2 y resolución de transacciones incompletas.
+- **sdd-status**: Muestra `txn_status` en la tabla de estado.
+- **Integraciones**: Claude Code, Gemini CLI, Antigravity y OpenCode reducidas a stubs mínimos que cargan `memory-guard.md`.
+- **install.sh**: Actualizado con markers `SDD MEMORY GUARD` y header renovado.
+
+### Removed
+
+- `_shared/orchestrator-core.md` — Absorbido en `memory-guard.md`
+- `_shared/orchestrator-delegation.md` — Absorbido en `memory-guard.md`
+- `_shared/orchestrator-state.md` — Absorbido en `transaction-protocol.md`
+- `_shared/execution-contract.md` — Absorbido en `transaction-protocol.md`
+- `_shared/orchestrator-commands.md` — Absorbido en `memory-guard.md`
+- `_shared/orchestrator-context.md` — Reemplazado por `context-injection.md`
+
+### Added
+
+- `_shared/memory-guard.md` — Contrato unificado de Memory Guard
+- `_shared/transaction-protocol.md` — Protocolo de transacciones con ciclo BEGIN/COMMIT/ROLLBACK
+- `_shared/capabilities.md` — Adapter de capacidades por agente host
+- `_shared/context-injection.md` — Protocolo simplificado de inyección de contexto
+- `integrations/system-prompt.md` — Template unificado de system prompt

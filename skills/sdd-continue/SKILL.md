@@ -6,19 +6,18 @@ description: >
 license: MIT
 metadata:
   author: ctrbts-steve
-  version: "2.1"
+  version: "3.0"
 ---
+
+# SDD-Continue Skill
 
 ## Propósito
 
-Eres una meta-skill responsable de continuar un cambio SDD existente.
-Como orquestador, debes leer `openspec/changes/{nombre-del-cambio}/state.yaml` (o explorar
-el directorio si no se provee argumento) para determinar el estado actual y delegar la
-siguiente fase al sub-agente correspondiente.
+Meta-skill responsable de continuar un cambio SDD existente. Lee `state.yaml` para determinar la siguiente fase y la ejecuta inline.
 
-## Paso 1: Leer state.yaml y Verificar Lock
+## Qué Hacer
 
-Antes de determinar qué fase ejecutar, DEBES:
+### Paso 1: Leer state.yaml y Verificar Lock
 
 ```text
 1. Leer `state.yaml` del cambio (o explorar openspec/changes/ si no hay argumento)
@@ -37,31 +36,29 @@ Antes de determinar qué fase ejecutar, DEBES:
 4. La fase a ejecutar ES lock_phase (no inferir desde current_phase ni pending_phases)
 ```
 
-## Paso 2: Delegar la Fase Indicada por lock_phase
+### Paso 2: Verificar Recovery de Transacción Incompleta
 
-Delega inmediatamente a la skill correspondiente al valor de `lock_phase`:
+Si `txn_status` es `in_progress`:
+- Verificar si el artefacto de `txn_phase` existe en disco
+- Si SÍ → ejecutar COMMIT (la fase se completó pero el estado no se persistió)
+- Si NO → ejecutar ROLLBACK y continuar con `lock_phase`
 
-| `lock_phase` | Skill a invocar |
-|-------------|-----------------|
-| `spec`      | sdd-spec        |
-| `design`    | sdd-design      |
-| `tasks`     | sdd-tasks       |
-| `apply`     | sdd-apply       |
-| `verify`    | sdd-verify      |
-| `archive`   | sdd-archive     |
+Si `txn_status` es `failed`:
+- Limpiar a `txn_status: idle` y continuar con `lock_phase`
 
-## Paso 3: Actualizar state.yaml tras la Delegación
+### Paso 3: Ejecutar la Fase Indicada por lock_phase
 
-Tras completar el sub-agente, extraer `lock_phase_next` del resumen de retorno y actualizar
-`state.yaml`:
+Cargá el SKILL.md correspondiente al valor de `lock_phase` y ejecutá inline:
 
-```text
-1. Leer sección `### Lock Phase` del resumen del sub-agente
-2. Extraer `lock_phase_next`
-3. SI es válido: actualizar current_phase, lock_phase, completed_phases, last_updated
-4. SI no viene `lock_phase_next` (fallo del sub-agente): preservar lock_phase actual sin cambios
-```
+| `lock_phase` | Skill a cargar |
+|-------------|----------------|
+| `explore`   | sdd-explore    |
+| `propose`   | sdd-propose    |
+| `spec`      | sdd-spec       |
+| `design`    | sdd-design     |
+| `tasks`     | sdd-tasks      |
+| `apply`     | sdd-apply      |
+| `verify`    | sdd-verify     |
+| `archive`   | sdd-archive    |
 
-## Execution and Persistence Contract
-
-- Lee las convenciones base referenciadas en `skills/_shared/execution-contract.md` antes de proceder.
+La transacción (BEGIN/COMMIT/ROLLBACK) la maneja la propia skill según el protocolo.
