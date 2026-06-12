@@ -14,7 +14,8 @@
 
 param(
     [string]$Agent = "",
-    [string]$Path = ""
+    [string]$Path = "",
+    [string]$Target = "opencode"
 )
 
 # ============================================================================
@@ -188,6 +189,7 @@ function Show-Help {
     Write-Host "Options:"
     Write-Host "  -Agent NAME    Install for a specific agent (non-interactive)"
     Write-Host "  -Path DIR      Custom install path (use with -Agent custom)"
+    Write-Host "  -Target NAME   Build target environment (opencode or antigravity, default: opencode)"
     Write-Host "  -Help          Show this help"
     Write-Host ""
     Write-Host "Agents: claude-code, opencode, gemini-cli, antigravity, project-local, all-global"
@@ -238,59 +240,75 @@ function Compile-AndAppendConfig {
 function Merge-OpenCodeConfig {
     $configDir = if ($OS -eq "windows") { "$env:USERPROFILE\.config\opencode" } else { "$HOME/.config/opencode" }
     $targetConfig = Join-Path $configDir "opencode.json"
-    $sourceConfig = Join-Path $RepoDir "integrations\opencode\opencode.json"
     
-    if (-not (Test-Path $configDir)) {
-        New-Item -ItemType Directory -Path $configDir -Force | Out-Null
+    $pythonCmd = Get-Command python -ErrorAction SilentlyContinue
+    if (-not $pythonCmd) {
+        $pythonCmd = Get-Command python3 -ErrorAction SilentlyContinue
     }
     
-    # Use Python for safe JSON merge and prompt compilation
-    $pythonCmd = Get-Command python -ErrorAction SilentlyContinue
     if ($pythonCmd) {
-        $pythonScript = @"
-import json, sys, os
-target_path, source_path = sys.argv[1:3]
-
-# Read source JSON (header)
-try:
-    with open(source_path, "r", encoding="utf-8") as f: source = json.load(f)
-except Exception:
-    sys.exit(1)
-
-# Apply to user JSON
-if os.path.exists(target_path):
-    try:
-        with open(target_path, "r", encoding="utf-8") as f: target = json.load(f)
-    except Exception:
-        target = {"`$schema": "https://opencode.ai/config.json", "agent": {}}
-else:
-    target = {"`$schema": "https://opencode.ai/config.json", "agent": {}}
-    
-if "agent" not in target: target["agent"] = {}
-target["agent"]["sdd-orchestrator"] = source["agent"]["sdd-orchestrator"]
-
-with open(target_path, "w", encoding="utf-8") as f: json.dump(target, f, indent=2, ensure_ascii=False)
-sys.exit(0)
-"@
-        $tempScript = [System.IO.Path]::GetTempFileName() + ".py"
-        Set-Content -Path $tempScript -Value $pythonScript -Encoding UTF8
-        
+        $packagerScript = Join-Path $RepoDir "scripts\packager.py"
         try {
-            & python $tempScript $targetConfig $sourceConfig 2>&1 | Out-Null
+            & $pythonCmd.Source $packagerScript --target $Target --repo-dir $RepoDir --opencode-config-file $targetConfig 2>&1 | Out-Null
             if ($LASTEXITCODE -eq 0) {
                 Write-Skill "sdd-orchestrator compilado e inyectado en opencode.json"
             } else {
                 Write-Warn "No se pudo inyectar automáticamente. Error en compilación Python."
             }
         } catch {
-            Write-Warn "No se detectó Python3. Copia el orquestador a opencode.json manualmente."
-        } finally {
-            Remove-Item $tempScript -Force -ErrorAction SilentlyContinue
+            Write-Warn "Error ejecutando packager.py."
         }
     } else {
         Write-Warn "No se detectó Python3. Copia el orquestador a opencode.json manualmente."
     }
 }
+
+function Install-OpenCodeCommands {
+    param([string]$SkillsPath)
+    
+    $commandsSrc = Join-Path $RepoDir "integrations\opencode\commands"
+    $commandsTarget = if ($OS -eq "windows") { "$env:USERPROFILE\.config\opencode\commands" } else { "$HOME/.config/opencode/commands" }
+    
+    if (-not (Test-Path $commandsSrc)) {
+        Write-Warn "No se encontró integrations/opencode/commands/ en el repositorio"
+        return
+    }
+    
+    $pythonCmd = Get-Command python -ErrorAction SilentlyContinue
+    if (-not $pythonCmd) {
+        $pythonCmd = Get-Command python3 -ErrorAction SilentlyContinue
+    }
+    
+    if ($pythonCmd) {
+        $packagerScript = Join-Path $RepoDir "scripts\packager.py"
+        try {
+            & $pythonCmd.Source $packagerScript --target $Target --repo-dir $RepoDir --opencode-commands-dir $commandsTarget --skills-path $SkillsPath 2>&1 | Out-Null
+            if ($LASTEXITCODE -eq 0) {
+                Write-Skill "slash commands instalados → $commandsTarget"
+            } else {
+                Write-Warn "Error instalando comandos slash."
+            }
+        } catch {
+            Write-Warn "Error ejecutando packager.py."
+        }
+    } else {
+        Write-Warn "No se detectó Python3. Copiando comandos sin procesar."
+        if (-not (Test-Path $commandsTarget)) {
+            New-Item -ItemType Directory -Path $commandsTarget -Force | Out-Null
+        }
+        $count = 0
+        foreach ($cmdFile in Get-ChildItem -Path $commandsSrc -Filter "*.md") {
+            $content = Get-Content $cmdFile.FullName -Raw
+            $content = $content -replace [regex]::Escape("{{SKILLS_PATH}}"), $SkillsPath
+            Set-Content -Path (Join-Path $commandsTarget $cmdFile.Name) -Value $content
+            $count++
+        }
+        if ($count -gt 0) {
+            Write-Skill "$count slash commands instalados → $commandsTarget"
+        }
+    }
+}
+
 
 # ============================================================================
 # Install Functions
@@ -406,6 +424,7 @@ function Install-ForAgent {
         "opencode" {
             $targetPath = Get-ToolPath "opencode"
             Install-Skills $targetPath "OpenCode"
+            Install-OpenCodeCommands $targetPath
             Merge-OpenCodeConfig
         }
         "gemini-cli" {
@@ -439,6 +458,7 @@ function Install-ForAgent {
             # OpenCode
             $targetPath = Get-ToolPath "opencode"
             Install-Skills $targetPath "OpenCode"
+            Install-OpenCodeCommands $targetPath
             Merge-OpenCodeConfig
             
             # Gemini CLI

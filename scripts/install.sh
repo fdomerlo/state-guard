@@ -155,6 +155,7 @@ show_help() {
     echo "Options:"
     echo "  --agent NAME    Install for a specific agent (non-interactive)"
     echo "  --path DIR      Custom install path (use with --agent custom)"
+    echo "  --target NAME   Build target environment (opencode or antigravity, default: opencode)"
     echo "  -h, --help      Show this help"
     echo ""
     echo "Agents: claude-code, opencode, gemini-cli, antigravity, project-local, all-global"
@@ -200,37 +201,9 @@ merge_opencode_config() {
         config_dir="$HOME/.config/opencode"
     fi
     local target_config="$config_dir/opencode.json"
-    local source_config="$REPO_DIR/integrations/opencode/opencode.json"
 
-    mkdir -p "$config_dir"
-
-    # Usamos Python para hacer un merge seguro del JSON y compilar el prompt
     if command -v python3 >/dev/null 2>&1; then
-        python3 -c '
-import json, sys, os
-target_path, source_path = sys.argv[1:3]
-
-# Leer el source JSON (header)
-try:
-    with open(source_path, "r", encoding="utf-8") as f: source = json.load(f)
-except Exception:
-    sys.exit(1)
-
-# Aplicar al JSON del usuario
-if os.path.exists(target_path):
-    try:
-        with open(target_path, "r", encoding="utf-8") as f: target = json.load(f)
-    except Exception:
-        target = {"$schema": "https://opencode.ai/config.json", "agent": {}}
-else:
-    target = {"$schema": "https://opencode.ai/config.json", "agent": {}}
-    
-if "agent" not in target: target["agent"] = {}
-target["agent"]["sdd-orchestrator"] = source["agent"]["sdd-orchestrator"]
-
-with open(target_path, "w", encoding="utf-8") as f: json.dump(target, f, indent=2, ensure_ascii=False)
-sys.exit(0)
-' "$target_config" "$source_config"
+        python3 "$REPO_DIR/scripts/packager.py" --target "$TARGET" --repo-dir "$REPO_DIR" --opencode-config-file "$target_config"
         
         if [ $? -eq 0 ]; then
             print_skill "sdd-orchestrator compilado e inyectado en opencode.json"
@@ -352,17 +325,27 @@ install_opencode_commands() {
         return
     fi
 
-    mkdir -p "$commands_target"
-    local count=0
-    for cmd_file in "$commands_src"/*.md; do
-        [ -f "$cmd_file" ] || continue
-        local cmd_name
-        cmd_name=$(basename "$cmd_file")
-        sed "s|{{SKILLS_PATH}}|$skills_path|g" "$cmd_file" > "$commands_target/$cmd_name"
-        count=$((count + 1))
-    done
-    if [ "$count" -gt 0 ]; then
-        print_skill "$count slash commands instalados → $commands_target"
+    if command -v python3 >/dev/null 2>&1; then
+        python3 "$REPO_DIR/scripts/packager.py" --target "$TARGET" --repo-dir "$REPO_DIR" --opencode-commands-dir "$commands_target" --skills-path "$skills_path"
+        if [ $? -eq 0 ]; then
+            print_skill "slash commands instalados → $commands_target"
+        else
+            print_warn "Error instalando comandos slash."
+        fi
+    else
+        print_warn "No se detectó Python3. Copiando comandos sin procesar."
+        mkdir -p "$commands_target"
+        local count=0
+        for cmd_file in "$commands_src"/*.md; do
+            [ -f "$cmd_file" ] || continue
+            local cmd_name
+            cmd_name=$(basename "$cmd_file")
+            sed "s|{{SKILLS_PATH}}|$skills_path|g" "$cmd_file" > "$commands_target/$cmd_name"
+            count=$((count + 1))
+        done
+        if [ "$count" -gt 0 ]; then
+            print_skill "$count slash commands instalados → $commands_target"
+        fi
     fi
 }
 
@@ -479,10 +462,12 @@ setup_colors
 # Parse arguments
 AGENT=""
 CUSTOM_PATH=""
+TARGET="opencode"
 while [ $# -gt 0 ]; do
     case "$1" in
         --agent)  AGENT="$2"; shift 2 ;;
         --path)   CUSTOM_PATH="$2"; shift 2 ;;
+        --target) TARGET="$2"; shift 2 ;;
         -h|--help) show_help; exit 0 ;;
         *)  echo "Unknown option: $1"; show_help; exit 1 ;;
     esac
