@@ -5,7 +5,7 @@ description: >
   Disparador: Cuando el usuario ejecuta /sdd-changelog o quiere generar un changelog desde los cambios archivados.
 license: MIT
 metadata:
-  author: ctrbts-steve
+  author: fdomerlo-steve
   version: "1.0"
 ---
 
@@ -21,9 +21,9 @@ Del orquestador:
 
 - Nombre del proyecto (opcional, usa el directorio actual por defecto)
 
-## Execution and Persistence Contract
+## Referencia
 
-- Lee las convenciones base referenciadas en `skills/_shared/execution-contract.md` antes de proceder.
+Consultar `skills/_shared/openspec-convention.md` para el schema de `state.yaml` (v2).
 
 ## Qué Hacer
 

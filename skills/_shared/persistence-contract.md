@@ -4,27 +4,46 @@
 
 El framework utiliza el File System como único mecanismo de persistencia nativo. Todas las operaciones de lectura y escritura de artefactos se realizan bajo el directorio `openspec/` siguiendo la convención [openspec-convention.md](./openspec-convention.md).
 
-## Persistencia de Estado del Orquestador
+## Persistencia Transaccional del Estado
 
-El orquestador persiste el estado del DAG en `openspec/changes/{change-name}/state.yaml` después de cada transición de fase exitosa.
-Ver [orchestrator-core.md](./orchestrator-core.md) (sección "Gestión de Estado") para el schema completo y las reglas de escritura.
+El Memory Guard persiste el estado del DAG en `openspec/changes/{change-name}/state.yaml` mediante el protocolo de transacciones (ver [transaction-protocol.md](./transaction-protocol.md)).
 
-**Responsabilidad exclusiva:** Solo el orquestador escribe y mantiene `state.yaml`.
-Las skills de sub-agentes no interactúan con este archivo directamente, con la ÚNICA EXCEPCIÓN de la skill `sdd-status`, que tiene autorización para leerlo masivamente, y la skill `sdd-checkpoint`, que tiene autorización para escribir el `session_summary` en él.
+Cada transición de fase sigue el ciclo: BEGIN → EXECUTE (persistir artefacto) → COMMIT (actualizar state.yaml).
 
-## Reglas de Contexto para Sub-Agentes
+**Responsabilidad de escritura:**
 
-Los sub-agentes inician con contexto fresco y SIN acceso a las instrucciones del orquestador. El orquestador controla qué contexto reciben. Los sub-agentes son responsables de persistir lo que producen directamente en el disco.
+| Quién | Qué escribe en state.yaml |
+|-------|---------------------------|
+| Memory Guard (transacción) | Todos los campos de fase y transacción |
+| `sdd-checkpoint` | Solo `session_summary` y `last_updated` |
+| `sdd-fix` | Todo el archivo (reparación y migración) |
 
-### Quién lee, quién escribe
+## Ejecución Inline vs Delegada
 
-| Tarea / Fase | Quién lee del disco | Quién escribe en el disco |
-|---|---|---|
-| Fase con dependencias | **El sub-agente** lee artefactos previos directamente | **El sub-agente** guarda su artefacto |
-| Fase sin dependencias (ej: explore) | Nadie | **El sub-agente** guarda su artefacto (si aplica) |
-| Transición de fase | — | **El orquestador** actualiza `state.yaml` |
+### Ejecución Inline (por defecto)
 
-### Protocolo de Comunicación (Orquestador → Sub-agente)
+Cuando ejecutás una fase inline, vos mismo sos responsable de:
+
+1. Ejecutar BEGIN (escribir `txn_status: in_progress` en state.yaml)
+2. Leer artefactos de dependencia del disco
+3. Ejecutar la fase
+4. Persistir el artefacto resultante en disco
+5. Ejecutar COMMIT (actualizar state.yaml)
+
+### Ejecución Delegada (fases pesadas)
+
+Cuando delegás a un sub-agente:
+
+| Tarea | Quién lo hace |
+|-------|---------------|
+| Leer artefactos de dependencia | **El sub-agente** |
+| Ejecutar la fase | **El sub-agente** |
+| Persistir artefacto en disco | **El sub-agente** |
+| Actualizar `state.yaml` (COMMIT) | **Vos (Memory Guard)** |
+
+El sub-agente NUNCA escribe en `state.yaml`. Solo persiste sus artefactos y retorna un resumen.
+
+## Protocolo de Comunicación (para fases delegadas)
 
 **Fase con dependencias:**
 
@@ -42,12 +61,7 @@ Si hay un glosario en openspec/config.yaml, cargarlo y usarlo para terminología
 Después de completar tu trabajo, persistí tu artefacto siguiendo openspec-convention.md.
 ```
 
-## Nivel de Detalle
-
-El orquestador puede pasar `detail_level`: `concise | standard | deep`.
-Esto controla la verbosidad de la salida en el chat, pero NO afecta lo que se guarda en disco — siempre se persiste el artefacto completo.
-
-## Carga de Glosario (para sub-agentes)
+## Carga de Glosario
 
 Al inicio de cada skill:
 
@@ -56,15 +70,8 @@ Al inicio de cada skill:
 3. Usar los términos definidos para mantener consistencia en el output
 4. Si no existe el glosario, continuar normalmente (es opcional)
 
-Los términos del glosario deben respetarse al generar artefactos:
-
-- Usar la terminología definida en lugar de sinónimos
-- Mantener consistencia semántica en proposal.md, specs/, design.md, etc.
-
 ### Graceful Degradation
 
 - Si `openspec/config.yaml` NO existe → continuar sin glosario
 - Si el archivo existe pero NO tiene sección `glossary:` → continuar sin glosario
 - Si la sección `glossary:` existe pero está vacía o malformada → continuar sin glosario, sin lanzar error
-
-Esta estrategia permite que proyectos existentes (sin glosario) funcionen correctamente mientras nuevos proyectos pueden adoptar el glosario cuando lo necesiten.

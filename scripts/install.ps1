@@ -1,6 +1,6 @@
 <#
 .SYNOPSIS
-    Agentify: SDD Orchestrator — Install Script for Windows PowerShell
+    Agentify: SDD Memory Guard — Install Script for Windows PowerShell
 .DESCRIPTION
     Copies skills to your AI coding assistant's skill directory
     Cross-platform: Windows PowerShell 5.1+, PowerShell Core
@@ -13,7 +13,8 @@
 #>
 
 param(
-    [string]$Agent = "",
+    [Alias("Agent")]
+    [string]$Target = "",
     [string]$Path = ""
 )
 
@@ -149,7 +150,7 @@ function Write-Header {
     Write-Host ""
     Write-Host "${CYAN}${BOLD}======================================${NC}" -NoNewline
     Write-Host "${CYAN}${BOLD}╗${NC}"
-    Write-Host "${CYAN}${BOLD}║       Agentify: SDD Orchestrator— Installer     ║${NC}" -NoNewline
+    Write-Host "${CYAN}${BOLD}║       Agentify: SDD Memory Guard — Installer     ║${NC}" -NoNewline
     Write-Host "${CYAN}${BOLD}║${NC}"
     Write-Host "${CYAN}${BOLD}║   Spec-Driven Development for AI Agents  ║${NC}" -NoNewline
     Write-Host "${CYAN}${BOLD}║${NC}"
@@ -175,120 +176,47 @@ function Write-Error {
     Write-Host "  ${RED}✗${NC} $Message"
 }
 
-function Write-NextStep {
-    param([string]$ConfigFile, [string]$ExampleFile)
-    Write-Host ""
-    Write-Host "${YELLOW}Next step:${NC} Add the orchestrator to your ${BOLD}$ConfigFile${NC}"
-    Write-Host "  See: ${CYAN}$ExampleFile${NC}"
-}
-
 function Show-Help {
     Write-Host "Usage: install.ps1 [OPTIONS]"
     Write-Host ""
     Write-Host "Options:"
-    Write-Host "  -Agent NAME    Install for a specific agent (non-interactive)"
-    Write-Host "  -Path DIR      Custom install path (use with -Agent custom)"
+    Write-Host "  -Target NAME   Install for a specific target engine (non-interactive)"
+    Write-Host "  -Path DIR      Custom install path (use with -Target custom)"
     Write-Host "  -Help          Show this help"
     Write-Host ""
-    Write-Host "Agents: claude-code, opencode, gemini-cli, antigravity, project-local, all-global"
+    Write-Host "Targets: claude-code, opencode, gemini-cli, antigravity, project-local, all-global"
 }
 
 # ============================================================================
-# Config Injection Helpers
+# Packager Wrapper
 # ============================================================================
 
-function Compile-AndAppendConfig {
-    param(
-        [string]$TargetFile,
-        [string]$HeaderFile
-    )
+function Call-Packager {
+    param([string]$TargetName, [string]$SkillsPath, [string]$ConfigTarget)
     
-    $MarkerBegin = "<!-- BEGIN SDD ORCHESTRATOR -->"
-    $MarkerEnd = "<!-- END SDD ORCHESTRATOR -->"
-    
-    $targetDir = Split-Path -Parent $TargetFile
-    if ($targetDir -and -not (Test-Path $targetDir)) {
-        New-Item -ItemType Directory -Path $targetDir -Force | Out-Null
-    }
-    
-    # If file exists and has our block, purge it safely
-    if ((Test-Path $TargetFile) -and (Get-Content $TargetFile -Raw -ErrorAction SilentlyContinue) -match [regex]::Escape($MarkerBegin)) {
-        $content = Get-Content $TargetFile -Raw
-        $pattern = "(?s)$([regex]::Escape($MarkerBegin)).*?$([regex]::Escape($MarkerEnd))"
-        $newContent = $content -replace $pattern, ""
-        Set-Content -Path $TargetFile -Value $newContent -NoNewline
-        Write-Skill "Bloque anterior del orquestador purgado en $(Split-Path $TargetFile -Leaf)"
-    }
-    
-    # Assemble and compile new block
-    Add-Content -Path $TargetFile -Value ""
-    Add-Content -Path $TargetFile -Value $MarkerBegin
-    
-    # Add specific header (e.g., original CLAUDE.md)
-    if (Test-Path $HeaderFile) {
-        Get-Content $HeaderFile | Add-Content -Path $TargetFile
-    }
-    
-    Add-Content -Path $TargetFile -Value ""
-    Add-Content -Path $TargetFile -Value $MarkerEnd
-    
-    Write-Skill "Orquestador inyectado/actualizado exitosamente en $(Split-Path $TargetFile -Leaf)"
-}
-
-function Merge-OpenCodeConfig {
-    $configDir = if ($OS -eq "windows") { "$env:USERPROFILE\.config\opencode" } else { "$HOME/.config/opencode" }
-    $targetConfig = Join-Path $configDir "opencode.json"
-    $sourceConfig = Join-Path $RepoDir "integrations\opencode\opencode.json"
-    
-    if (-not (Test-Path $configDir)) {
-        New-Item -ItemType Directory -Path $configDir -Force | Out-Null
-    }
-    
-    # Use Python for safe JSON merge and prompt compilation
     $pythonCmd = Get-Command python -ErrorAction SilentlyContinue
-    if ($pythonCmd) {
-        $pythonScript = @"
-import json, sys, os
-target_path, source_path = sys.argv[1:3]
-
-# Read source JSON (header)
-try:
-    with open(source_path, "r", encoding="utf-8") as f: source = json.load(f)
-except Exception:
-    sys.exit(1)
-
-# Apply to user JSON
-if os.path.exists(target_path):
-    try:
-        with open(target_path, "r", encoding="utf-8") as f: target = json.load(f)
-    except Exception:
-        target = {"`$schema": "https://opencode.ai/config.json", "agent": {}}
-else:
-    target = {"`$schema": "https://opencode.ai/config.json", "agent": {}}
+    if (-not $pythonCmd) {
+        $pythonCmd = Get-Command python3 -ErrorAction SilentlyContinue
+    }
     
-if "agent" not in target: target["agent"] = {}
-target["agent"]["sdd-orchestrator"] = source["agent"]["sdd-orchestrator"]
-
-with open(target_path, "w", encoding="utf-8") as f: json.dump(target, f, indent=2, ensure_ascii=False)
-sys.exit(0)
-"@
-        $tempScript = [System.IO.Path]::GetTempFileName() + ".py"
-        Set-Content -Path $tempScript -Value $pythonScript -Encoding UTF8
+    if ($pythonCmd) {
+        $packagerScript = Join-Path $ScriptDir "packager.py"
         
-        try {
-            & python $tempScript $targetConfig $sourceConfig 2>&1 | Out-Null
-            if ($LASTEXITCODE -eq 0) {
-                Write-Skill "sdd-orchestrator compilado e inyectado en opencode.json"
-            } else {
-                Write-Warn "No se pudo inyectar automáticamente. Error en compilación Python."
-            }
-        } catch {
-            Write-Warn "No se detectó Python3. Copia el orquestador a opencode.json manualmente."
-        } finally {
-            Remove-Item $tempScript -Force -ErrorAction SilentlyContinue
+        if ($TargetName -eq "opencode") {
+            $commandsSrc = Join-Path $RepoDir "integrations\opencode\commands"
+            $commandsTarget = if ($OS -eq "windows") { "$env:USERPROFILE\.config\opencode\commands" } else { "$HOME/.config/opencode/commands" }
+            & $pythonCmd.Path $packagerScript --target $TargetName --skills-path $SkillsPath --config-target "$ConfigTarget" --commands-src $commandsSrc --commands-target $commandsTarget 2>&1 | Out-Null
+        } else {
+            & $pythonCmd.Path $packagerScript --target $TargetName --skills-path $SkillsPath --config-target "$ConfigTarget" 2>&1 | Out-Null
+        }
+        
+        if ($LASTEXITCODE -eq 0) {
+            Write-Skill "Configuracion inyectada correctamente para $TargetName mediante packager.py"
+        } else {
+            Write-Error "Error ejecutando packager.py para $TargetName"
         }
     } else {
-        Write-Warn "No se detectó Python3. Copia el orquestador a opencode.json manualmente."
+        Write-Warn "No se detectó Python. La configuración no pudo ser empaquetada."
     }
 }
 
@@ -319,7 +247,7 @@ function Test-SourceValid {
     if ($missing -gt 0) {
         Write-Host ""
         Write-Host "${RED}${BOLD}Source validation failed.${NC} Is this a complete clone of the repository?"
-        Write-Host "  Try: ${CYAN}git clone https://github.com/TU-USUARIO/agentify-sdd.git${NC}"
+        Write-Host "  Try: ${CYAN}git clone https://github.com/fdomerlo/agentify-sdd.git${NC}"
         Write-Host ""
         exit 1
     }
@@ -390,10 +318,10 @@ function Install-Skills {
 # Agent Install Dispatcher
 # ============================================================================
 
-function Install-ForAgent {
-    param([string]$AgentName)
+function Install-ForTarget {
+    param([string]$TargetName)
     
-    switch ($AgentName) {
+    switch ($TargetName) {
         "claude-code" {
             $targetPath = Get-ToolPath "claude-code"
             Install-Skills $targetPath "Claude Code"
@@ -401,27 +329,28 @@ function Install-ForAgent {
             if (-not $configTarget.Contains("$env:USERPROFILE")) {
                 $configTarget = "$HOME\.claude\CLAUDE.md"
             }
-            Compile-AndAppendConfig -TargetFile $configTarget -HeaderFile (Join-Path $RepoDir "integrations\claude-code\CLAUDE.md")
+            Call-Packager "claude-code" (Get-ToolPath "claude-code") $configTarget
         }
         "opencode" {
             $targetPath = Get-ToolPath "opencode"
             Install-Skills $targetPath "OpenCode"
-            Merge-OpenCodeConfig
+            $configTarget = if ($OS -eq "windows") { "$env:USERPROFILE\.config\opencode\opencode.json" } else { "$HOME/.config/opencode/opencode.json" }
+            Call-Packager "opencode" (Get-ToolPath "opencode") $configTarget
         }
         "gemini-cli" {
             $targetPath = Get-ToolPath "gemini-cli"
             Install-Skills $targetPath "Gemini CLI"
             $configTarget = if ($OS -eq "windows") { "$env:USERPROFILE\.gemini\GEMINI.md" } else { "$HOME/.gemini/GEMINI.md" }
-            Compile-AndAppendConfig -TargetFile $configTarget -HeaderFile (Join-Path $RepoDir "integrations\gemini-cli\GEMINI.md")
+            Call-Packager "gemini-cli" (Get-ToolPath "gemini-cli") $configTarget
         }
         "antigravity" {
-            $target = Get-ToolPath "antigravity"
-            Install-Skills $target "Antigravity"
+            $targetPath = Get-ToolPath "antigravity"
+            Install-Skills $targetPath "Antigravity"
             $configTarget = if ($OS -eq "windows") { "$env:USERPROFILE\.gemini\GEMINI.md" } else { "$HOME/.gemini/GEMINI.md" }
             if (Test-Path ".\.agent\rules") {
                 Remove-Item -Path ".\.agent\rules" -Recurse -Force -ErrorAction SilentlyContinue
             }
-            Compile-AndAppendConfig -TargetFile $configTarget -HeaderFile (Join-Path $RepoDir "integrations\antigravity\sdd-orchestrator.md")
+            Call-Packager "antigravity" (Get-ToolPath "antigravity") $configTarget
         }
         "project-local" {
             $targetPath = Get-ToolPath "project-local"
@@ -434,18 +363,19 @@ function Install-ForAgent {
             $targetPath = Get-ToolPath "claude-code"
             Install-Skills $targetPath "Claude Code"
             $configTarget = if ($OS -eq "windows") { "$env:USERPROFILE\.claude\CLAUDE.md" } else { "$HOME/.claude/CLAUDE.md" }
-            Compile-AndAppendConfig -TargetFile $configTarget -HeaderFile (Join-Path $RepoDir "integrations\claude-code\CLAUDE.md")
+            Call-Packager "claude-code" (Get-ToolPath "claude-code") $configTarget
             
             # OpenCode
             $targetPath = Get-ToolPath "opencode"
             Install-Skills $targetPath "OpenCode"
-            Merge-OpenCodeConfig
+            $ocTarget = if ($OS -eq "windows") { "$env:USERPROFILE\.config\opencode\opencode.json" } else { "$HOME/.config/opencode/opencode.json" }
+            Call-Packager "opencode" (Get-ToolPath "opencode") $ocTarget
             
             # Gemini CLI
             $targetPath = Get-ToolPath "gemini-cli"
             Install-Skills $targetPath "Gemini CLI"
             $configTarget = if ($OS -eq "windows") { "$env:USERPROFILE\.gemini\GEMINI.md" } else { "$HOME/.gemini/GEMINI.md" }
-            Compile-AndAppendConfig -TargetFile $configTarget -HeaderFile (Join-Path $RepoDir "integrations\gemini-cli\GEMINI.md")
+            Call-Packager "gemini-cli" (Get-ToolPath "gemini-cli") $configTarget
             
             # Antigravity
             $targetPath = Get-ToolPath "antigravity"
@@ -454,7 +384,7 @@ function Install-ForAgent {
             if (Test-Path ".\.agent\rules") {
                 Remove-Item -Path ".\.agent\rules" -Recurse -Force -ErrorAction SilentlyContinue
             }
-            Compile-AndAppendConfig -TargetFile $configTarget -HeaderFile (Join-Path $RepoDir "integrations\antigravity\sdd-orchestrator.md")
+            Call-Packager "antigravity" (Get-ToolPath "antigravity") $configTarget
             
             Write-Host ""
             Write-Host "${GREEN}${BOLD}Todos los orquestadores globales configurados automaticamente!${NC}"
@@ -467,9 +397,10 @@ function Install-ForAgent {
                 $customPath = $Path
             }
             Install-Skills $customPath "Custom"
+            Call-Packager "custom" $customPath ""
         }
         default {
-            Write-Error "Unknown agent: $AgentName"
+            Write-Error "Unknown target: $TargetName"
             Write-Host ""
             Show-Help
             exit 1
@@ -495,13 +426,13 @@ function Show-InteractiveMenu {
     $choice = Read-Host "Choice [1-7]"
     
     switch ($choice) {
-        "1"  { Install-ForAgent "claude-code" }
-        "2"  { Install-ForAgent "opencode" }
-        "3"  { Install-ForAgent "gemini-cli" }
-        "4"  { Install-ForAgent "antigravity" }
-        "5"  { Install-ForAgent "project-local" }
-        "6"  { Install-ForAgent "all-global" }
-        "7"  { Install-ForAgent "custom" }
+        "1"  { Install-ForTarget "claude-code" }
+        "2"  { Install-ForTarget "opencode" }
+        "3"  { Install-ForTarget "gemini-cli" }
+        "4"  { Install-ForTarget "antigravity" }
+        "5"  { Install-ForTarget "project-local" }
+        "6"  { Install-ForTarget "all-global" }
+        "7"  { Install-ForTarget "custom" }
         default {
             Write-Error "Invalid choice"
             exit 1
@@ -514,7 +445,7 @@ function Show-InteractiveMenu {
 # ============================================================================
 
 # Parse arguments
-$agentArg = $Agent
+$targetArg = $Target
 $pathArg = $Path
 
 # Check for help
@@ -526,9 +457,9 @@ if ($args -contains "-Help" -or $args -contains "-h" -or $args -contains "/?" ) 
 Write-Header
 Test-SourceValid
 
-if (-not [string]::IsNullOrEmpty($agentArg)) {
+if (-not [string]::IsNullOrEmpty($targetArg)) {
     # Non-interactive mode
-    Install-ForAgent $agentArg
+    Install-ForTarget $targetArg
 } else {
     # Interactive mode
     Show-InteractiveMenu

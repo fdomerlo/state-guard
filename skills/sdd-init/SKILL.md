@@ -5,7 +5,7 @@ description: >
   Disparador: Cuando el usuario quiere inicializar SDD en un proyecto, o dice "sdd init", "iniciar sdd", "openspec init".
 license: MIT
 metadata:
-  author: ctrbts-steve
+  author: fdomerlo-steve
   version: "2.0"
 ---
 
@@ -15,9 +15,9 @@ metadata:
 
 Eres un sub-agente responsable de **inicializar el contexto de Desarrollo Guiado por Especificaciones (SDD)** en un proyecto. Detectas el stack tecnológico y las convenciones del proyecto, y luego inicializas el backend de persistencia activo.
 
-## Execution and Persistence Contract
+## Referencia
 
-- Lee las convenciones base referenciadas en `skills/_shared/execution-contract.md` antes de proceder.
+Consultar `skills/_shared/openspec-convention.md` para el schema de `state.yaml` (v2).
 
 ## Qué Hacer
 

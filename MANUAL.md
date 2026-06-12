@@ -4,57 +4,55 @@ Este manual cubre la arquitectura técnica, configuración y flujos avanzados de
 
 ---
 
-## Arquitectura DRY
+## Arquitectura Memory Guard
 
-### Compilación Dinámica del Orquestador
+### Contrato Unificado
 
-El orquestador SDD sigue el principio **DRY (Don't Repeat Yourself)** mediante un sistema de compilación dinámica. En lugar de un único archivo monolítico, el orquestador se assembla dinámicamente cargando las skills individuales en tiempo de ejecución.
-
-### Mecanismo de Carga de Skills
-
-El orquestador utiliza **Inyección dinámica de rutas**, lo que centraliza la carga de contratos base y dependencias en el orquestador en lugar de obligar a cada sub-agente a descubrirlas:
+El Memory Guard es el contrato central que el agente carga al iniciar una sesión SDD. En lugar de un orquestador que despacha comandos CLI a sub-agentes, el agente ejecuta fases directamente (inline) protegido por un protocolo de persistencia transaccional.
 
 ```
-Orquestador (orquestador-core)
+Memory Guard (memory-guard.md)
     │
-    ├── Carga persistence-contract.md  → Resuelve el modo
-    ├── Carga openspec-convention.md   → Prepara rutas de contexto
+    ├── Carga transaction-protocol.md → Protocolo BEGIN/COMMIT/ROLLBACK
+    ├── Carga capabilities.md         → Detecta capacidades del host
+    ├── Carga persistence-contract.md → Resuelve el modo de persistencia
+    ├── Carga openspec-convention.md  → Prepara rutas y schema
     │
-    ├── Inyecta contexto y rutas → sdd-init
-    ├── Inyecta contexto y rutas → sdd-explore
-    ├── Inyecta contexto y rutas → sdd-propose
-    ├── Inyecta contexto y rutas → sdd-spec
-    ├── Inyecta contexto y rutas → sdd-design
-    ├── Inyecta contexto y rutas → sdd-tasks
-    ├── Inyecta contexto y rutas → sdd-apply
-    ├── Inyecta contexto y rutas → sdd-verify
-    └── Inyecta contexto y rutas → sdd-archive
+    ├── Ejecuta inline → sdd-explore   (carga SKILL.md como instrucciones)
+    ├── Ejecuta inline → sdd-propose
+    ├── Ejecuta inline → sdd-spec
+    ├── Ejecuta inline → sdd-design
+    ├── Ejecuta inline → sdd-tasks
+    ├── Ejecuta inline → sdd-apply     (delega si > 10 tareas y host soporta)
+    ├── Ejecuta inline → sdd-verify
+    └── Ejecuta inline → sdd-archive
 ```
 
-### Herencia Inyectada
+### Módulos del Memory Guard
 
-Las skills reciben sus convenciones dinámicamente desde el orquestador, quienes las lee de `skills/_shared/`:
+Los contratos compartidos residen en `skills/_shared/`:
 
 | Archivo | Propósito |
 |---------|-----------|
-| `persistence-contract.md` | El orquestador lo lee para decidir el modo (`openspec` o `none`) y se lo instruye al sub-agente |
-| `openspec-convention.md` | El orquestador arma las rutas y el contexto basado en esto y se las inyecta al sub-agente |
-| `sdd-phase-common.md` | Define el contrato del Return Envelope para todas las fases SDD |
+| `memory-guard.md` | Contrato unificado: identidad del agente, ejecución de fases, delegación inteligente, recovery |
+| `transaction-protocol.md` | Protocolo de transacciones: ciclo BEGIN/COMMIT/ROLLBACK, campos txn_* en state.yaml, auto-checkpoint |
+| `capabilities.md` | Detección de capacidades del agente host y regla de delegación inteligente |
+| `context-injection.md` | Dependencias de contexto por fase y secuencia de ejecución |
+| `persistence-contract.md` | Contrato de persistencia: inline vs delegada, protocolo de comunicación |
+| `openspec-convention.md` | Convención de filesystem, schema state.yaml v2, tabla de transiciones de lock_phase |
+| `sdd-phase-common.md` | Protocolo de transacción común a todas las skills de fase |
+| `test-runner-detection.md` | Pseudocódigo para la detección automática del test runner del proyecto |
 
-Puesto que el orquestador se encarga de proveer las rutas exactas, los sub-agentes solo tienen que utilizarlas, optimizando el uso de tokens y la consistencia.
+### Autodetección y Delegación Inteligente
 
-### Presupuestos de Contexto
+El agente determina su comportamiento en tiempo de ejecución analizando las reglas de `capabilities.md`. A través del sistema de archivos, el agente detecta dinámicamente el host en runtime (por ejemplo, verificando la presencia de `.claude`, `.gemini` o `.config/opencode/`) y activa o desactiva capacidades según la plataforma.
 
-Cada skill de fase tiene un **presupuesto de tamaño** para proteger la ventana de contexto:
+El Memory Guard ejecuta fases **inline por defecto**: carga el `SKILL.md` correspondiente y sigue sus instrucciones como propias. Sin embargo, para aislar el contexto y preservar la memoria de la sesión principal, delega el trabajo pesado a un sub-agente real bajo estas estrictas condiciones:
 
-| Skill | Límite |
-|-------|--------|
-| `sdd-propose` | < 400 palabras |
-| `sdd-spec` | < 650 palabras |
-| `sdd-design` | < 800 palabras (usar tablas) |
-| `sdd-tasks` | < 530 palabras |
+1. La fase es `sdd-apply` con más de 10 tareas pendientes, **Y**
+2. El agente host detectado soporta sub-agentes reales (Claude Code, OpenCode, Antigravity).
 
-Estos límites están definidos en la sección "Reglas" de cada skill y aseguran que la salida sea concisa y enfocada
+En la ejecución delegada, el sub-agente ejecuta las tareas e interactúa con el disco, pero **nunca** escribe en `state.yaml`. El Memory Guard asume exclusivamente la responsabilidad del COMMIT transaccional al finalizar la delegación.
 
 ### Skill Registry Dinámico
 
@@ -62,15 +60,29 @@ El sistema incluye un **registry dinámico de skills** que permite el descubrimi
 
 - Script bash POSIX en `skills/sdd-skill-registry/scan.sh`
 - Índice generado en `.agentify/skill-registry.md`
-- El orquestador lee este índice al iniciar para conocer las herramientas disponibles
+- El Memory Guard lee este índice al iniciar para conocer las herramientas disponibles
 
 El registry escanea los directorios global (`$HOME/.skills-custom`) y local (`./skills-custom`), extrayendo nombre, descripción, trigger y ubicación de cada SKILL.md.
 
 ---
 
-## State Machine ACID
+## Compilación Condicional vs Runtime
 
-### Estructura de state.yaml
+El sistema emplea el script empaquetador `scripts/packager.py` para adaptar la arquitectura al nivel de inteligencia del motor destino, garantizando la inmutabilidad de la carpeta raíz de habilidades (`skills/`):
+
+### Compilación Estática (Target OpenCode)
+Los modelos de entrada tienden a sufrir de "pereza de herramientas" y les cuesta inferir que deben leer el contexto dinámicamente si no se les inyecta explícitamente en el *system prompt*.
+Para `--target opencode`, el empaquetador realiza un **inlining masivo**: lee todo el contenido de `memory-guard.md`, `transaction-protocol.md`, `capabilities.md` y `openspec-convention.md`, inyectándolo como un único bloque gigante dentro de la clave `prompt` del archivo `opencode.json`. 
+Además, el empaquetador reescribe dinámicamente las directivas de los *slash commands* (como `sdd-apply.md`) para usar lenguaje imperativo (ej. `INSTRUCCIÓN CRÍTICA: DEBES usar tu herramienta read_file INMEDIATAMENTE en la ruta...`), forzando al modelo a realizar el *tool-calling* esperado.
+
+### Context Streaming (Targets Avanzados)
+Para modelos de frontera como Antigravity o Claude Code (`--target antigravity`, `--target claude-code`), el empaquetador evita el inlining pesado. Despliega un *system prompt* minimalista conservando la filosofía de **Lazy Loading** (Context Streaming). El agente carga dinámicamente las habilidades compartidas y específicas bajo demanda, respetando las referencias modulares limpias para mantener la ventana de contexto sumamente ligera.
+
+---
+
+## State Machine Transaccional
+
+### Estructura de state.yaml (v2)
 
 El archivo `state.yaml` es el núcleo del sistema de estados. Se encuentra en:
 
@@ -78,15 +90,16 @@ El archivo `state.yaml` es el núcleo del sistema de estados. Se encuentra en:
 openspec/changes/{nombre-del-cambio}/state.yaml
 ```
 
-**Schema:**
+**Schema (v2):**
 
 ```yaml
+schema_version: 2                    # Versión del schema (para migración automática)
 change: {nombre-del-cambio}
 started_at: "YYYY-MM-DDTHH:MM:SS"   # ISO 8601
-last_updated: "YYYY-MM-DDTHH:MM:SS" # Actualizado en cada transición
-current_phase: {fase-actual}        # última fase completada exitosamente
-lock_phase: {fase-siguiente}        # única fase autorizada a ejecutarse ahora
-status: {estado}                    # active | done | blocked
+last_updated: "YYYY-MM-DDTHH:MM:SS" # Actualizado en cada COMMIT de transacción
+current_phase: {fase-actual}         # Última fase completada exitosamente
+lock_phase: {fase-siguiente}         # Única fase autorizada a ejecutarse ahora
+status: {estado}                     # active | done | blocked
 completed_phases:
   - explore
   - propose
@@ -98,32 +111,81 @@ pending_phases:
   - archive
 blocked: false
 blocked_reason: null
-session_summary:                     # bloque YAML estructurado (ver openspec-convention.md)
+
+# --- Campos transaccionales (v2) ---
+txn_status: idle                     # idle | in_progress | failed
+txn_phase: null                      # Fase en ejecución, o null si idle
+txn_started_at: null                 # ISO 8601 de inicio de transacción
+
+session_summary:                     # Bloque YAML estructurado (máx 500 tokens)
   archivos_modificados:
-    - ruta/al/archivo.ext            # máx 10 entradas
+    - ruta/al/archivo.ext            # Máx 10 entradas
   estado_tareas: "{X}/{Y} — última: [{ID}] {descripción breve}"
   decisiones_clave:
     - "{decisión clave}"
   proxima_accion: "/sdd-{comando} {nombre-cambio}"
 ```
 
+### Protocolo de Transacciones (transaction-protocol.md)
+
+Cada fase SDD se ejecuta como una transacción ACID atómica gobernada estrictamente por `transaction-protocol.md`:
+
+```text
+IDLE → BEGIN → EXECUTE → COMMIT (éxito) o ROLLBACK (fallo) → IDLE
+```
+
+El ciclo de vida de la transacción exige la actualización de los nuevos campos transaccionales obligatorios (`schema_version: 2`):
+
+| Paso | Qué ocurre |
+|------|-----------|
+| **BEGIN** | Registra el inicio marcando `txn_status: in_progress`, `txn_phase: {fase}` y capturando el timestamp actual en `txn_started_at` dentro de `state.yaml`. |
+| **EXECUTE** | El agente ejecuta la fase encomendada, persistiendo los artefactos generados (código, diseño, specs) en disco de forma segura. |
+| **COMMIT** | Consolida la operación. Actualiza atómicamente `current_phase` y `lock_phase`, mueve la fase a `completed_phases`, y reinicia `txn_status: idle` y `txn_phase: null`. |
+| **ROLLBACK** | Si ocurre un fallo, aborta seteando `txn_status: failed`, dejando sin alterar el registro de fases para preservar la integridad estructural del DAG. |
+
+**Anti-batching por protocolo**: Cada fase requiere su propio ciclo BEGIN → COMMIT ineludiblemente. Al ser `txn_phase` un valor escalar y no una lista, es mecánicamente imposible ejecutar múltiples fases bajo una misma transacción.
+
+### Mitigación de Fuga de Contexto
+
+Como mecanismo crucial post-COMMIT, `transaction-protocol.md` establece un procedimiento para la **mitigación de fuga de contexto**. 
+Una vez que el estado es exitosamente consolidado en `state.yaml`, el protocolo exige emitir una **advertencia de purga de chat**. Esta instrucción sirve para alertar al usuario y al agente sobre la necesidad de limpiar el historial de la conversación (o disparar una recarga de contexto / inicio de un nuevo sub-hilo) antes de proceder con la siguiente fase de desarrollo. Esto erradica la acumulación de directivas obsoletas, evitando severas "alucinaciones" durante transiciones prolongadas.
+
+### Recovery Automático
+
+Al detectar un `state.yaml` con `txn_status: in_progress` (crash durante ejecución):
+
+1. Verifica si el artefacto de `txn_phase` se persistió en disco
+2. Si **SÍ** → ejecuta COMMIT (la fase se completó pero el estado no se persistió)
+3. Si **NO** → ejecuta ROLLBACK (restaura `txn_status: idle` sin modificar phases)
+
 ### Propiedades ACID
 
-**Atomicidad (Atomicity):** Cada fase se completa completamente o no se completa. El orquestador solo actualiza `state.yaml` después de que una fase termina exitosamente.
+**Atomicidad (Atomicity):** Cada fase se completa completamente o no se completa. El COMMIT solo ocurre después de que el artefacto se persistió en disco exitosamente.
 
-**Consistencia (Consistency):** El schema de `state.yaml` está validado. Las transiciones siguen un orden estricto definido por el grafo de dependencias.
+**Consistencia (Consistency):** El schema de `state.yaml` v2 está validado. Las transiciones siguen un orden estricto definido por el grafo de dependencias y los campos transaccionales garantizan detección de estado intermedio.
 
 **Aislamiento (Isolation):** Cada cambio tiene su propio `state.yaml`. Múltiples cambios pueden ejecutarse en paralelo sin interferir entre sí.
 
-**Durabilidad (Durability):** El estado persiste en el filesystem del proyecto. Sobrevive a recargas de sesión, compactaciones de contexto y reinicios del IDE.
+**Durabilidad (Durability):** El estado persiste en el filesystem del proyecto. Sobrevive a recargas de sesión, compactaciones de contexto y reinicios del IDE. Los campos transaccionales permiten recovery automático.
 
 ### Prevención de Colisiones
 
-El orquestador detecta cambios concurrentes mediante:
+El Memory Guard detecta cambios concurrentes mediante:
 
-1. Lectura del `state.yaml` antes de cada transición de fase
-2. Verificación de que la fase anterior está marcada como completada
-3. Bloqueo de fases si el campo `status` es `blocked` (proporcionando un `blocked_reason`)
+1. Lectura del `state.yaml` antes de cada transacción
+2. Verificación del campo `lock_phase` (única fase autorizada)
+3. Bloqueo de fases si `status` es `blocked`
+4. Detección de transacciones incompletas (`txn_status: in_progress`)
+
+### Migración v1 → v2
+
+Los `state.yaml` sin campo `schema_version` se consideran v1. La migración es automática:
+
+1. Agregar `schema_version: 2`
+2. Agregar `txn_status: idle`, `txn_phase: null`, `txn_started_at: null`
+3. Si falta `lock_phase`, inferirlo desde artefactos (lógica de `sdd-fix`)
+
+La migración la ejecuta `sdd-fix` o el Recovery Protocol al encontrar un state.yaml sin `schema_version`.
 
 ---
 
@@ -154,6 +216,12 @@ rules:
     - Usar rutas en kebab-case para nombres de cambios
     - Los nombres de archivos de skills también usan kebab-case
 ```
+
+### Scripts de Mantenimiento y Desarrollo
+
+El directorio `scripts/` incluye herramientas adicionales de soporte:
+- `cleanup.sh`: Desinstala stubs y limpia los datos temporales del framework en los diferentes agentes de IA. Soporta el flag `--hard` para purgar históricos.
+- `install_test.sh`: Suite de tests unitarios y de integración para validar el correcto funcionamiento del script de instalación en diferentes entornos.
 
 ### Parámetro test_command
 
@@ -196,25 +264,30 @@ El comando `/sdd-split` analiza una proposal monolítica y la divide en sub-camb
 
 ### /sdd-ff — Avance Rápido (Fast-Forward)
 
-El comando `/sdd-ff` permite ejecutar secuencialmente y sin interrupción las fases de planificación (`propose`, `spec`, `design`, `tasks`).
+El comando `/sdd-ff` permite ejecutar secuencialmente las fases de planificación (`propose`, `spec`, `design`, `tasks`).
 
 **Cuándo usarlo:**
 
 - Al iniciar un cambio nuevo bien definido donde no necesitas revisar manualmente cada artefacto intermedio.
 
-**Anti-Batching y Persistencia:**
-A diferencia de pedirle al LLM que "haga todas las fases de una vez" en un solo prompt (lo que corrompe el DAG), `/sdd-ff` es una meta-skill que itera paso a paso: verifica `lock_phase` antes de delegar cada fase, escribe el `state.yaml` por cada transición e invoca a la siguiente, respetando estrictamente el principio ACID y la regla de **anti-batching**.
+**Anti-Batching Transaccional:**
+A diferencia de pedirle al LLM que "haga todas las fases de una vez" en un solo prompt (lo que corrompe el DAG), `/sdd-ff` ejecuta 4 transacciones secuenciales independientes. Cada fase tiene su propio ciclo BEGIN → COMMIT, y si el agente crashea entre la transacción 2 y la 3, el Recovery Protocol continúa automáticamente desde donde quedó.
 
-### /sdd-checkpoint — Guardado de Estado de Alta Fidelidad
+### /sdd-checkpoint — Guardado de Estado
 
 El comando `/sdd-checkpoint` genera un **bloque YAML estructurado** analizando proactivamente
 `tasks.md` y `design.md` del cambio activo. El resultado se guarda en el campo `session_summary`
 de `state.yaml`, posibilitando una recuperación de contexto eficiente (**Warm-Boot**).
 
+**Dos modos de operación:**
+
+1. **Automático** (post-COMMIT): El protocolo de transacción genera un `session_summary` compacto después de cada fase. Esto es suficiente para la mayoría de los casos.
+2. **Manual** (`/sdd-checkpoint`): Genera un checkpoint de alta fidelidad con análisis proactivo de todos los artefactos. Útil antes de operaciones riesgosas o para refrescar el contexto.
+
 El checkpoint es **agnóstico al DAG**: puede ejecutarse en cualquier momento sin modificar
 `lock_phase`, `current_phase` ni el flujo de fases activo.
 
-**Cuándo usarlo:**
+**Cuándo usarlo manualmente:**
 
 - Antes de realizar operaciones riesgosas
 - Al interrumpir un lote de `sdd-apply` para preservar el estado
@@ -260,16 +333,17 @@ El comando `/sdd-review` compara el código implementado contra las especificaci
 /sdd-review mi-cambio
 ```
 
-### /sdd-fix — Reparación de Problemas
+### /sdd-fix — Reparación y Migración
 
 El comando `/sdd-fix` detecta y repara problemas comunes en el proyecto.
 
-**Problemas que detecta:**
+**Problemas que detecta y repara:**
 
 - Estado corrupto en `state.yaml`
 - Archivos de spec faltantes
-- Referencias rotas entre artefactos
-- Convenciones violadas
+- Campo `lock_phase` ausente (inferencia desde artefactos)
+- State.yaml v1 sin campos transaccionales (migración automática a v2)
+- Transacciones incompletas (`txn_status: in_progress` o `failed`)
 
 **Ejemplo de uso:**
 
@@ -309,7 +383,7 @@ openspec/
     ├── archive/
     │   └── YYYY-MM-DD-{change}/
     └── {change-name}/
-        ├── state.yaml             ← Estado del DAG
+        ├── state.yaml             ← Estado del DAG (v2 con campos txn_*)
         ├── proposal.md            ← Propuesta
         ├── exploration.md         ← Investigación inicial (opcional)
         ├── specs/                 ← Specs delta
@@ -361,22 +435,22 @@ Las specs usan el formato **GIVEN/WHEN/THEN**:
 
 ## Integración con Herramientas
 
-Agentify SDD soporta múltiples herramientas de IA:
+Agentify SDD soporta múltiples agentes de IA. El Memory Guard se adapta automáticamente a las capacidades de cada host:
 
-| Herramienta | Sub-agentes | Meta-comandos SDD |
-|------------|:-----------:|:-----------------:|
-| Claude Code | ✅ | ✅ |
-| OpenCode | ✅ | ✅ |
-| Gemini CLI | ✅ (ejecuta skills inline, por lo que la anti-compactación de contexto es limitada) | ✅ |
-| Antigravity | ✅ | ✅ |
+| Herramienta | Ejecución Inline | Sub-agentes | Delegación Inteligente |
+|------------|:----------------:|:-----------:|:---------------------:|
+| Claude Code | ✅ | ✅ | Apply pesados |
+| OpenCode | ✅ | ✅ | Apply pesados |
+| Gemini CLI | ✅ | ❌ | Siempre inline |
+| Antigravity | ✅ | ✅ | Apply pesados |
 
-La instalación varía según la herramienta. Ejecuta `scripts/install.sh` y selecciona tu herramienta.
+La instalación varía según la herramienta. Ejecuta `scripts/install.sh` y selecciona tu herramienta. Cada integración es un stub mínimo que carga `memory-guard.md` como contrato central.
 
 ---
 
 ## Guía de Integración: Custom Skills
 
-El framework SDD es extensible mediante "Custom Skills", permitiendo integrar sub-agentes especializados que no son partes nativas del orquestador SDD (por ejemplo, herramientas de desarrollo frontend, diseño o base de datos).
+El framework SDD es extensible mediante "Custom Skills", permitiendo integrar herramientas especializadas que no son parte nativa del framework (por ejemplo, herramientas de desarrollo frontend, diseño o base de datos).
 
 ### 1. Ubicación Física
 
@@ -388,11 +462,11 @@ Toda nueva skill personalizada o de terceros debe residir en su propio directori
 
 ### 2. Archivo de Contrato (`SKILL.md`)
 
-Toda skill **DEBE** contener un archivo `SKILL.md` en su raíz. Este archivo actúa como el contrato de integración, las instrucciones directas (System Prompt) generadas para la herramienta y los metadatos necesarios. Sin este archivo, el skill no existirá.
+Toda skill **DEBE** contener un archivo `SKILL.md` en su raíz. Este archivo actúa como el contrato de integración, las instrucciones directas que el agente carga inline cuando necesita ejecutar la skill. Sin este archivo, la skill no existirá.
 
 ### 3. Indexación (`skill-registry`)
 
-Una vez añadida la skill, el desarrollador (o el sistema) debe registrarla para que pueda ser descubierta. Para esto, ejecuta el meta-comando del orquestador o corre el script directamente:
+Una vez añadida la skill, el desarrollador (o el sistema) debe registrarla para que pueda ser descubierta. Para esto, ejecuta el comando:
 
 ```text
 /sdd-skill-registry
@@ -400,9 +474,9 @@ Una vez añadida la skill, el desarrollador (o el sistema) debe registrarla para
 
 Esto escaneará las rutas global y local, y actualizará el archivo de repositorio local en `.agentify/skill-registry.md`.
 
-### 4. Uso por el Orquestador
+### 4. Uso por el Memory Guard
 
-El orquestador SDD lee `.agentify/skill-registry.md` al inicializar contexto y mapea cada entrada como una herramienta delegable válida. Al analizar la necesidad de un usuario, se basará en atributos declarados como `name` y `description` para delegar proactivamente el trabajo de sub-agentes no nativos.
+El Memory Guard lee `.agentify/skill-registry.md` al inicializar contexto y mapea cada entrada como una herramienta ejecutable. Al analizar la necesidad de un usuario, se basará en atributos declarados como `name` y `description` para cargar proactivamente la skill relevante.
 
 ### Ejemplo Boilerplate (`frontend-design/SKILL.md`)
 
@@ -427,9 +501,10 @@ Actúas como un desarrollador y diseñador de componentes Vue/React/HTML...
 
 ### El estado no avanza
 
-1. Verificar que `state.yaml` existe
+1. Verificar que `state.yaml` existe y tiene `schema_version: 2`
 2. Revisar que el campo `status` sea `active`. Si es `blocked`, revisar `blocked_reason`.
-3. Ejecutar `/sdd-fix` para reparación automática
+3. Verificar `txn_status`: si es `in_progress`, hay una transacción incompleta; si es `failed`, hubo un error en la última fase.
+4. Ejecutar `/sdd-fix` para reparación automática y migración
 
 ### Los artefactos no persisten
 
@@ -437,12 +512,18 @@ Actúas como un desarrollador y diseñador de componentes Vue/React/HTML...
 2. Verificar que el directorio `openspec/` existe
 3. Revisar permisos de escritura
 
+### Transacción incompleta detectada
+
+1. El Recovery Protocol intenta resolver automáticamente al ejecutar `/sdd-continue`
+2. Si persiste, ejecutar `/sdd-fix` para reparación manual
+3. Como último recurso, editar manualmente `state.yaml`: setear `txn_status: idle`, `txn_phase: null`
+
 ### Conflictos entre cambios
 
-1. Usar `/sdd-status` para ver todos los cambios activos
+1. Usar `/sdd-status` para ver todos los cambios activos (incluye columna de estado transaccional)
 2. Archivar cambios completados antes de iniciar nuevos
 3. No trabajar en el mismo cambio desde múltiples sesiones
 
 ---
 
-*Manual técnico — Agentify SDD v1.0*
+*Manual técnico — Agentify SDD v2.0 — Arquitectura Memory Guard*

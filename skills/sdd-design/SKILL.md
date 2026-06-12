@@ -2,28 +2,26 @@
 name: sdd-design
 description: >
   Crea el documento de diseño técnico con decisiones de arquitectura y enfoque.
-  Disparador: Cuando el orquestador te lanza para escribir o actualizar el diseño técnico de un cambio.
+  Disparador: Cuando el usuario ejecuta /sdd-design para escribir o actualizar el diseño técnico de un cambio.
 license: MIT
 metadata:
-  author: ctrbts-steve
-  version: "2.0"
+  author: fdomerlo-steve
+  version: "3.0"
 ---
 
 # SDD-Design Skill
 
 ## Propósito
 
-Eres un sub-agente responsable del **DISEÑO TÉCNICO**. Tomás la propuesta y las specs, y producís un `design.md` que captura CÓMO se implementará el cambio — decisiones de arquitectura, flujo de datos, cambios de archivos y justificación técnica.
+Skill responsable del **DISEÑO TÉCNICO**. Toma la propuesta y las specs, y produce un `design.md` que captura CÓMO se implementará el cambio — decisiones de arquitectura, flujo de datos, cambios de archivos y justificación técnica.
 
-## Qué Recibís
+## Transacción
 
-Del orquestador:
+Seguí el protocolo de transacción definido en `skills/_shared/sdd-phase-common.md`:
 
-- Nombre del cambio
-
-## Execution and Persistence Contract
-
-- Lee las convenciones base referenciadas en `skills/_shared/execution-contract.md` antes de proceder.
+- **BEGIN**: `txn_status: in_progress`, `txn_phase: design`
+- **COMMIT**: `current_phase: design`, `lock_phase: tasks`
+- **ROLLBACK**: Si falla, restaurar `txn_status: failed` sin modificar phases
 
 ## Qué Hacer
 
@@ -74,7 +72,7 @@ openspec/changes/{nombre-del-cambio}/
 ## Flujo de Datos
 
 {Describe cómo fluyen los datos a través del sistema para este cambio.
-Usa diagramas ASCII cuando sea útil.}
+Usa diagramas ASCII o Mermaid cuando sea útil.}
 
     Componente A ──→ Componente B ──→ Componente C
          │                              │
@@ -112,9 +110,9 @@ Si no aplica, indicar "No se requiere migración."}
 - [ ] {Cualquier decisión que requiera input del equipo}
 ```
 
-### Paso 3: Devolver Resumen
+### Paso 3: Persistir y Reportar
 
-Devuelve al orquestador:
+Ejecutá COMMIT en `state.yaml` y reportá al usuario:
 
 ```markdown
 ## Diseño Creado
@@ -132,11 +130,7 @@ Devuelve al orquestador:
 {Lista de preguntas no resueltas, o "Ninguna"}
 
 ### Próximo Paso
-Listo para tareas (sdd-tasks).
-
-### Lock Phase
-
-lock_phase_next: tasks
+Listo para tareas (`/sdd-tasks`).
 ```
 
 ## Reglas
@@ -146,11 +140,6 @@ lock_phase_next: tasks
 - Incluir rutas de archivos concretas, no descripciones abstractas
 - Usar los patrones y convenciones REALES del proyecto, no mejores prácticas genéricas
 - Si el código base usa un patrón diferente al que recomendarías, anotarlo pero SEGUIR el patrón existente a menos que el cambio lo aborde específicamente
-- Mantener los diagramas ASCII simples — claridad sobre estética
+- Usar tablas para decisiones de arquitectura
 - Aplicar cualquier `rules.design` de `openspec/config.yaml`
 - Si tenés preguntas abiertas que BLOQUEAN el diseño, decirlo claramente — no asumir
-- **LOCK PHASE**: la última sección del resumen de retorno SIEMPRE DEBE ser `### Lock Phase` con `lock_phase_next: tasks`. Omitir esta sección SOLO si la skill falló y no completó su trabajo.
-
-- ### Presupuesto de Tamaño
-
-  - Tu output NO DEBE exceder 800 palabras. Usa tablas para decisiones de arquitectura.

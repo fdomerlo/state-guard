@@ -2,29 +2,26 @@
 name: sdd-propose
 description: >
   Crea una propuesta de cambio con intención, alcance y enfoque.
-  Disparador: Cuando el orquestador te lanza para crear o actualizar una propuesta de cambio.
+  Disparador: Cuando el usuario ejecuta /sdd-propose para crear o actualizar una propuesta de cambio.
 license: MIT
 metadata:
-  author: ctrbts-steve
-  version: "2.0"
+  author: fdomerlo-steve
+  version: "3.0"
 ---
 
 # SDD-Propose Skill
 
 ## Propósito
 
-Eres un sub-agente responsable de crear **PROPUESTAS**. Tomás el análisis de exploración (o la descripción directa del usuario) y producís un documento `proposal.md` estructurado dentro de la carpeta del cambio.
+Skill responsable de crear **PROPUESTAS**. Toma el análisis de exploración (o la descripción directa del usuario) y produce un documento `proposal.md` estructurado dentro de la carpeta del cambio.
 
-## Qué Recibís
+## Transacción
 
-Del orquestador:
+Seguí el protocolo de transacción definido en `skills/_shared/sdd-phase-common.md`:
 
-- Nombre del cambio (ej: "agregar-modo-oscuro")
-- Análisis de exploración (de sdd-explore) O descripción directa del usuario
-
-## Execution and Persistence Contract
-
-- Lee las convenciones base referenciadas en `skills/_shared/execution-contract.md` antes de proceder.
+- **BEGIN**: `txn_status: in_progress`, `txn_phase: propose`
+- **COMMIT**: `current_phase: propose`, `lock_phase: spec`
+- **ROLLBACK**: Si falla, restaurar `txn_status: failed` sin modificar phases
 
 ## Qué Hacer
 
@@ -70,7 +67,7 @@ Hace referencia al enfoque recomendado de la exploración si está disponible.}
 ## Áreas Afectadas
 
 | Área              | Impacto                     | Descripción        |
-|-------------------|-----------------------------|--------------------|
+|-------------------|-----------------------------|--------------------| 
 | `ruta/al/área`    | Nuevo/Modificado/Eliminado  | {Qué cambia}       |
 
 ## Riesgos
@@ -93,9 +90,9 @@ Hace referencia al enfoque recomendado de la exploración si está disponible.}
 - [ ] {Resultado medible}
 ```
 
-### Paso 4: Devolver Resumen
+### Paso 4: Persistir y Reportar
 
-Devuelve al orquestador:
+Ejecutá COMMIT en `state.yaml` y reportá al usuario:
 
 ```markdown
 ## Propuesta Creada
@@ -110,7 +107,7 @@ Devuelve al orquestador:
 - **Nivel de Riesgo**: {Bajo/Medio/Alto}
 
 ### Próximo Paso
-Listo para specs (sdd-spec) o diseño (sdd-design).
+Listo para specs (`/sdd-spec`) o diseño (`/sdd-design`).
 ```
 
 ## Reglas
@@ -123,7 +120,3 @@ Listo para specs (sdd-spec) o diseño (sdd-design).
 - Usar rutas de archivos concretas en "Áreas Afectadas" cuando sea posible
 - Aplicar cualquier `rules.proposal` de `openspec/config.yaml`
 - **VALIDAR el nombre del cambio contra la regla `change_naming` (kebab-case)** si está configurada en config.yaml
-
-- ### Presupuesto de Tamaño
-
-  - Tu output NO DEBE exceder 400 palabras.
