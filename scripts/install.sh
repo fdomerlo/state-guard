@@ -99,9 +99,9 @@ get_tool_path() {
             ;;
         antigravity)
             case "$OS" in
-                windows)  echo "$USERPROFILE/.gemini/antigravity/skills" ;;
-                wsl)      echo "$HOME/.gemini/antigravity/skills" ;;
-                *)        echo "$HOME/.gemini/antigravity/skills" ;;
+                windows)  echo "$USERPROFILE/.gemini/skills" ;;
+                wsl)      echo "$HOME/.gemini/skills" ;;
+                *)        echo "$HOME/.gemini/skills" ;;
             esac
             ;;
         project-local) echo "./skills" ;;
@@ -363,7 +363,7 @@ interactive_menu() {
     echo "  1) Claude Code    ($(get_tool_path claude-code))"
     echo "  2) OpenCode       ($(get_tool_path opencode))"
     echo "  3) Gemini CLI     ($(get_tool_path gemini-cli))"
-    echo "  4) Antigravity    (~/.gemini/antigravity/skills/)"
+    echo "  4) Antigravity    (~/.gemini/skills/)"
     echo "  5) Project-local  ($(get_tool_path project-local))"
     echo "  6) All global     (Claude Code + OpenCode + Gemini CLI + Antigravity)"
     echo "  7) Custom path"

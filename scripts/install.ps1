@@ -135,7 +135,7 @@ function Get-ToolPath {
         }
         "antigravity" {
             if ($OS -eq "windows") { return "$env:USERPROFILE\.gemini\antigravity\skills" }
-            return "$home/.gemini/antigravity/skills"
+            return "$home/.gemini/skills"
         }
         "project-local" { return ".\skills" }
     }
@@ -418,7 +418,7 @@ function Show-InteractiveMenu {
     Write-Host "  1) Claude Code    ($(Get-ToolPath "claude-code"))"
     Write-Host "  2) OpenCode       ($(Get-ToolPath "opencode"))"
     Write-Host "  3) Gemini CLI     ($(Get-ToolPath "gemini-cli"))"
-    Write-Host "  4) Antigravity    (~/.gemini/antigravity/skills/)"
+    Write-Host "  4) Antigravity    (~/.gemini/skills/)"
     Write-Host "  5) Project-local  ($(Get-ToolPath "project-local"))"
     Write-Host "  6) All global     (Claude Code + OpenCode + Gemini CLI + Antigravity)"
     Write-Host "  7) Custom path"

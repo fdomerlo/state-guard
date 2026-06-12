@@ -6,11 +6,11 @@ Este módulo permite al Memory Guard adaptar su comportamiento según las capaci
 
 ## Tabla de Capacidades
 
-| Capacidad | Claude Code | OpenCode | Gemini CLI | Antigravity |
-|-----------|:-----------:|:--------:|:----------:|:-----------:|
-| Sub-agentes reales (Task) | ✅ | ✅ | ❌ | ✅ |
-| Ejecución inline de skills | ✅ | ✅ | ✅ | ✅ |
-| Ventana de contexto 200K+ | ✅ | ✅ | ✅ | ✅ |
+| Capacidad                  | Claude Code | OpenCode | Gemini CLI | Antigravity |
+| -------------------------- | :---------: | :------: | :--------: | :---------: |
+| Sub-agentes reales (Task)  |      ✅      |    ✅     |     ❌      |      ✅      |
+| Ejecución inline de skills |      ✅      |    ✅     |     ✅      |      ✅      |
+| Ventana de contexto 200K+  |      ✅      |    ✅     |     ✅      |      ✅      |
 
 ## Auto-Detección del Host
 
@@ -80,9 +80,9 @@ Cargá también al inicio:
 
 La única variación es `{ruta-skills}`:
 
-| Host | `{ruta-skills}` |
-|------|-----------------|
-| Claude Code | `~/.claude/skills` |
-| OpenCode | `~/.config/opencode/skills` |
-| Gemini CLI | `~/.gemini/skills` |
-| Antigravity | `~/.gemini/antigravity/skills` |
+| Host        | `{ruta-skills}`             |
+| ----------- | --------------------------- |
+| Claude Code | `~/.claude/skills`          |
+| OpenCode    | `~/.config/opencode/skills` |
+| Gemini CLI  | `~/.gemini/skills`          |
+| Antigravity | `~/.gemini/skills`          |

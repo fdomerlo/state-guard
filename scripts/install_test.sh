@@ -264,13 +264,13 @@ test_gemini_cli_skill_count() {
 
 test_install_antigravity() {
     bash "$INSTALL_SCRIPT" --agent antigravity > /dev/null 2>&1
-    assert_all_skills_installed "$HOME/.gemini/antigravity/skills"
+    assert_all_skills_installed "$HOME/.gemini/skills"
 }
 
 test_antigravity_skill_count() {
     bash "$INSTALL_SCRIPT" --agent antigravity > /dev/null 2>&1
     local count
-    count=$(find "$HOME/.gemini/antigravity/skills" -name "SKILL.md" | wc -l | tr -d ' ')
+    count=$(find "$HOME/.gemini/skills" -name "SKILL.md" | wc -l | tr -d ' ')
     assert_eq "20" "$count" "Expected exactly 20 skills for Antigravity"
 }
 
@@ -325,7 +325,7 @@ test_all_global() {
     # Gemini CLI
     assert_all_skills_installed "$HOME/.gemini/skills" || return 1
     # Antigravity
-    assert_all_skills_installed "$HOME/.gemini/antigravity/skills" || return 1
+    assert_all_skills_installed "$HOME/.gemini/skills" || return 1
 }
 
 test_all_global_total_skill_count() {
@@ -336,7 +336,7 @@ test_all_global_total_skill_count() {
         "$HOME/.claude/skills" \
         "$HOME/.config/opencode/skills" \
         "$HOME/.gemini/skills" \
-        "$HOME/.gemini/antigravity/skills"; do
+        "$HOME/.gemini/skills"; do
         local count
         count=$(find "$dir" -name "SKILL.md" | wc -l | tr -d ' ')
         assert_eq "20" "$count" "Expected 20 skills in $dir" || return 1
@@ -371,9 +371,9 @@ test_idempotent_opencode() {
 test_idempotent_antigravity() {
     bash "$INSTALL_SCRIPT" --agent antigravity > /dev/null 2>&1
     bash "$INSTALL_SCRIPT" --agent antigravity > /dev/null 2>&1
-    assert_all_skills_installed "$HOME/.gemini/antigravity/skills" || return 1
+    assert_all_skills_installed "$HOME/.gemini/skills" || return 1
     local count
-    count=$(find "$HOME/.gemini/antigravity/skills" -name "SKILL.md" | wc -l | tr -d ' ')
+    count=$(find "$HOME/.gemini/skills" -name "SKILL.md" | wc -l | tr -d ' ')
     assert_eq "20" "$count" "Expected exactly 20 skills after double install"
 }
 
@@ -384,7 +384,7 @@ test_idempotent_all_global() {
         "$HOME/.claude/skills" \
         "$HOME/.config/opencode/skills" \
         "$HOME/.gemini/skills" \
-        "$HOME/.gemini/antigravity/skills"; do
+        "$HOME/.gemini/skills"; do
         local count
         count=$(find "$dir" -name "SKILL.md" | wc -l | tr -d ' ')
         assert_eq "20" "$count" "Expected 20 skills in $dir after double install" || return 1
@@ -549,7 +549,7 @@ run_test "Exactly 20 SKILL.md files" test_gemini_cli_skill_count
 echo ""
 
 echo -e "${BOLD}Antigravity${NC}"
-run_test "Installs all 20 skills to ~/.gemini/antigravity/skills" test_install_antigravity
+run_test "Installs all 20 skills to ~/.gemini/skills" test_install_antigravity
 run_test "Exactly 20 SKILL.md files" test_antigravity_skill_count
 echo ""
 
