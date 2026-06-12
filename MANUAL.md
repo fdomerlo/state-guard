@@ -43,14 +43,16 @@ Los contratos compartidos residen en `skills/_shared/`:
 | `sdd-phase-common.md` | Protocolo de transacción común a todas las skills de fase |
 | `test-runner-detection.md` | Pseudocódigo para la detección automática del test runner del proyecto |
 
-### Ejecución Inline vs Delegada
+### Autodetección y Delegación Inteligente
 
-El Memory Guard ejecuta fases **inline por defecto**: carga el SKILL.md correspondiente y sigue sus instrucciones como propias. Solo delega a un sub-agente real cuando:
+El agente determina su comportamiento en tiempo de ejecución analizando las reglas de `capabilities.md`. A través del sistema de archivos, el agente detecta dinámicamente el host en runtime (por ejemplo, verificando la presencia de `.claude`, `.gemini` o `.config/opencode/`) y activa o desactiva capacidades según la plataforma.
 
-1. La fase es `apply` con más de 10 tareas pendientes, **Y**
-2. El agente host soporta sub-agentes reales (Claude Code, OpenCode, Antigravity)
+El Memory Guard ejecuta fases **inline por defecto**: carga el `SKILL.md` correspondiente y sigue sus instrucciones como propias. Sin embargo, para aislar el contexto y preservar la memoria de la sesión principal, delega el trabajo pesado a un sub-agente real bajo estas estrictas condiciones:
 
-En ejecución delegada, el sub-agente persiste sus artefactos en disco pero **nunca** escribe en `state.yaml`. El Memory Guard es el único responsable del COMMIT transaccional.
+1. La fase es `sdd-apply` con más de 10 tareas pendientes, **Y**
+2. El agente host detectado soporta sub-agentes reales (Claude Code, OpenCode, Antigravity).
+
+En la ejecución delegada, el sub-agente ejecuta las tareas e interactúa con el disco, pero **nunca** escribe en `state.yaml`. El Memory Guard asume exclusivamente la responsabilidad del COMMIT transaccional al finalizar la delegación.
 
 ### Skill Registry Dinámico
 
@@ -61,6 +63,20 @@ El sistema incluye un **registry dinámico de skills** que permite el descubrimi
 - El Memory Guard lee este índice al iniciar para conocer las herramientas disponibles
 
 El registry escanea los directorios global (`$HOME/.skills-custom`) y local (`./skills-custom`), extrayendo nombre, descripción, trigger y ubicación de cada SKILL.md.
+
+---
+
+## Compilación Condicional vs Runtime
+
+El sistema emplea el script empaquetador `scripts/packager.py` para adaptar la arquitectura al nivel de inteligencia del motor destino, garantizando la inmutabilidad de la carpeta raíz de habilidades (`skills/`):
+
+### Compilación Estática (Target OpenCode)
+Los modelos de entrada tienden a sufrir de "pereza de herramientas" y les cuesta inferir que deben leer el contexto dinámicamente si no se les inyecta explícitamente en el *system prompt*.
+Para `--target opencode`, el empaquetador realiza un **inlining masivo**: lee todo el contenido de `memory-guard.md`, `transaction-protocol.md`, `capabilities.md` y `openspec-convention.md`, inyectándolo como un único bloque gigante dentro de la clave `prompt` del archivo `opencode.json`. 
+Además, el empaquetador reescribe dinámicamente las directivas de los *slash commands* (como `sdd-apply.md`) para usar lenguaje imperativo (ej. `INSTRUCCIÓN CRÍTICA: DEBES usar tu herramienta read_file INMEDIATAMENTE en la ruta...`), forzando al modelo a realizar el *tool-calling* esperado.
+
+### Context Streaming (Targets Avanzados)
+Para modelos de frontera como Antigravity o Claude Code (`--target antigravity`, `--target claude-code`), el empaquetador evita el inlining pesado. Despliega un *system prompt* minimalista conservando la filosofía de **Lazy Loading** (Context Streaming). El agente carga dinámicamente las habilidades compartidas y específicas bajo demanda, respetando las referencias modulares limpias para mantener la ventana de contexto sumamente ligera.
 
 ---
 
@@ -110,22 +126,29 @@ session_summary:                     # Bloque YAML estructurado (máx 500 tokens
   proxima_accion: "/sdd-{comando} {nombre-cambio}"
 ```
 
-### Protocolo de Transacciones
+### Protocolo de Transacciones (transaction-protocol.md)
 
-Cada fase SDD se ejecuta como una transacción atómica:
+Cada fase SDD se ejecuta como una transacción ACID atómica gobernada estrictamente por `transaction-protocol.md`:
 
 ```text
 IDLE → BEGIN → EXECUTE → COMMIT (éxito) o ROLLBACK (fallo) → IDLE
 ```
 
+El ciclo de vida de la transacción exige la actualización de los nuevos campos transaccionales obligatorios (`schema_version: 2`):
+
 | Paso | Qué ocurre |
 |------|-----------|
-| **BEGIN** | Escribe `txn_status: in_progress`, `txn_phase: {fase}` en state.yaml |
-| **EXECUTE** | Ejecuta la fase, persiste artefactos en disco |
-| **COMMIT** | Actualiza `current_phase`, `lock_phase`, `completed_phases`, `pending_phases`, `txn_status: idle` |
-| **ROLLBACK** | Si falla: `txn_status: failed`, sin modificar phases |
+| **BEGIN** | Registra el inicio marcando `txn_status: in_progress`, `txn_phase: {fase}` y capturando el timestamp actual en `txn_started_at` dentro de `state.yaml`. |
+| **EXECUTE** | El agente ejecuta la fase encomendada, persistiendo los artefactos generados (código, diseño, specs) en disco de forma segura. |
+| **COMMIT** | Consolida la operación. Actualiza atómicamente `current_phase` y `lock_phase`, mueve la fase a `completed_phases`, y reinicia `txn_status: idle` y `txn_phase: null`. |
+| **ROLLBACK** | Si ocurre un fallo, aborta seteando `txn_status: failed`, dejando sin alterar el registro de fases para preservar la integridad estructural del DAG. |
 
-**Anti-batching por protocolo**: Cada fase requiere su propio ciclo BEGIN → COMMIT. `txn_phase` es un valor escalar, no una lista, lo que hace imposible ejecutar múltiples fases en una sola transacción.
+**Anti-batching por protocolo**: Cada fase requiere su propio ciclo BEGIN → COMMIT ineludiblemente. Al ser `txn_phase` un valor escalar y no una lista, es mecánicamente imposible ejecutar múltiples fases bajo una misma transacción.
+
+### Mitigación de Fuga de Contexto
+
+Como mecanismo crucial post-COMMIT, `transaction-protocol.md` establece un procedimiento para la **mitigación de fuga de contexto**. 
+Una vez que el estado es exitosamente consolidado en `state.yaml`, el protocolo exige emitir una **advertencia de purga de chat**. Esta instrucción sirve para alertar al usuario y al agente sobre la necesidad de limpiar el historial de la conversación (o disparar una recarga de contexto / inicio de un nuevo sub-hilo) antes de proceder con la siguiente fase de desarrollo. Esto erradica la acumulación de directivas obsoletas, evitando severas "alucinaciones" durante transiciones prolongadas.
 
 ### Recovery Automático
 

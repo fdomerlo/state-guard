@@ -8,16 +8,25 @@ Para equipos que exigen rigor construyendo sobre lineamientos auditables.
 
 ## Instalación
 
+Los scripts de instalación compilan y empaquetan la configuración dinámicamente. El repositorio sigue un principio estricto de **Aislamiento de Código Fuente**: las skills base en `skills/` permanecen limpias e inmutables. El empaquetador (`packager.py`) genera en memoria y copia los artefactos específicos al directorio destino según el motor de IA.
+
 ### Unix / Linux / macOS
 
 ```bash
-bash scripts/install.sh
+# Para modelos de entrada (OpenCode): realiza inlining para evitar pereza de herramientas
+bash scripts/install.sh --target opencode
+
+# Para modelos de frontera (Antigravity): usa Context Streaming (lazy loading)
+bash scripts/install.sh --target antigravity
 ```
+
+Opciones para `--target`: `opencode` (por defecto), `antigravity`, `claude-code`, `gemini-cli`.
 
 ### Windows
 
 ```powershell
-powershell .\scripts\install.ps1
+# Usando el flag equivalente -Target
+powershell .\scripts\install.ps1 -Target opencode
 ```
 
 ---

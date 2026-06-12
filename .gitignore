@@ -6,3 +6,4 @@ openspec/changes/*
 # Permitir persistir el archivo histórico (archive)
 !openspec/changes/archive/
 .claude/
+__pycache__/

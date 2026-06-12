@@ -145,100 +145,42 @@ show_help() {
     echo "Usage: install.sh [OPTIONS]"
     echo ""
     echo "Options:"
-    echo "  --agent NAME    Install for a specific agent (non-interactive)"
-    echo "  --path DIR      Custom install path (use with --agent custom)"
+    echo "  --target NAME   Install for a specific target engine (non-interactive)"
+    echo "  --path DIR      Custom install path (use with --target custom)"
     echo "  -h, --help      Show this help"
     echo ""
-    echo "Agents: claude-code, opencode, gemini-cli, antigravity, project-local, all-global"
+    echo "Targets: claude-code, opencode, gemini-cli, antigravity, project-local, all-global"
 }
 
 # ============================================================================
-# Config Injection Helpers
+# Packager Wrapper
 # ============================================================================
 
-compile_and_append_config() {
-    local target_file="$1"
+call_packager() {
+    local target="$1"
     local skills_path="$2"
-    local system_prompt="$REPO_DIR/integrations/system-prompt.md"
-    local marker_begin="<!-- BEGIN SDD MEMORY GUARD -->"
-    local marker_end="<!-- END SDD MEMORY GUARD -->"
-
-    mkdir -p "$(dirname "$target_file")" 2>/dev/null || true
-
-    # Si el archivo existe y tiene nuestro bloque, lo purgamos de forma segura
-    if [ -f "$target_file" ] && grep -q "$marker_begin" "$target_file"; then
-        awk "/$marker_begin/{flag=1} /$marker_end/{flag=0; next} !flag" "$target_file" > "${target_file}.tmp"
-        mv "${target_file}.tmp" "$target_file"
-        print_skill "Bloque anterior del Memory Guard purgado en $(basename "$target_file")"
-    fi
-
-    # Ensamblar y compilar el nuevo bloque desde system-prompt.md
-    echo "" >> "$target_file"
-    echo "$marker_begin" >> "$target_file"
-    if [ -f "$system_prompt" ]; then
-        sed "s|{SKILLS_PATH}|$skills_path|g" "$system_prompt" >> "$target_file"
-    fi
-    echo "$marker_end" >> "$target_file"
+    local config_target="$3"
     
-    print_skill "Memory Guard inyectado/actualizado exitosamente en $(basename "$target_file")"
-}
-
-merge_opencode_config() {
-    local config_dir
-    if [ "$OS" = "windows" ]; then
-        config_dir="$USERPROFILE/.config/opencode"
-    else
-        config_dir="$HOME/.config/opencode"
-    fi
-    local target_config="$config_dir/opencode.json"
-    local source_config="$REPO_DIR/integrations/opencode/opencode.json"
-    local system_prompt="$REPO_DIR/integrations/system-prompt.md"
-    local skills_path
-    skills_path="$(get_tool_path opencode)"
-
-    mkdir -p "$config_dir"
-
-    # Usamos Python para leer system-prompt.md, compilar y mergear
     if command -v python3 >/dev/null 2>&1; then
-        python3 -c '
-import json, sys, os
-target_path, source_path, prompt_path, skills_path = sys.argv[1:5]
-
-# Leer y compilar el system prompt
-with open(prompt_path, "r", encoding="utf-8") as f:
-    prompt = f.read()
-prompt = prompt.replace("{SKILLS_PATH}", skills_path)
-
-# Leer el source JSON (config template)
-try:
-    with open(source_path, "r", encoding="utf-8") as f: source = json.load(f)
-except Exception:
-    sys.exit(1)
-
-# Aplicar al JSON del usuario
-if os.path.exists(target_path):
-    try:
-        with open(target_path, "r", encoding="utf-8") as f: target = json.load(f)
-    except Exception:
-        target = {"$schema": "https://opencode.ai/config.json", "agent": {}}
-else:
-    target = {"$schema": "https://opencode.ai/config.json", "agent": {}}
-    
-if "agent" not in target: target["agent"] = {}
-target["agent"]["sdd-orchestrator"] = source["agent"]["sdd-orchestrator"]
-target["agent"]["sdd-orchestrator"]["prompt"] = prompt
-
-with open(target_path, "w", encoding="utf-8") as f: json.dump(target, f, indent=2, ensure_ascii=False)
-sys.exit(0)
-' "$target_config" "$source_config" "$system_prompt" "$skills_path"
-        
-        if [ $? -eq 0 ]; then
-            print_skill "sdd-orchestrator compilado e inyectado en opencode.json"
+        if [ "$target" = "opencode" ]; then
+            local commands_src="$REPO_DIR/integrations/opencode/commands"
+            local commands_target
+            if [ "$OS" = "windows" ]; then
+                commands_target="$USERPROFILE/.config/opencode/commands"
+            else
+                commands_target="$HOME/.config/opencode/commands"
+            fi
+            python3 "$SCRIPT_DIR/packager.py" --target "$target" --skills-path "$skills_path" --config-target "$config_target" --commands-src "$commands_src" --commands-target "$commands_target"
         else
-            print_warn "No se pudo inyectar automáticamente. Error en compilación Python."
+            python3 "$SCRIPT_DIR/packager.py" --target "$target" --skills-path "$skills_path" --config-target "$config_target"
+        fi
+        if [ $? -eq 0 ]; then
+            print_skill "Configuración inyectada correctamente para $target mediante packager.py"
+        else
+            print_error "Error ejecutando packager.py para $target"
         fi
     else
-        print_warn "No se detectó Python3. Copia el orquestador a opencode.json manualmente."
+        print_warn "No se detectó Python3. La configuración no pudo ser empaquetada."
     fi
 }
 
@@ -334,68 +276,39 @@ install_skills() {
 
 
 # ============================================================================
-# Install commands (OpenCode — markdown files)
-# ============================================================================
-
-install_opencode_commands() {
-    local skills_path="$1"
-    local commands_src="$REPO_DIR/integrations/opencode/commands"
-    local commands_target
-    if [ "$OS" = "windows" ]; then
-        commands_target="$USERPROFILE/.config/opencode/commands"
-    else
-        commands_target="$HOME/.config/opencode/commands"
-    fi
-
-    if [ ! -d "$commands_src" ]; then
-        print_warn "No se encontró integrations/opencode/commands/ en el repositorio"
-        return
-    fi
-
-    mkdir -p "$commands_target"
-    local count=0
-    for cmd_file in "$commands_src"/*.md; do
-        [ -f "$cmd_file" ] || continue
-        local cmd_name
-        cmd_name=$(basename "$cmd_file")
-        sed "s|{{SKILLS_PATH}}|$skills_path|g" "$cmd_file" > "$commands_target/$cmd_name"
-        count=$((count + 1))
-    done
-    if [ "$count" -gt 0 ]; then
-        print_skill "$count slash commands instalados → $commands_target"
-    fi
-}
-
-
-# ============================================================================
 # Agent install dispatcher
 # ============================================================================
 
 install_for_agent() {
-    local agent="$1"
+    local target="$1"
 
-    case "$agent" in
+    case "$target" in
         claude-code)
             install_skills "$(get_tool_path claude-code)" "Claude Code"
             local config_target="${USERPROFILE:-$HOME}/.claude/CLAUDE.md"
-            compile_and_append_config "$config_target" "$(get_tool_path claude-code)"
+            call_packager "claude-code" "$(get_tool_path claude-code)" "$config_target"
             ;;
         opencode)
             install_skills "$(get_tool_path opencode)" "OpenCode"
-            install_opencode_commands "$(get_tool_path opencode)"
-            merge_opencode_config
+            local config_target
+            if [ "$OS" = "windows" ]; then
+                config_target="$USERPROFILE/.config/opencode/opencode.json"
+            else
+                config_target="$HOME/.config/opencode/opencode.json"
+            fi
+            call_packager "opencode" "$(get_tool_path opencode)" "$config_target"
             ;;
         gemini-cli)
             install_skills "$(get_tool_path gemini-cli)" "Gemini CLI"
             local config_target="${USERPROFILE:-$HOME}/.gemini/GEMINI.md"
-            compile_and_append_config "$config_target" "$(get_tool_path gemini-cli)"
+            call_packager "gemini-cli" "$(get_tool_path gemini-cli)" "$config_target"
             ;;
         antigravity)
-            local target="$(get_tool_path antigravity)"
-            install_skills "$target" "Antigravity"
+            local skills_target="$(get_tool_path antigravity)"
+            install_skills "$skills_target" "Antigravity"
             local config_target="${USERPROFILE:-$HOME}/.gemini/GEMINI.md"
             rm -rf "./.agent/rules" 2>/dev/null || true
-            compile_and_append_config "$config_target" "$(get_tool_path antigravity)"
+            call_packager "antigravity" "$(get_tool_path antigravity)" "$config_target"
             ;;
         project-local)
             install_skills "$(get_tool_path project-local)" "Project-local"
@@ -403,20 +316,25 @@ install_for_agent() {
             ;;
         all-global)
             install_skills "$(get_tool_path claude-code)" "Claude Code"
-            compile_and_append_config "${USERPROFILE:-$HOME}/.claude/CLAUDE.md" "$(get_tool_path claude-code)"
+            call_packager "claude-code" "$(get_tool_path claude-code)" "${USERPROFILE:-$HOME}/.claude/CLAUDE.md"
             
             install_skills "$(get_tool_path opencode)" "OpenCode"
-            install_opencode_commands "$(get_tool_path opencode)"
-            merge_opencode_config
+            local oc_target
+            if [ "$OS" = "windows" ]; then
+                oc_target="$USERPROFILE/.config/opencode/opencode.json"
+            else
+                oc_target="$HOME/.config/opencode/opencode.json"
+            fi
+            call_packager "opencode" "$(get_tool_path opencode)" "$oc_target"
             
             install_skills "$(get_tool_path gemini-cli)" "Gemini CLI"
-            compile_and_append_config "${USERPROFILE:-$HOME}/.gemini/GEMINI.md" "$(get_tool_path gemini-cli)"
+            call_packager "gemini-cli" "$(get_tool_path gemini-cli)" "${USERPROFILE:-$HOME}/.gemini/GEMINI.md"
             
             local ag_target
             ag_target="$(get_tool_path antigravity)"
             install_skills "$ag_target" "Antigravity"
             rm -rf "./.agent/rules" 2>/dev/null || true
-            compile_and_append_config "${USERPROFILE:-$HOME}/.gemini/GEMINI.md" "$(get_tool_path antigravity)"
+            call_packager "antigravity" "$(get_tool_path antigravity)" "${USERPROFILE:-$HOME}/.gemini/GEMINI.md"
             
             echo -e "\n${GREEN}${BOLD}¡Todos los orquestadores globales configurados automáticamente!${NC}"
             ;;
@@ -425,9 +343,10 @@ install_for_agent() {
                 read -rp "Enter target path: " CUSTOM_PATH
             fi
             install_skills "$CUSTOM_PATH" "Custom"
+            call_packager "custom" "$CUSTOM_PATH" ""
             ;;
         *)
-            print_error "Unknown agent: $agent"
+            print_error "Unknown target: $target"
             echo ""
             show_help
             exit 1
@@ -477,11 +396,12 @@ detect_os
 setup_colors
 
 # Parse arguments
-AGENT=""
+TARGET=""
 CUSTOM_PATH=""
 while [ $# -gt 0 ]; do
     case "$1" in
-        --agent)  AGENT="$2"; shift 2 ;;
+        --target) TARGET="$2"; shift 2 ;;
+        --agent)  TARGET="$2"; shift 2 ;; # Fallback for backward compatibility
         --path)   CUSTOM_PATH="$2"; shift 2 ;;
         -h|--help) show_help; exit 0 ;;
         *)  echo "Unknown option: $1"; show_help; exit 1 ;;
@@ -491,9 +411,9 @@ done
 print_header
 validate_source
 
-if [ -n "$AGENT" ]; then
+if [ -n "$TARGET" ]; then
     # Non-interactive mode
-    install_for_agent "$AGENT"
+    install_for_agent "$TARGET"
 else
     # Interactive mode
     interactive_menu
