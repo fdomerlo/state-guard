@@ -31,38 +31,11 @@ Verifica explícitamente en el directorio del cambio si los archivos `review-rep
 
 ### Paso 1: Verificar Estado Git Antes de Archivar
 
-Antes de sincronizar specs y mover al archivo, verificá el estado del repositorio git:
+Antes de sincronizar specs y mover al archivo, DEBES verificar estrictamente el estado del repositorio mediante la terminal:
 
-```bash
-verify_git_clean_for_change() {
-    local repo_root="${1:-.}"
-
-    if [ ! -d "$repo_root/.git" ]; then
-        echo "INFO: No git repository detected, skipping verification"
-        return 0
-    fi
-
-    if ! command -v git &> /dev/null; then
-        echo "WARN: git not available, skipping verification"
-        return 0
-    fi
-
-    local status
-    status=$(cd "$repo_root" && git status --porcelain 2>/dev/null || echo "")
-
-    if [ -n "$status" ]; then
-        echo "ERROR: Uncommitted changes detected in repository:"
-        echo "$status"
-        echo ""
-        echo "Please commit your changes before archiving."
-        return 1
-    fi
-
-    return 0
-}
-```
-
-Si hay cambios sin commitear → BLOQUEAR el archivado.
+1. Ejecuta: `git status --porcelain`
+2. Si la salida está **vacía**, el repositorio está limpio. Continúa con el Paso 2.
+3. Si la salida **NO está vacía** (hay archivos listados), hay cambios sin commitear. DEBES BLOQUEAR el archivado, ejecutar ROLLBACK y exigir al usuario que haga commit.
 
 ### Paso 2: Sincronizar Specs Delta con Specs Principales
 

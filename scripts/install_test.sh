@@ -27,7 +27,7 @@ CYAN='\033[0;36m'
 BOLD='\033[1m'
 NC='\033[0m'
 
-# All 20 expected skills
+# All 21 expected skills
 EXPECTED_SKILLS=(
     sdd-apply
     sdd-archive
@@ -38,6 +38,7 @@ EXPECTED_SKILLS=(
     sdd-explore
     sdd-ff
     sdd-fix
+    sdd-hotfix
     sdd-init
     sdd-new
     sdd-propose
@@ -159,8 +160,8 @@ test_help_flag() {
     echo "$output" | grep -q "opencode" || { echo "Help output missing 'opencode'"; return 1; }
     echo "$output" | grep -q "antigravity" || { echo "Help output missing 'antigravity'"; return 1; }
     echo "$output" | grep -q "all-global" || { echo "Help output missing 'all-global'"; return 1; }
-    echo "$output" | grep -q "\-\-agent" || { echo "Help output missing '--agent'"; return 1; }
-    echo "$output" | grep -q "\-\-path" || { echo "Help output missing '--path'"; return 1; }
+    echo "$output" | grep -q -- "--target" || { echo "Help output missing '--target'"; return 1; }
+    echo "$output" | grep -q -- "--path" || { echo "Help output missing '--path'"; return 1; }
 }
 
 test_help_exits_zero() {
@@ -198,7 +199,7 @@ test_claude_code_skill_count() {
     bash "$INSTALL_SCRIPT" --agent claude-code > /dev/null 2>&1
     local count
     count=$(find "$HOME/.claude/skills" -name "SKILL.md" | wc -l | tr -d ' ')
-    assert_eq "20" "$count" "Expected exactly 20 skills for Claude Code"
+    assert_eq "21" "$count" "Expected exactly 21 skills for Claude Code"
 }
 
 # ============================================================================
@@ -214,7 +215,7 @@ test_opencode_skill_count() {
     bash "$INSTALL_SCRIPT" --agent opencode > /dev/null 2>&1
     local count
     count=$(find "$HOME/.config/opencode/skills" -name "SKILL.md" | wc -l | tr -d ' ')
-    assert_eq "20" "$count" "Expected exactly 20 skills for OpenCode"
+    assert_eq "21" "$count" "Expected exactly 21 skills for OpenCode"
 }
 
 test_opencode_commands_folder() {
@@ -223,7 +224,7 @@ test_opencode_commands_folder() {
     assert_dir_exists "$commands_dir" || return 1
     local cmd_count
     cmd_count=$(find "$commands_dir" -maxdepth 1 -name '*.md' | wc -l | tr -d ' ')
-    assert_eq "20" "$cmd_count" "Expected 20 command .md files in ~/.config/opencode/commands/"
+    assert_eq "21" "$cmd_count" "Expected 21 command .md files in ~/.config/opencode/commands/"
 }
 
 test_opencode_commands_path_substituted() {
@@ -256,7 +257,7 @@ test_antigravity_cli_skill_count() {
     bash "$INSTALL_SCRIPT" --agent antigravity-cli > /dev/null 2>&1
     local count
     count=$(find "$HOME/.gemini/skills" -name "SKILL.md" | wc -l | tr -d ' ')
-    assert_eq "20" "$count" "Expected exactly 20 skills for Antigravity CLI"
+    assert_eq "21" "$count" "Expected exactly 21 skills for Antigravity CLI"
 }
 
 # ============================================================================
@@ -276,7 +277,7 @@ test_project_local_skill_count() {
     (cd "$project" && bash "$INSTALL_SCRIPT" --agent project-local > /dev/null 2>&1)
     local count
     count=$(find "$project/skills" -name "SKILL.md" | wc -l | tr -d ' ')
-    assert_eq "20" "$count" "Expected exactly 20 skills for project-local"
+    assert_eq "21" "$count" "Expected exactly 21 skills for project-local"
 }
 
 # ============================================================================
@@ -294,7 +295,7 @@ test_custom_path_skill_count() {
     bash "$INSTALL_SCRIPT" --agent custom --path "$custom" > /dev/null 2>&1
     local count
     count=$(find "$custom" -name "SKILL.md" | wc -l | tr -d ' ')
-    assert_eq "20" "$count" "Expected exactly 20 skills for custom path"
+    assert_eq "21" "$count" "Expected exactly 21 skills for custom path"
 }
 
 # ============================================================================
@@ -313,7 +314,7 @@ test_all_global() {
 
 test_all_global_total_skill_count() {
     bash "$INSTALL_SCRIPT" --agent all-global > /dev/null 2>&1
-    # 3 targets × 20 skills = 60 SKILL.md files
+    # 3 targets × 21 skills = 63 SKILL.md files
     local total=0
     for dir in \
         "$HOME/.claude/skills" \
@@ -321,10 +322,10 @@ test_all_global_total_skill_count() {
         "$HOME/.gemini/skills"; do
         local count
         count=$(find "$dir" -name "SKILL.md" | wc -l | tr -d ' ')
-        assert_eq "20" "$count" "Expected 20 skills in $dir" || return 1
+        assert_eq "21" "$count" "Expected 21 skills in $dir" || return 1
         total=$((total + count))
     done
-    assert_eq "60" "$total" "Expected 60 total SKILL.md files across all targets"
+    assert_eq "63" "$total" "Expected 63 total SKILL.md files across all targets"
 }
 
 
@@ -338,7 +339,7 @@ test_idempotent_claude_code() {
     assert_all_skills_installed "$HOME/.claude/skills"
     local count
     count=$(find "$HOME/.claude/skills" -name "SKILL.md" | wc -l | tr -d ' ')
-    assert_eq "20" "$count" "Expected exactly 20 skills after double install"
+    assert_eq "21" "$count" "Expected exactly 21 skills after double install"
 }
 
 test_idempotent_opencode() {
@@ -347,7 +348,7 @@ test_idempotent_opencode() {
     assert_all_skills_installed "$HOME/.config/opencode/skills" || return 1
     local skill_count
     skill_count=$(find "$HOME/.config/opencode/skills" -name "SKILL.md" | wc -l | tr -d ' ')
-    assert_eq "20" "$skill_count" "Expected exactly 20 skills after double install" || return 1
+    assert_eq "21" "$skill_count" "Expected exactly 21 skills after double install" || return 1
 }
 
 test_idempotent_antigravity_cli() {
@@ -356,7 +357,7 @@ test_idempotent_antigravity_cli() {
     assert_all_skills_installed "$HOME/.gemini/skills" || return 1
     local count
     count=$(find "$HOME/.gemini/skills" -name "SKILL.md" | wc -l | tr -d ' ')
-    assert_eq "20" "$count" "Expected exactly 20 skills after double install"
+    assert_eq "21" "$count" "Expected exactly 21 skills after double install"
 }
 
 test_idempotent_all_global() {
@@ -368,7 +369,7 @@ test_idempotent_all_global() {
         "$HOME/.gemini/skills"; do
         local count
         count=$(find "$dir" -name "SKILL.md" | wc -l | tr -d ' ')
-        assert_eq "20" "$count" "Expected 20 skills in $dir after double install" || return 1
+        assert_eq "21" "$count" "Expected 21 skills in $dir after double install" || return 1
     done
 }
 
@@ -421,8 +422,8 @@ test_output_shows_done_message() {
 test_output_shows_install_count() {
     local output
     output=$(bash "$INSTALL_SCRIPT" --agent claude-code 2>&1)
-    echo "$output" | grep -q "20 skills installed" || {
-        echo "Output missing '20 skills installed' message"
+    echo "$output" | grep -q "21 skills installed" || {
+        echo "Output missing '21 skills installed' message"
         return 1
     }
 }
@@ -430,12 +431,11 @@ test_output_shows_install_count() {
 test_output_shows_injection_success() {
     local output
     output=$(bash "$INSTALL_SCRIPT" --agent claude-code 2>&1)
-    echo "$output" | grep -q "inyectado" || {
+    echo "$output" | grep -E -q "inyectad[oa]" || {
         echo "Output missing injection success message"
         return 1
     }
 }
-
 
 # ============================================================================
 # Tests — OS detection (limited — we can only test the current OS)
@@ -500,9 +500,9 @@ test_nested_custom_path() {
 # ============================================================================
 
 echo ""
-echo -e "${CYAN}${BOLD}╔══════════════════════════════════════════╗${NC}"
+echo -e "${CYAN}${BOLD}╔═════════════════════════════════════════════════════════════╗${NC}"
 echo -e "${CYAN}${BOLD}║    Agentify: SDD Memory Guard — Install Script Tests        ║${NC}"
-echo -e "${CYAN}${BOLD}╚══════════════════════════════════════════╝${NC}"
+echo -e "${CYAN}${BOLD}╚═════════════════════════════════════════════════════════════╝${NC}"
 echo ""
 
 echo -e "${BOLD}Help & Error Handling${NC}"
@@ -513,36 +513,36 @@ run_test "Unknown option exits non-zero" test_invalid_option
 echo ""
 
 echo -e "${BOLD}Claude Code${NC}"
-run_test "Installs all 20 skills to ~/.claude/skills" test_install_claude_code
-run_test "Exactly 20 SKILL.md files" test_claude_code_skill_count
+run_test "Installs all 21 skills to ~/.claude/skills" test_install_claude_code
+run_test "Exactly 21 SKILL.md files" test_claude_code_skill_count
 echo ""
 
 echo -e "${BOLD}OpenCode${NC}"
-run_test "Installs all 20 skills to ~/.config/opencode/skills" test_install_opencode
-run_test "Exactly 20 SKILL.md files" test_opencode_skill_count
-run_test "20 command .md files in commands/ folder" test_opencode_commands_folder
+run_test "Installs all 21 skills to ~/.config/opencode/skills" test_install_opencode
+run_test "Exactly 21 SKILL.md files" test_opencode_skill_count
+run_test "21 command .md files in commands/ folder" test_opencode_commands_folder
 run_test "{{SKILLS_PATH}} placeholder substituted" test_opencode_commands_path_substituted
 echo ""
 
 echo -e "${BOLD}Antigravity CLI${NC}"
-run_test "Installs all 20 skills to ~/.gemini/skills" test_install_antigravity_cli
-run_test "Exactly 20 SKILL.md files" test_antigravity_cli_skill_count
+run_test "Installs all 21 skills to ~/.gemini/skills" test_install_antigravity_cli
+run_test "Exactly 21 SKILL.md files" test_antigravity_cli_skill_count
 echo ""
 
 echo -e "${BOLD}Project-local${NC}"
-run_test "Installs all 20 skills to ./skills/" test_install_project_local
-run_test "Exactly 20 SKILL.md files" test_project_local_skill_count
+run_test "Installs all 21 skills to ./skills/" test_install_project_local
+run_test "Exactly 21 SKILL.md files" test_project_local_skill_count
 echo ""
 
 echo -e "${BOLD}Custom path${NC}"
 run_test "Installs to arbitrary custom path" test_custom_path
-run_test "Exactly 20 SKILL.md files" test_custom_path_skill_count
+run_test "Exactly 21 SKILL.md files" test_custom_path_skill_count
 run_test "Handles deeply nested custom path" test_nested_custom_path
 echo ""
 
 echo -e "${BOLD}All-global${NC}"
 run_test "Installs to all 3 global targets" test_all_global
-run_test "60 total SKILL.md files (3×20)" test_all_global_total_skill_count
+run_test "60 total SKILL.md files (3×21)" test_all_global_total_skill_count
 echo ""
 
 echo -e "${BOLD}Idempotency${NC}"

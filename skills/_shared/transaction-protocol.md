@@ -12,7 +12,9 @@ IDLE → BEGIN → EXECUTE → COMMIT (éxito) o ROLLBACK (fallo) → IDLE
 
 ### BEGIN
 
-Antes de ejecutar cualquier fase, escribí en `state.yaml`:
+Antes de registrar `in_progress`, debes capturar un snapshot rápido del estado del repositorio (ej. ejecutar `git status --porcelain` o generar un hash del directorio) y registrarlo transaccionalmente (o simplemente verificar que el árbol de trabajo esté limpio).
+
+Luego, escribí en `state.yaml`:
 
 ```yaml
 txn_status: in_progress
@@ -31,7 +33,10 @@ Ejecutá la fase siguiendo las instrucciones del SKILL.md correspondiente. Duran
 
 ### COMMIT (éxito)
 
-Cuando la fase se completa exitosamente, actualizá `state.yaml` atómicamente:
+Antes de consolidar el `state.yaml`, debes verificar que los archivos afectados en tu lote no hayan sido modificados por un factor externo desde el `txn_started_at`.
+Si se detecta concurrencia, debes forzar un `ROLLBACK` y emitir una alerta "CONFLICTO DE CONCURRENCIA HUMANA DETECTADO".
+
+Cuando la fase se completa exitosamente y sin conflictos, actualizá `state.yaml` atómicamente:
 
 ```yaml
 # Actualizar en una sola escritura:

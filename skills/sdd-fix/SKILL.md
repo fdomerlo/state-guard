@@ -28,7 +28,7 @@ Buscar todos los `state.yaml` activos en `openspec/changes/*/state.yaml`. Ignora
 Para cada `state.yaml`:
 
 **Campos obligatorios (v1 y v2):**
-- `current_phase`: valor válido de `explore|propose|spec|design|tasks|apply|verify|archive`
+- `current_phase`: valor válido de `explore|propose|spec|design|tasks|hotfix|apply|verify|archive`
 - `status`: valor válido de `active|done|blocked`
 - `started_at`: fecha ISO 8601
 - `last_updated`: fecha ISO 8601 ≥ `started_at`
@@ -89,7 +89,8 @@ Para cada cambio con schema válido, verificar que los artefactos requeridos exi
 | `spec` | `proposal.md`, `specs/` (≥1 archivo) |
 | `design` | `proposal.md`, `specs/` (≥1 archivo), `design.md` |
 | `tasks` | `proposal.md`, `specs/` (≥1 archivo), `design.md`, `tasks.md` |
-| `apply` | `proposal.md`, `specs/` (≥1 archivo), `design.md`, `tasks.md` |
+| `hotfix` | Ninguno (solo `state.yaml`) |
+| `apply` | (Si proviene de hotfix: ninguno. Si proviene de tasks: `proposal.md`, `specs/`, `design.md`, `tasks.md`) |
 | `verify` | `proposal.md`, `specs/` (≥1 archivo), `design.md`, `tasks.md`, `verify-report.md` |
 | `archive` | `proposal.md`, `specs/` (≥1 archivo), `design.md`, `tasks.md`, `verify-report.md` |
 

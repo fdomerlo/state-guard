@@ -6,21 +6,9 @@ import re
 import sys
 
 def compile_opencode_prompt(repo_dir, skills_path):
-    shared_files = [
-        "memory-guard.md",
-        "transaction-protocol.md",
-        "capabilities.md",
-        "openspec-convention.md"
-    ]
     content = "Actúas como agente de desarrollo con memoria transaccional usando la metodología Spec-Driven Development (SDD).\n\n"
     content += "## REGLA DE IDIOMA ESTRICTA (CRÍTICA)\nTodo tu output DEBE ser generado íntegramente en ESPAÑOL (Castellano).\n\n"
-    
-    for f in shared_files:
-        path = os.path.join(repo_dir, "skills", "_shared", f)
-        if os.path.exists(path):
-            with open(path, "r", encoding="utf-8") as file:
-                content += f"--- {f} ---\n"
-                content += file.read() + "\n\n"
+    content += "INSTRUCCIÓN CRÍTICA: Debes usar tu herramienta `read_file` inmediatamente para cargar `{SKILLS_PATH}/_shared/memory-guard.md` antes de tomar cualquier otra acción.\n\n"
     
     # We still need to replace {SKILLS_PATH} in the compiled content if it exists
     return content.replace("{SKILLS_PATH}", skills_path)

@@ -27,6 +27,7 @@ openspec/
 | Skill | Crea / Lee | Ruta |
 |-------|-----------|------|
 | orquestador | Crea/Actualiza | `openspec/changes/{change-name}/state.yaml` |
+| sdd-hotfix | Crea/Actualiza | `openspec/changes/{change-name}/state.yaml` |
 | sdd-init | Crea | `openspec/config.yaml`, `openspec/specs/`, `openspec/changes/`, `openspec/changes/archive/` |
 | sdd-explore | Crea (opcional) | `openspec/changes/{change-name}/exploration.md` |
 | sdd-propose | Crea | `openspec/changes/{change-name}/proposal.md` |
@@ -61,7 +62,7 @@ started_at: "YYYY-MM-DDTHH:MM:SS"   # ISO 8601 — se establece al crear, nunca 
 last_updated: "YYYY-MM-DDTHH:MM:SS" # actualizar en cada COMMIT de transacción
 current_phase: {fase-actual}         # descriptivo: última fase completada exitosamente
 lock_phase: {fase-siguiente}         # prescriptivo: la ÚNICA fase autorizada a ejecutarse ahora
-                                     # Valores válidos: propose | spec | design | tasks | apply | verify | archive
+                                     # Valores válidos: explore | propose | spec | design | tasks | hotfix | apply | verify | archive
                                      # Inicialización: primera fase de pending_phases al crear el cambio
 status: active                       # active | done | blocked (default: active)
 completed_phases:                    # lista ordenada, solo fases completadas exitosamente
@@ -107,7 +108,7 @@ session_summary:                     # bloque YAML estructurado — límite tota
 | `proxima_accion` | String | Comando completo: `/sdd-{cmd} {nombre-cambio}` |
 
 **Valores válidos para `current_phase`, `lock_phase` y elementos de listas:**
-`explore | propose | spec | design | tasks | apply | verify | archive`
+`explore | propose | spec | design | tasks | hotfix | apply | verify | archive`
 
 **Notas de transición:**
 
@@ -127,6 +128,7 @@ session_summary:                     # bloque YAML estructurado — límite tota
 | `spec`           | `design`                |
 | `design`         | `tasks`                 |
 | `tasks`          | `apply`                 |
+| `hotfix`         | `apply`                 |
 | `apply`          | `verify`                |
 | `verify`         | `archive`               |
 
