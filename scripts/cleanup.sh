@@ -80,7 +80,7 @@ show_help() {
     echo "Usage: cleanup.sh [OPTIONS]"
     echo ""
     echo "Options:"
-    echo "  --agent NAME    Clean for a specific agent (claude-code, opencode, gemini-cli, antigravity, project-local, all-global)"
+    echo "  --agent NAME    Clean for a specific agent (claude-code, opencode, antigravity-cli, project-local, all-global)"
     echo "  --hard          Hard mode: Remove openspec/changes historical data"
     echo "  -h, --help      Show this help"
     echo ""
@@ -114,14 +114,7 @@ get_tool_path() {
                 *)        echo "$HOME/.config/opencode/commands" ;;
             esac
             ;;
-        gemini-cli)
-            case "$OS" in
-                windows)  echo "$USERPROFILE/.gemini/skills" ;;
-                wsl)      echo "$HOME/.gemini/skills" ;;
-                *)        echo "$HOME/.gemini/skills" ;;
-            esac
-            ;;
-        antigravity)
+        antigravity-cli)
             case "$OS" in
                 windows)  echo "$USERPROFILE/.gemini/skills" ;;
                 wsl)      echo "$HOME/.gemini/skills" ;;
@@ -220,15 +213,10 @@ sys.exit(0)
                  print_step "Archivo de configuración no encontrado para OpenCode Config ($config_dir/opencode.json)"
             fi
             ;;
-        gemini-cli)
-            echo -e "\n${BLUE}Limpiando Gemini CLI...${NC}"
-            remove_directory "$(get_tool_path gemini-cli)" "Gemini CLI Skills"
-            remove_injected_blocks "${USERPROFILE:-$HOME}/.gemini/GEMINI.md" "Gemini CLI Config"
-            ;;
-        antigravity)
-            echo -e "\n${BLUE}Limpiando Antigravity...${NC}"
-            remove_directory "$(get_tool_path antigravity)" "Antigravity Skills"
-            remove_injected_blocks "${USERPROFILE:-$HOME}/.gemini/GEMINI.md" "Antigravity Global Config"
+        antigravity-cli)
+            echo -e "\n${BLUE}Limpiando Antigravity CLI...${NC}"
+            remove_directory "$(get_tool_path antigravity-cli)" "Antigravity CLI Skills"
+            remove_injected_blocks "${USERPROFILE:-$HOME}/.gemini/GEMINI.md" "Antigravity CLI Global Config"
             ;;
 project-local)
             echo -e "\n${BLUE}Limpiando locación del proyecto...${NC}"
@@ -246,8 +234,7 @@ project-local)
         all-global)
             clean_agent "claude-code"
             clean_agent "opencode"
-            clean_agent "gemini-cli"
-            clean_agent "antigravity"
+            clean_agent "antigravity-cli"
             clean_agent "project-local"
             echo -e "\n${GREEN}${BOLD}¡Todas las integraciones de agentes globales procesadas!${NC}"
             ;;
@@ -266,20 +253,18 @@ interactive_menu() {
     echo -e "${BOLD}Select integration to clean:${NC}\n"
     echo "  1) Claude Code    ($(get_tool_path claude-code))"
     echo "  2) OpenCode       ($(get_tool_path opencode))"
-    echo "  3) Gemini CLI     ($(get_tool_path gemini-cli))"
-    echo "  4) Antigravity    (~/.gemini/skills/)"
-    echo "  5) Project-local  ($(get_tool_path project-local))"
-    echo "  6) All global"
+    echo "  3) Project-local    ($(get_tool_path project-local))"
+    echo "  4) Antigravity CLI  (~/.gemini/skills/)"
+    echo "  5) All global"
     echo ""
-    read -rp "Choice [1-6]: " choice
+    read -rp "Choice [1-5]: " choice
 
     case $choice in
         1)  clean_agent "claude-code" ;;
         2)  clean_agent "opencode" ;;
-        3)  clean_agent "gemini-cli" ;;
-        4)  clean_agent "antigravity" ;;
-        5)  clean_agent "project-local" ;;
-        6)  clean_agent "all-global" ;;
+        3)  clean_agent "project-local" ;;
+        4)  clean_agent "antigravity-cli" ;;
+        5)  clean_agent "all-global" ;;
         *)
             print_error "Invalid choice"
             exit 1

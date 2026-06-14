@@ -62,7 +62,7 @@ def process_opencode_commands(commands_src, commands_target, skills_path):
 
 def main():
     parser = argparse.ArgumentParser(description="Agentify SDD Packager")
-    parser.add_argument("--target", required=True, help="Target engine: opencode, claude-code, gemini-cli, antigravity, project-local, all-global, custom")
+    parser.add_argument("--target", required=True, help="Target engine: opencode, claude-code, antigravity-cli, project-local, all-global, custom")
     parser.add_argument("--skills-path", required=True, help="Resolved skills path")
     parser.add_argument("--config-target", required=False, help="Path to config file to inject")
     parser.add_argument("--commands-src", required=False, help="Source directory for opencode commands")
@@ -109,7 +109,7 @@ def main():
         if args.commands_src and args.commands_target:
             process_opencode_commands(args.commands_src, args.commands_target, args.skills_path)
             
-    elif args.target in ["claude-code", "gemini-cli", "antigravity"]:
+    elif args.target in ["claude-code", "antigravity-cli"]:
         if not args.config_target:
             print(f"Missing --config-target for {args.target}")
             sys.exit(1)

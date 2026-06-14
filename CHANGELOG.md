@@ -5,7 +5,7 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased]
+## [2.0.2]
 
 ### Changed — Arquitectura: De Despachador CLI a Harness de Memoria Transaccional
 
@@ -20,8 +20,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **sdd-checkpoint**: Ahora opera en modo dual (automático post-COMMIT + manual bajo demanda).
 - **sdd-fix**: Añadida migración v1→v2 y resolución de transacciones incompletas.
 - **sdd-status**: Muestra `txn_status` en la tabla de estado.
-- **Integraciones**: Claude Code, Gemini CLI, Antigravity y OpenCode reducidas a stubs mínimos que cargan `memory-guard.md`.
-- **install.sh**: Actualizado con markers `SDD MEMORY GUARD` y header renovado.
+- **Integraciones**: Claude Code, Antigravity CLI y OpenCode reducidas a stubs mínimos que cargan `memory-guard.md`. Se eliminó por completo la integración obsoleta de `gemini-cli` y se renombró `antigravity` a `antigravity-cli` en todos los instaladores, scripts y documentación.
+- **install.sh / cleanup.sh**: Actualizados para soportar exclusivamente `antigravity-cli` y retirar la opción de `gemini-cli`.
+- **Estructura SDD**: Inicialización de la estructura SDD en el proyecto (`/sdd-init`) creando `openspec/config.yaml` y generando el índice de habilidades `.agentify/skill-registry.md`.
+
 
 ### Removed
 

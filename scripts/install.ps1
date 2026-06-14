@@ -5,7 +5,7 @@
     Copies skills to your AI coding assistant's skill directory
     Cross-platform: Windows PowerShell 5.1+, PowerShell Core
 .PARAMETER Agent
-    Specify which agent to install for (opencode, claude-code, gemini-cli, codex, vscode, antigravity, cursor, project-local, all-global)
+    Specify which agent to install for (opencode, claude-code, antigravity-cli, project-local, all-global)
 .PARAMETER Path
     Custom install path (use with -Agent custom)
 .EXAMPLE
@@ -129,12 +129,8 @@ function Get-ToolPath {
             if ($OS -eq "windows") { return "$env:USERPROFILE\.config\opencode\commands" }
             return "$home/.config/opencode/commands"
         }
-        "gemini-cli" {
+        "antigravity-cli" {
             if ($OS -eq "windows") { return "$env:USERPROFILE\.gemini\skills" }
-            return "$home/.gemini/skills"
-        }
-        "antigravity" {
-            if ($OS -eq "windows") { return "$env:USERPROFILE\.gemini\antigravity\skills" }
             return "$home/.gemini/skills"
         }
         "project-local" { return ".\skills" }
@@ -184,7 +180,7 @@ function Show-Help {
     Write-Host "  -Path DIR      Custom install path (use with -Target custom)"
     Write-Host "  -Help          Show this help"
     Write-Host ""
-    Write-Host "Targets: claude-code, opencode, gemini-cli, antigravity, project-local, all-global"
+    Write-Host "Targets: claude-code, opencode, antigravity-cli, project-local, all-global"
 }
 
 # ============================================================================
@@ -337,20 +333,14 @@ function Install-ForTarget {
             $configTarget = if ($OS -eq "windows") { "$env:USERPROFILE\.config\opencode\opencode.json" } else { "$HOME/.config/opencode/opencode.json" }
             Call-Packager "opencode" (Get-ToolPath "opencode") $configTarget
         }
-        "gemini-cli" {
-            $targetPath = Get-ToolPath "gemini-cli"
-            Install-Skills $targetPath "Gemini CLI"
-            $configTarget = if ($OS -eq "windows") { "$env:USERPROFILE\.gemini\GEMINI.md" } else { "$HOME/.gemini/GEMINI.md" }
-            Call-Packager "gemini-cli" (Get-ToolPath "gemini-cli") $configTarget
-        }
-        "antigravity" {
-            $targetPath = Get-ToolPath "antigravity"
-            Install-Skills $targetPath "Antigravity"
+        "antigravity-cli" {
+            $targetPath = Get-ToolPath "antigravity-cli"
+            Install-Skills $targetPath "Antigravity CLI"
             $configTarget = if ($OS -eq "windows") { "$env:USERPROFILE\.gemini\GEMINI.md" } else { "$HOME/.gemini/GEMINI.md" }
             if (Test-Path ".\.agent\rules") {
                 Remove-Item -Path ".\.agent\rules" -Recurse -Force -ErrorAction SilentlyContinue
             }
-            Call-Packager "antigravity" (Get-ToolPath "antigravity") $configTarget
+            Call-Packager "antigravity-cli" (Get-ToolPath "antigravity-cli") $configTarget
         }
         "project-local" {
             $targetPath = Get-ToolPath "project-local"
@@ -371,20 +361,14 @@ function Install-ForTarget {
             $ocTarget = if ($OS -eq "windows") { "$env:USERPROFILE\.config\opencode\opencode.json" } else { "$HOME/.config/opencode/opencode.json" }
             Call-Packager "opencode" (Get-ToolPath "opencode") $ocTarget
             
-            # Gemini CLI
-            $targetPath = Get-ToolPath "gemini-cli"
-            Install-Skills $targetPath "Gemini CLI"
-            $configTarget = if ($OS -eq "windows") { "$env:USERPROFILE\.gemini\GEMINI.md" } else { "$HOME/.gemini/GEMINI.md" }
-            Call-Packager "gemini-cli" (Get-ToolPath "gemini-cli") $configTarget
-            
-            # Antigravity
-            $targetPath = Get-ToolPath "antigravity"
-            Install-Skills $targetPath "Antigravity"
+            # Antigravity CLI
+            $targetPath = Get-ToolPath "antigravity-cli"
+            Install-Skills $targetPath "Antigravity CLI"
             $configTarget = if ($OS -eq "windows") { "$env:USERPROFILE\.gemini\GEMINI.md" } else { "$HOME/.gemini/GEMINI.md" }
             if (Test-Path ".\.agent\rules") {
                 Remove-Item -Path ".\.agent\rules" -Recurse -Force -ErrorAction SilentlyContinue
             }
-            Call-Packager "antigravity" (Get-ToolPath "antigravity") $configTarget
+            Call-Packager "antigravity-cli" (Get-ToolPath "antigravity-cli") $configTarget
             
             Write-Host ""
             Write-Host "${GREEN}${BOLD}Todos los orquestadores globales configurados automaticamente!${NC}"
@@ -417,22 +401,20 @@ function Show-InteractiveMenu {
     Write-Host ""
     Write-Host "  1) Claude Code    ($(Get-ToolPath "claude-code"))"
     Write-Host "  2) OpenCode       ($(Get-ToolPath "opencode"))"
-    Write-Host "  3) Gemini CLI     ($(Get-ToolPath "gemini-cli"))"
-    Write-Host "  4) Antigravity    (~/.gemini/skills/)"
-    Write-Host "  5) Project-local  ($(Get-ToolPath "project-local"))"
-    Write-Host "  6) All global     (Claude Code + OpenCode + Gemini CLI + Antigravity)"
-    Write-Host "  7) Custom path"
+    Write-Host "  3) Project-local    ($(Get-ToolPath "project-local"))"
+    Write-Host "  4) Antigravity CLI  (~/.gemini/skills/)"
+    Write-Host "  5) All global       (Claude Code + OpenCode + Antigravity CLI)"
+    Write-Host "  6) Custom path"
     Write-Host ""
-    $choice = Read-Host "Choice [1-7]"
+    $choice = Read-Host "Choice [1-6]"
     
     switch ($choice) {
         "1"  { Install-ForTarget "claude-code" }
         "2"  { Install-ForTarget "opencode" }
-        "3"  { Install-ForTarget "gemini-cli" }
-        "4"  { Install-ForTarget "antigravity" }
-        "5"  { Install-ForTarget "project-local" }
-        "6"  { Install-ForTarget "all-global" }
-        "7"  { Install-ForTarget "custom" }
+        "3"  { Install-ForTarget "project-local" }
+        "4"  { Install-ForTarget "antigravity-cli" }
+        "5"  { Install-ForTarget "all-global" }
+        "6"  { Install-ForTarget "custom" }
         default {
             Write-Error "Invalid choice"
             exit 1

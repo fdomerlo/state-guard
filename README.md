@@ -16,11 +16,11 @@ Los scripts de instalación compilan y empaquetan la configuración dinámicamen
 # Para modelos de entrada (OpenCode): realiza inlining para evitar pereza de herramientas
 bash scripts/install.sh --target opencode
 
-# Para modelos de frontera (Antigravity): usa Context Streaming (lazy loading)
-bash scripts/install.sh --target antigravity
+# Para modelos de frontera (Antigravity CLI): usa Context Streaming (lazy loading)
+bash scripts/install.sh --target antigravity-cli
 ```
 
-Opciones para `--target`: `opencode` (por defecto), `antigravity`, `claude-code`, `gemini-cli`.
+Opciones para `--target`: `opencode` (por defecto), `antigravity-cli`, `claude-code`.
 
 ### Windows
 
@@ -156,8 +156,7 @@ Agentify SDD es un framework **Agent-First**. El Memory Guard se adapta automát
 |-------------|:----------------:|:-----------:|:---------------------:|
 | **Claude Code** | ✅ | ✅ | Delega apply pesados (> 10 tareas) |
 | **OpenCode** | ✅ | ✅ | Delega apply pesados (> 10 tareas) |
-| **Gemini CLI** | ✅ | ❌ | Siempre inline |
-| **Antigravity** | ✅ | ✅ | Delega apply pesados (> 10 tareas) |
+| **Antigravity CLI** | ✅ | ✅ | Delega apply pesados (> 10 tareas) |
 
 Todos los agentes ejecutan fases inline por defecto. La delegación a sub-agentes solo ocurre cuando la fase `apply` tiene más de 10 tareas pendientes y el host soporta sub-agentes reales.
 

@@ -6,11 +6,11 @@ Este módulo permite al Memory Guard adaptar su comportamiento según las capaci
 
 ## Tabla de Capacidades
 
-| Capacidad                  | Claude Code | OpenCode | Gemini CLI | Antigravity |
-| -------------------------- | :---------: | :------: | :--------: | :---------: |
-| Sub-agentes reales (Task)  |      ✅      |    ✅     |     ❌      |      ✅      |
-| Ejecución inline de skills |      ✅      |    ✅     |     ✅      |      ✅      |
-| Ventana de contexto 200K+  |      ✅      |    ✅     |     ✅      |      ✅      |
+| Capacidad                  | Claude Code | OpenCode | Antigravity CLI |
+| -------------------------- | :---------: | :------: | :-------------: |
+| Sub-agentes reales (Task)  |      ✅      |    ✅     |        ✅        |
+| Ejecución inline de skills |      ✅      |    ✅     |        ✅        |
+| Ventana de contexto 200K+  |      ✅      |    ✅     |        ✅        |
 
 ## Auto-Detección del Host
 
@@ -19,8 +19,7 @@ El agente detecta su host por la presencia de archivos de configuración especí
 ```text
 ¿Existe ~/.claude/CLAUDE.md?           → Claude Code
 ¿Existe ~/.config/opencode/opencode.json? → OpenCode
-¿Existe ~/.gemini/GEMINI.md sin /antigravity/? → Gemini CLI
-¿Existe ~/.gemini/antigravity/?        → Antigravity
+¿Existe ~/.gemini/GEMINI.md?           → Antigravity CLI
 ```
 
 Si no se puede detectar automáticamente, asumir capacidades máximas (ejecución inline + sub-agentes disponibles).
@@ -39,11 +38,7 @@ SINO:
 
 ## Adaptaciones por Host
 
-### Gemini CLI (sin sub-agentes reales)
-
-Todas las fases se ejecutan inline. No hay delegación posible. El Memory Guard funciona idénticamente, pero la opción de delegar `sdd-apply` pesados no está disponible.
-
-### Claude Code / OpenCode / Antigravity (con sub-agentes)
+### Claude Code / OpenCode / Antigravity CLI (con sub-agentes)
 
 Modo híbrido: inline por defecto, delegación para fases pesadas. Al delegar:
 
@@ -80,9 +75,8 @@ Cargá también al inicio:
 
 La única variación es `{ruta-skills}`:
 
-| Host        | `{ruta-skills}`             |
-| ----------- | --------------------------- |
-| Claude Code | `~/.claude/skills`          |
-| OpenCode    | `~/.config/opencode/skills` |
-| Gemini CLI  | `~/.gemini/skills`          |
-| Antigravity | `~/.gemini/skills`          |
+| Host            | `{ruta-skills}`             |
+| --------------- | --------------------------- |
+| Claude Code     | `~/.claude/skills`          |
+| OpenCode        | `~/.config/opencode/skills` |
+| Antigravity CLI | `~/.gemini/skills`          |

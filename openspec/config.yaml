@@ -1,11 +1,10 @@
-# openspec/config.yaml
 schema: spec-driven
 
 context: |
-  Stack tecnológico: Shell (Bash/PowerShell), Markdown, YAML
-  Arquitectura: Framework SDD transaccional
-  Testing: Scripts de prueba (scripts/install_test.sh)
-  Estilo: Markdownlint (.markdownlint.json)
+  Stack tecnológico: Python (packager.py) y Shell scripts (Bash/PowerShell).
+  Arquitectura: Directorios de skills modulares integrados en un framework de desarrollo IA.
+  Testing: Scripts de validación en bash (scripts/install_test.sh).
+  Estilo: Reglas de formateo JSON y Markdown (.markdownlint.json).
 
 rules:
   change_naming: kebab-case

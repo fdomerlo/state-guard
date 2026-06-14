@@ -50,7 +50,7 @@ El agente determina su comportamiento en tiempo de ejecución analizando las reg
 El Memory Guard ejecuta fases **inline por defecto**: carga el `SKILL.md` correspondiente y sigue sus instrucciones como propias. Sin embargo, para aislar el contexto y preservar la memoria de la sesión principal, delega el trabajo pesado a un sub-agente real bajo estas estrictas condiciones:
 
 1. La fase es `sdd-apply` con más de 10 tareas pendientes, **Y**
-2. El agente host detectado soporta sub-agentes reales (Claude Code, OpenCode, Antigravity).
+2. El agente host detectado soporta sub-agentes reales (Claude Code, OpenCode, Antigravity CLI).
 
 En la ejecución delegada, el sub-agente ejecuta las tareas e interactúa con el disco, pero **nunca** escribe en `state.yaml`. El Memory Guard asume exclusivamente la responsabilidad del COMMIT transaccional al finalizar la delegación.
 
@@ -76,7 +76,7 @@ Para `--target opencode`, el empaquetador realiza un **inlining masivo**: lee to
 Además, el empaquetador reescribe dinámicamente las directivas de los *slash commands* (como `sdd-apply.md`) para usar lenguaje imperativo (ej. `INSTRUCCIÓN CRÍTICA: DEBES usar tu herramienta read_file INMEDIATAMENTE en la ruta...`), forzando al modelo a realizar el *tool-calling* esperado.
 
 ### Context Streaming (Targets Avanzados)
-Para modelos de frontera como Antigravity o Claude Code (`--target antigravity`, `--target claude-code`), el empaquetador evita el inlining pesado. Despliega un *system prompt* minimalista conservando la filosofía de **Lazy Loading** (Context Streaming). El agente carga dinámicamente las habilidades compartidas y específicas bajo demanda, respetando las referencias modulares limpias para mantener la ventana de contexto sumamente ligera.
+Para modelos de frontera como Antigravity CLI o Claude Code (`--target antigravity-cli`, `--target claude-code`), el empaquetador evita el inlining pesado. Despliega un *system prompt* minimalista conservando la filosofía de **Lazy Loading** (Context Streaming). El agente carga dinámicamente las habilidades compartidas y específicas bajo demanda, respetando las referencias modulares limpias para mantener la ventana de contexto sumamente ligera.
 
 ---
 
@@ -441,8 +441,7 @@ Agentify SDD soporta múltiples agentes de IA. El Memory Guard se adapta automá
 |------------|:----------------:|:-----------:|:---------------------:|
 | Claude Code | ✅ | ✅ | Apply pesados |
 | OpenCode | ✅ | ✅ | Apply pesados |
-| Gemini CLI | ✅ | ❌ | Siempre inline |
-| Antigravity | ✅ | ✅ | Apply pesados |
+| Antigravity CLI | ✅ | ✅ | Apply pesados |
 
 La instalación varía según la herramienta. Ejecuta `scripts/install.sh` y selecciona tu herramienta. Cada integración es un stub mínimo que carga `memory-guard.md` como contrato central.
 

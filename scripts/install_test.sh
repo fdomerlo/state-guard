@@ -157,6 +157,7 @@ test_help_flag() {
     echo "$output" | grep -q "Usage:" || { echo "Help output missing 'Usage:'"; return 1; }
     echo "$output" | grep -q "claude-code" || { echo "Help output missing 'claude-code'"; return 1; }
     echo "$output" | grep -q "opencode" || { echo "Help output missing 'opencode'"; return 1; }
+    echo "$output" | grep -q "antigravity" || { echo "Help output missing 'antigravity'"; return 1; }
     echo "$output" | grep -q "all-global" || { echo "Help output missing 'all-global'"; return 1; }
     echo "$output" | grep -q "\-\-agent" || { echo "Help output missing '--agent'"; return 1; }
     echo "$output" | grep -q "\-\-path" || { echo "Help output missing '--path'"; return 1; }
@@ -243,35 +244,19 @@ test_opencode_commands_path_substituted() {
 
 
 # ============================================================================
-# Tests — Gemini CLI
+# Tests — Antigravity CLI
 # ============================================================================
 
-test_install_gemini_cli() {
-    bash "$INSTALL_SCRIPT" --agent gemini-cli > /dev/null 2>&1
+test_install_antigravity_cli() {
+    bash "$INSTALL_SCRIPT" --agent antigravity-cli > /dev/null 2>&1
     assert_all_skills_installed "$HOME/.gemini/skills"
 }
 
-test_gemini_cli_skill_count() {
-    bash "$INSTALL_SCRIPT" --agent gemini-cli > /dev/null 2>&1
+test_antigravity_cli_skill_count() {
+    bash "$INSTALL_SCRIPT" --agent antigravity-cli > /dev/null 2>&1
     local count
     count=$(find "$HOME/.gemini/skills" -name "SKILL.md" | wc -l | tr -d ' ')
-    assert_eq "20" "$count" "Expected exactly 20 skills for Gemini CLI"
-}
-
-# ============================================================================
-# Tests — Antigravity
-# ============================================================================
-
-test_install_antigravity() {
-    bash "$INSTALL_SCRIPT" --agent antigravity > /dev/null 2>&1
-    assert_all_skills_installed "$HOME/.gemini/skills"
-}
-
-test_antigravity_skill_count() {
-    bash "$INSTALL_SCRIPT" --agent antigravity > /dev/null 2>&1
-    local count
-    count=$(find "$HOME/.gemini/skills" -name "SKILL.md" | wc -l | tr -d ' ')
-    assert_eq "20" "$count" "Expected exactly 20 skills for Antigravity"
+    assert_eq "20" "$count" "Expected exactly 20 skills for Antigravity CLI"
 }
 
 # ============================================================================
@@ -322,27 +307,24 @@ test_all_global() {
     assert_all_skills_installed "$HOME/.claude/skills" || return 1
     # OpenCode
     assert_all_skills_installed "$HOME/.config/opencode/skills" || return 1
-    # Gemini CLI
-    assert_all_skills_installed "$HOME/.gemini/skills" || return 1
-    # Antigravity
+    # Antigravity CLI
     assert_all_skills_installed "$HOME/.gemini/skills" || return 1
 }
 
 test_all_global_total_skill_count() {
     bash "$INSTALL_SCRIPT" --agent all-global > /dev/null 2>&1
-    # 4 targets × 20 skills = 80 SKILL.md files
+    # 3 targets × 20 skills = 60 SKILL.md files
     local total=0
     for dir in \
         "$HOME/.claude/skills" \
         "$HOME/.config/opencode/skills" \
-        "$HOME/.gemini/skills" \
         "$HOME/.gemini/skills"; do
         local count
         count=$(find "$dir" -name "SKILL.md" | wc -l | tr -d ' ')
         assert_eq "20" "$count" "Expected 20 skills in $dir" || return 1
         total=$((total + count))
     done
-    assert_eq "80" "$total" "Expected 80 total SKILL.md files across all targets"
+    assert_eq "60" "$total" "Expected 60 total SKILL.md files across all targets"
 }
 
 
@@ -368,9 +350,9 @@ test_idempotent_opencode() {
     assert_eq "20" "$skill_count" "Expected exactly 20 skills after double install" || return 1
 }
 
-test_idempotent_antigravity() {
-    bash "$INSTALL_SCRIPT" --agent antigravity > /dev/null 2>&1
-    bash "$INSTALL_SCRIPT" --agent antigravity > /dev/null 2>&1
+test_idempotent_antigravity_cli() {
+    bash "$INSTALL_SCRIPT" --agent antigravity-cli > /dev/null 2>&1
+    bash "$INSTALL_SCRIPT" --agent antigravity-cli > /dev/null 2>&1
     assert_all_skills_installed "$HOME/.gemini/skills" || return 1
     local count
     count=$(find "$HOME/.gemini/skills" -name "SKILL.md" | wc -l | tr -d ' ')
@@ -383,7 +365,6 @@ test_idempotent_all_global() {
     for dir in \
         "$HOME/.claude/skills" \
         "$HOME/.config/opencode/skills" \
-        "$HOME/.gemini/skills" \
         "$HOME/.gemini/skills"; do
         local count
         count=$(find "$dir" -name "SKILL.md" | wc -l | tr -d ' ')
@@ -543,14 +524,9 @@ run_test "20 command .md files in commands/ folder" test_opencode_commands_folde
 run_test "{{SKILLS_PATH}} placeholder substituted" test_opencode_commands_path_substituted
 echo ""
 
-echo -e "${BOLD}Gemini CLI${NC}"
-run_test "Installs all 20 skills to ~/.gemini/skills" test_install_gemini_cli
-run_test "Exactly 20 SKILL.md files" test_gemini_cli_skill_count
-echo ""
-
-echo -e "${BOLD}Antigravity${NC}"
-run_test "Installs all 20 skills to ~/.gemini/skills" test_install_antigravity
-run_test "Exactly 20 SKILL.md files" test_antigravity_skill_count
+echo -e "${BOLD}Antigravity CLI${NC}"
+run_test "Installs all 20 skills to ~/.gemini/skills" test_install_antigravity_cli
+run_test "Exactly 20 SKILL.md files" test_antigravity_cli_skill_count
 echo ""
 
 echo -e "${BOLD}Project-local${NC}"
@@ -565,14 +541,14 @@ run_test "Handles deeply nested custom path" test_nested_custom_path
 echo ""
 
 echo -e "${BOLD}All-global${NC}"
-run_test "Installs to all 4 global targets" test_all_global
-run_test "80 total SKILL.md files (4×20)" test_all_global_total_skill_count
+run_test "Installs to all 3 global targets" test_all_global
+run_test "60 total SKILL.md files (3×20)" test_all_global_total_skill_count
 echo ""
 
 echo -e "${BOLD}Idempotency${NC}"
 run_test "Claude Code: double install is safe" test_idempotent_claude_code
 run_test "OpenCode: double install is safe" test_idempotent_opencode
-run_test "Antigravity: double install is safe" test_idempotent_antigravity
+run_test "Antigravity CLI: double install is safe" test_idempotent_antigravity_cli
 run_test "All-global: double install is safe" test_idempotent_all_global
 echo ""
 

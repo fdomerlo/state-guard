@@ -90,14 +90,7 @@ get_tool_path() {
                 *)        echo "$HOME/.config/opencode/commands" ;;
             esac
             ;;
-        gemini-cli)
-            case "$OS" in
-                windows)  echo "$USERPROFILE/.gemini/skills" ;;
-                wsl)      echo "$HOME/.gemini/skills" ;;
-                *)        echo "$HOME/.gemini/skills" ;;
-            esac
-            ;;
-        antigravity)
+        antigravity-cli)
             case "$OS" in
                 windows)  echo "$USERPROFILE/.gemini/skills" ;;
                 wsl)      echo "$HOME/.gemini/skills" ;;
@@ -149,7 +142,7 @@ show_help() {
     echo "  --path DIR      Custom install path (use with --target custom)"
     echo "  -h, --help      Show this help"
     echo ""
-    echo "Targets: claude-code, opencode, gemini-cli, antigravity, project-local, all-global"
+    echo "Targets: claude-code, opencode, antigravity-cli, project-local, all-global"
 }
 
 # ============================================================================
@@ -298,17 +291,12 @@ install_for_agent() {
             fi
             call_packager "opencode" "$(get_tool_path opencode)" "$config_target"
             ;;
-        gemini-cli)
-            install_skills "$(get_tool_path gemini-cli)" "Gemini CLI"
-            local config_target="${USERPROFILE:-$HOME}/.gemini/GEMINI.md"
-            call_packager "gemini-cli" "$(get_tool_path gemini-cli)" "$config_target"
-            ;;
-        antigravity)
-            local skills_target="$(get_tool_path antigravity)"
-            install_skills "$skills_target" "Antigravity"
+        antigravity-cli)
+            local skills_target="$(get_tool_path antigravity-cli)"
+            install_skills "$skills_target" "Antigravity CLI"
             local config_target="${USERPROFILE:-$HOME}/.gemini/GEMINI.md"
             rm -rf "./.agent/rules" 2>/dev/null || true
-            call_packager "antigravity" "$(get_tool_path antigravity)" "$config_target"
+            call_packager "antigravity-cli" "$(get_tool_path antigravity-cli)" "$config_target"
             ;;
         project-local)
             install_skills "$(get_tool_path project-local)" "Project-local"
@@ -327,14 +315,11 @@ install_for_agent() {
             fi
             call_packager "opencode" "$(get_tool_path opencode)" "$oc_target"
             
-            install_skills "$(get_tool_path gemini-cli)" "Gemini CLI"
-            call_packager "gemini-cli" "$(get_tool_path gemini-cli)" "${USERPROFILE:-$HOME}/.gemini/GEMINI.md"
-            
             local ag_target
-            ag_target="$(get_tool_path antigravity)"
-            install_skills "$ag_target" "Antigravity"
+            ag_target="$(get_tool_path antigravity-cli)"
+            install_skills "$ag_target" "Antigravity CLI"
             rm -rf "./.agent/rules" 2>/dev/null || true
-            call_packager "antigravity" "$(get_tool_path antigravity)" "${USERPROFILE:-$HOME}/.gemini/GEMINI.md"
+            call_packager "antigravity-cli" "$(get_tool_path antigravity-cli)" "${USERPROFILE:-$HOME}/.gemini/GEMINI.md"
             
             echo -e "\n${GREEN}${BOLD}¡Todos los orquestadores globales configurados automáticamente!${NC}"
             ;;
@@ -362,22 +347,20 @@ interactive_menu() {
     echo -e "${BOLD}Select your AI coding assistant:${NC}\n"
     echo "  1) Claude Code    ($(get_tool_path claude-code))"
     echo "  2) OpenCode       ($(get_tool_path opencode))"
-    echo "  3) Gemini CLI     ($(get_tool_path gemini-cli))"
-    echo "  4) Antigravity    (~/.gemini/skills/)"
-    echo "  5) Project-local  ($(get_tool_path project-local))"
-    echo "  6) All global     (Claude Code + OpenCode + Gemini CLI + Antigravity)"
-    echo "  7) Custom path"
+    echo "  3) Project-local    ($(get_tool_path project-local))"
+    echo "  4) Antigravity CLI  (~/.gemini/skills/)"
+    echo "  5) All global       (Claude Code + OpenCode + Antigravity CLI)"
+    echo "  6) Custom path"
     echo ""
-    read -rp "Choice [1-7]: " choice
+    read -rp "Choice [1-6]: " choice
 
     case $choice in
         1)  install_for_agent "claude-code" ;;
         2)  install_for_agent "opencode" ;;
-        3)  install_for_agent "gemini-cli" ;;
-        4)  install_for_agent "antigravity" ;;
-        5)  install_for_agent "project-local" ;;
-        6)  install_for_agent "all-global" ;;
-        7)  install_for_agent "custom" ;;
+        3)  install_for_agent "project-local" ;;
+        4)  install_for_agent "antigravity-cli" ;;
+        5)  install_for_agent "all-global" ;;
+        6)  install_for_agent "custom" ;;
         *)
             print_error "Invalid choice"
             exit 1
