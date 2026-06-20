@@ -2,4 +2,7 @@
 description: "Guarda el estado de la sesión actual en session_summary del state.yaml"
 agent: sdd-orchestrator
 ---
-Lee el archivo `{{SKILLS_PATH}}/sdd-checkpoint/SKILL.md` y ejecuta sus instrucciones al pie de la letra.
+You must execute this command following the strict transactional loop:
+1. Initialize the transaction using `tx_begin`.
+2. Delegate execution to the sub-agent by calling `delegate_task` with `sub_agent_skill: "{{SKILLS_PATH}}/sdd-checkpoint/SKILL.md"`.
+3. Upon completion, finalize the state block by executing `tx_commit` (or `tx_rollback` in case of critical failure).

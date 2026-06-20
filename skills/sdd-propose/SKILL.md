@@ -1,129 +1,113 @@
 ---
 name: sdd-propose
 description: >
-  Crea una propuesta de cambio con intención, alcance y enfoque.
-  Disparador: Cuando el orquestador te lanza para crear o actualizar una propuesta de cambio.
+  Creates a change proposal outlining intent, scope, and approach.
+  Trigger: When the orchestrator launches you to create or update a change proposal.
 license: MIT
 metadata:
   author: ctrbts-steve
-  version: "2.0"
+  version: "3.0"
 ---
 
 # SDD-Propose Skill
 
-## Propósito
+## Purpose
 
-Eres un sub-agente responsable de crear **PROPUESTAS**. Tomás el análisis de exploración (o la descripción directa del usuario) y producís un documento `proposal.md` estructurado dentro de la carpeta del cambio.
+You are a sub-agent responsible for creating **PROPOSALS**. You take the exploration analysis (or direct user description) and produce a structured `proposal.md` document inside the change folder.
 
-## Qué Recibís
+## What You Receive
 
-Del orquestador:
+From the orchestrator:
 
-- Nombre del cambio (ej: "agregar-modo-oscuro")
-- Análisis de exploración (de sdd-explore) O descripción directa del usuario
+- Change name (e.g., "add-dark-mode")
+- Exploration analysis (from sdd-explore) OR direct user description
 
 ## Execution and Persistence Contract
 
-- Lee las convenciones base referenciadas en `skills/_shared/execution-contract.md` antes de proceder.
+- Read the base conventions referenced in `skills/_shared/persistence-contract.md` before proceeding.
 
-## Qué Hacer
+## What to Do
 
-### Paso 1: Crear el Directorio del Cambio
+### Step 1: Create the Change Directory
 
-Crea la estructura de carpetas del cambio:
+Create the change folder structure:
 
 ```text
-openspec/changes/{nombre-del-cambio}/
+openspec/changes/{change-name}/
 └── proposal.md
 ```
 
-### Paso 2: Leer Specs Existentes
+### Step 2: Read Existing Specs
 
-Si `openspec/specs/` tiene specs relevantes, léelas para entender el comportamiento actual que este cambio podría afectar.
+If `openspec/specs/` has relevant specs, read them to understand current behavior that this change might affect.
 
-### Paso 3: Escribir proposal.md
+### Step 3: Write proposal.md
 
 ```markdown
-# Propuesta: {Título del Cambio}
+# Proposal: {Change Title}
 
-## Intención
+## Intent
 
-{¿Qué problema estamos resolviendo? ¿Por qué necesita ocurrir este cambio?
-Sé específico sobre la necesidad del usuario o la deuda técnica que se aborda.}
+{What problem are we solving? Why does this change need to happen?
+Be specific about the user need or technical debt being addressed.}
 
-## Alcance
+## Scope
 
-### Dentro del Alcance
-- {Entregable concreto 1}
-- {Entregable concreto 2}
-- {Entregable concreto 3}
+### In Scope
+- {Concrete deliverable 1}
+- {Concrete deliverable 2}
+- {Concrete deliverable 3}
 
-### Fuera del Alcance
-- {Lo que explícitamente NO vamos a hacer}
-- {Trabajo futuro relacionado pero diferido}
+### Out of Scope
+- {What we explicitly will NOT do}
+- {Related but deferred future work}
 
-## Enfoque
+## Approach
 
-{Enfoque técnico de alto nivel. ¿Cómo resolveremos esto?
-Hace referencia al enfoque recomendado de la exploración si está disponible.}
+{High-level technical approach. How will we solve this?
+Reference the recommended approach from exploration if available.}
 
-## Áreas Afectadas
+## Affected Areas
 
-| Área              | Impacto                     | Descripción        |
+| Area              | Impact                      | Description        |
 |-------------------|-----------------------------|--------------------|
-| `ruta/al/área`    | Nuevo/Modificado/Eliminado  | {Qué cambia}       |
+| `path/to/area`    | New/Modified/Deleted        | {What changes}     |
 
-## Riesgos
+## Risks
 
-| Riesgo               | Probabilidad    | Mitigación            |
+| Risk                 | Probability     | Mitigation            |
 |----------------------|-----------------|-----------------------|
-| {Descripción riesgo} | Baja/Med/Alta   | {Cómo lo mitigamos}   |
+| {Risk description}   | Low/Med/High    | {How we mitigate it}  |
 
-## Plan de Rollback
+## Rollback Plan
 
-{Cómo revertir si algo sale mal. Sé específico.}
+{How to revert if something goes wrong. Be specific.}
 
-## Dependencias
+## Dependencies
 
-- {Dependencia externa o prerequisito, si hay}
+- {External dependency or prerequisite, if any}
 
-## Criterios de Éxito
+## Success Criteria
 
-- [ ] {¿Cómo sabemos que este cambio tuvo éxito?}
-- [ ] {Resultado medible}
+- [ ] {How do we know this change succeeded?}
+- [ ] {Measurable outcome}
 ```
 
-### Paso 4: Devolver Resumen
+## Rules
 
-Devuelve al orquestador:
+- ALWAYS create the `proposal.md` file.
+- If the change directory already exists with a proposal, READ it first and UPDATE it.
+- Keep the proposal CONCISE — it is a thinking tool, not a novel.
+- Every proposal MUST have a rollback plan.
+- Every proposal MUST have success criteria.
+- Use concrete file paths in "Affected Areas" when possible.
+- Apply any `rules.proposal` from `openspec/config.yaml`.
+- **VALIDATE the change name against the `change_naming` rule (kebab-case)** if configured in config.yaml.
 
-```markdown
-## Propuesta Creada
+- ### Size Budget
 
-**Cambio**: {nombre-del-cambio}
-**Ubicación**: openspec/changes/{nombre-del-cambio}/proposal.md
+  - Your output MUST NOT exceed 400 words.
 
-### Resumen
-- **Intención**: {resumen en una línea}
-- **Alcance**: {N entregables incluidos, M ítems diferidos}
-- **Enfoque**: {enfoque en una línea}
-- **Nivel de Riesgo**: {Bajo/Medio/Alto}
+## Binding Protocol (CRITICAL)
 
-### Próximo Paso
-Listo para specs (sdd-spec) o diseño (sdd-design).
-```
-
-## Reglas
-
-- SIEMPRE crear el archivo `proposal.md`
-- Si el directorio del cambio ya existe con una propuesta, LEERLA primero y ACTUALIZARLA
-- Mantener la propuesta CONCISA — es una herramienta de pensamiento, no una novela
-- Toda propuesta DEBE tener un plan de rollback
-- Toda propuesta DEBE tener criterios de éxito
-- Usar rutas de archivos concretas en "Áreas Afectadas" cuando sea posible
-- Aplicar cualquier `rules.proposal` de `openspec/config.yaml`
-- **VALIDAR el nombre del cambio contra la regla `change_naming` (kebab-case)** si está configurada en config.yaml
-
-- ### Presupuesto de Tamaño
-
-  - Tu output NO DEBE exceder 400 palabras.
+You MUST format your final response payload using the exact markdown keys and structure defined in `skills/_shared/sdd-phase-common.md`. Internal logic must be in English; summaries and reports must be in Spanish.

@@ -1,105 +1,80 @@
 ---
 name: sdd-status
 description: >
-  Muestra el estado de todos los cambios activos del DAG mediante una tabla Markdown con emojis de semáforo.
-  Disparador: Cuando el orquestador te lanza para mostrar el estado de cambios activos, o el usuario ejecuta /sdd-status.
+  Displays the synchronization status of all active DAG changes using a Markdown traffic-light table.
+  Trigger: Executed when the user invokes /sdd-status or the orchestrator polls for a health check.
 license: MIT
 metadata:
   author: ctrbts-steve
-  version: "1.0"
+  version: "3.0"
 ---
 
-# SDD-Status Skill
+# SDD-Status Skill (Query Context)
 
-## Propósito
+## 1. PURPOSE & NATURE
+You are a specialized analytical **QUERY sub-agent** responsible for parsing and rendering workspace status.
+- **CRITICAL CONSTRAINT:** You operate strictly in READ-ONLY mode. You MUST NOT open transaction blocks (`tx_begin`), alter any files, or mutate `state.yaml` records.
 
-Eres un sub-agente responsable de **mostrar el estado de los cambios activos** en el DAG de SDD. Lees los archivos `state.yaml` de todos los cambios y generas una tabla Markdown con emojis de semáforo.
+## 2. INBOUND DATA
+The orchestrator provides:
+- References to active `state.yaml` file locations.
 
-## Qué Recibís
+## 3. EXECUTION STEPS
 
-El orquestador te dará:
-
-- Referencias a los archivos `state.yaml` activos
-
-## Execution and Persistence Contract
-
-- Lee las convenciones base referenciadas en `skills/_shared/execution-contract.md` antes de proceder.
-
-## Qué Hacer
-
-### Paso 1: Encontrar Archivos de Estado
-
-Busca todos los archivos `state.yaml` en el directorio `openspec/changes/`:
-
+### Step 1: Discover State Logs
+Scan the workspace directory specifically looking for active state configurations at:
 ```text
 openspec/changes/*/state.yaml
 ```
 
-### Paso 2: Parsear cada State.yaml
+### Step 2: Parse Ledger Content
 
-Para cada archivo encontrado, extrae los siguientes campos:
+For each discovered file, extract the following telemetry keys:
 
-- `change`: Nombre del cambio
-- `current_phase`: Fase actual (explore, propose, spec, design, tasks, apply, verify, archive)
-- `status`: Estado actual (active, done, blocked)
-- `started_at`: Fecha de inicio en formato ISO 8601
-- `pending_phases`: Lista de fases pendientes
-- `blocked_reason`: Razón del bloqueo (si aplica)
+* `change`: Naming label of the branch.
+* `current_phase`: Last successfully completed lifecycle checkpoint.
+* `status`: Structural health state (`active` | `done` | `blocked`).
+* `started_at`: ISO 8601 creation timestamp.
+* `pending_phases`: List of remaining milestones.
+* `blocked_reason`: Error logs if blocked.
 
-### Paso 3: Filtrar Cambios Archivados
+### Step 3: Filter Outactive Records
 
-Ignora los cambios que tengan:
+Strictly ignore any change directory that yields:
 
-- `status: done`
-- `current_phase: archive`
+* `status: "done"`
+* `current_phase: "archive"`
 
-### Paso 4: Calcular Tiempo Transcurrido
+### Step 4: Compute Dynamic Elapsed Runtime
 
-Para cada cambio activo, calcula el tiempo desde `started_at` hasta ahora:
+Calculate time delta from `started_at` to current system datetime:
 
-- Formato de salida: "Xh Ym" (horas y minutos)
-- Si ha pasado menos de 1 hora, mostrar solo minutos: "30m"
-- Si ha pasado más de 24 horas, mostrar "24h+"
+* Output token format: `"Xh Ym"` (Hours, Minutes).
+* If runtime < 1 hour: Display minutes only (`"30m"`).
+* If runtime > 24 hours: Display cap threshold (`"24h+"`).
 
-### Paso 5: Determinar Estado con Semáforo
+### Step 5: Map Status Emojis
 
-Aplica la lógica de semáforo:
+Translate status parameters to specific visual markers:
 
-```text
-| Condición | Emoji | Significado |
-|-----------|-------|-------------|
-| `status == "blocked"` | 🟡 | Bloqueado |
-| `status == "done"` | 🔴 | Completado (no debería aparecer) |
-| `status == "active"` | 🟢 | Activo |
-```
+* `status == "blocked"` ➔ 🟡 (Bloqueado)
+* `status == "active"`  ➔ 🟢 (Activo)
 
-### Paso 6: Formatear Tabla Markdown
+### Step 6: Generate Output Table (LOCALIZATION RULE)
 
-Genera una tabla con las siguientes columnas:
+Build a concise Markdown table. The headers and structural values MUST be printed **strictly in SPANISH** to comply with user interface rules:
 
 ```text
 | Cambio | Fase Actual | Tiempo Transcurrido | Estado |
 |--------|-------------|---------------------|--------|
-| feat-auth | Apply | 2h 30m | 🟢 |
+| {change} | {Capitalized Phase} | {Calculated Delta} | 🟢/🟡 |
 ```
 
-- **Cambio**: Nombre del cambio (de `change`)
-- **Fase Actual**: Current_phase con primera letra mayúscula (de `current_phase`)
-- **Tiempo Transcurrido**: Formato "Xh Ym" (del cálculo)
-- **Estado**: Emoji del semáforo
+### Step 7: Handle Boundary Conditions Gracefully
 
-### Paso 7: Manejar Casos Edge
+* **No Active Changes Found:** Output a polite informative text block in Spanish stating that the workspace is clean. Do not output an empty skeleton table.
+* **Malformed/Corrupt YAML:** Log a localized warning for the broken file path but continue processing the remaining valid ledgers. Do not crash.
 
-- **Sin cambios activos**: Mostrar mensaje informativo, no tabla vacía
-- **Archivo corrupto**: Continuar con los demás archivos, mostrar advertencia
+## 4. BINDING PROTOCOL
 
-### Paso 8: Devolver Resultado
-
-Devuelve la tabla Markdown con el estado de todos los cambios activos.
-
-## Reglas
-
-- SIEMPRE filtrar cambios con status "done" o current_phase "archive"
-- Si no hay cambios activos, mostrar mensaje informativo
-- Manejar gracefully archivos malformados (continuar, no fallar)
-- El formato de fase debe ser legible (primera letra mayúscula)
+You MUST format your final response payload using the exact markdown keys and structure defined in `skills/_shared/sdd-phase-common.md`. Internal logic must be in English; summaries and reports must be in Spanish.

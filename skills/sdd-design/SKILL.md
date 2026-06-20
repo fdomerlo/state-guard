@@ -1,156 +1,132 @@
 ---
 name: sdd-design
 description: >
-  Crea el documento de diseño técnico con decisiones de arquitectura y enfoque.
-  Disparador: Cuando el orquestador te lanza para escribir o actualizar el diseño técnico de un cambio.
+  Creates the technical design document with architecture decisions and approach.
+  Trigger: When the orchestrator launches you to write or update the technical design of a change.
 license: MIT
 metadata:
   author: ctrbts-steve
-  version: "2.0"
+  version: "3.0"
 ---
 
 # SDD-Design Skill
 
-## Propósito
+## Purpose
 
-Eres un sub-agente responsable del **DISEÑO TÉCNICO**. Tomás la propuesta y las specs, y producís un `design.md` que captura CÓMO se implementará el cambio — decisiones de arquitectura, flujo de datos, cambios de archivos y justificación técnica.
+You are a sub-agent responsible for **TECHNICAL DESIGN**. You take the proposal and specs, and produce a `design.md` that captures HOW the change will be implemented — architecture decisions, data flow, file changes, and technical justification.
 
-## Qué Recibís
+## What You Receive
 
-Del orquestador:
+From the orchestrator:
 
-- Nombre del cambio
+- Change name
 
 ## Execution and Persistence Contract
 
-- Lee las convenciones base referenciadas en `skills/_shared/execution-contract.md` antes de proceder.
+- Read the base conventions referenced in `skills/_shared/persistence-contract.md` before proceeding.
 
-## Qué Hacer
+## What to Do
 
-### Paso 1: Leer el Código Base
+### Step 1: Read the Codebase
 
-Antes de diseñar, lee el código real que será afectado:
+Before designing, read the actual code that will be affected:
 
-- Puntos de entrada y estructura de módulos
-- Patrones y convenciones existentes
-- Dependencias e interfaces
-- Infraestructura de testing (si existe)
+- Entry points and module structure
+- Existing patterns and conventions
+- Dependencies and interfaces
+- Testing infrastructure (if any)
 
-### Paso 2: Escribir design.md
+### Step 2: Write design.md
 
-Crea el documento de diseño:
+Create the design document:
 
 ```text
-openspec/changes/{nombre-del-cambio}/
+openspec/changes/{change-name}/
 ├── proposal.md
 ├── specs/
-└── design.md              ← Lo creas tú
+└── design.md              ← Created by you
 ```
 
-#### Formato del Documento de Diseño
+#### Design Document Format
 
 ```markdown
-# Diseño: {Título del Cambio}
+# Design: {Change Title}
 
-## Enfoque Técnico
+## Technical Approach
 
-{Descripción concisa de la estrategia técnica general.
-¿Cómo se relaciona con el enfoque de la propuesta? Hace referencia a las specs.}
+{Concise description of the overall technical strategy.
+How does it relate to the proposal's approach? Reference the specs.}
 
-## Decisiones de Arquitectura
+## Architecture Decisions
 
-### Decisión: {Título de la Decisión}
+### Decision: {Decision Title}
 
-**Elección**: {Qué elegimos}
-**Alternativas consideradas**: {Qué descartamos}
-**Justificación**: {Por qué esta elección sobre las alternativas}
+**Choice**: {What we chose}
+**Considered Alternatives**: {What we discarded}
+**Justification**: {Why this choice over alternatives}
 
-### Decisión: {Título de la Decisión}
+### Decision: {Decision Title}
 
-**Elección**: {Qué elegimos}
-**Alternativas consideradas**: {Qué descartamos}
-**Justificación**: {Por qué esta elección sobre las alternativas}
+**Choice**: {What we chose}
+**Considered Alternatives**: {What we discarded}
+**Justification**: {Why this choice over alternatives}
 
-## Flujo de Datos
+## Data Flow
 
-{Describe cómo fluyen los datos a través del sistema para este cambio.
-Usa diagramas ASCII cuando sea útil.}
+{Describe how data flows through the system for this change.
+Use ASCII diagrams when useful.}
 
-    Componente A ──→ Componente B ──→ Componente C
+    Component A ──→ Component B ──→ Component C
          │                              │
          └──────── Store ───────────────┘
 
-## Cambios de Archivos
+## File Changes
 
-| Archivo                      | Acción    | Descripción                          |
+| File                         | Action    | Description                          |
 |------------------------------|-----------|--------------------------------------|
-| `ruta/a/nuevo-archivo.ext`   | Crear     | {Qué hace este archivo}              |
-| `ruta/a/existente.ext`       | Modificar | {Qué cambia y por qué}              |
-| `ruta/a/archivo-viejo.ext`   | Eliminar  | {Por qué se elimina}                 |
+| `path/to/new-file.ext`       | Create    | {What this file does}                |
+| `path/to/existing.ext`       | Modify    | {What changes and why}               |
+| `path/to/old-file.ext`       | Delete    | {Why it is removed}                  |
 
-## Interfaces / Contratos
+## Interfaces / Contracts
 
-{Define cualquier nueva interfaz, contrato de API, definiciones de tipos o estructuras de datos.
-Usa bloques de código con el lenguaje del proyecto.}
+{Define any new interface, API contract, type definitions, or data structures.
+Use code blocks with the project's language.}
 
-## Estrategia de Testing
+## Testing Strategy
 
-| Capa        | Qué Testear | Enfoque  |
+| Layer       | What to Test| Approach |
 |-------------|-------------|----------|
-| Unitario    | {Qué}       | {Cómo}   |
-| Integración | {Qué}       | {Cómo}   |
-| E2E         | {Qué}       | {Cómo}   |
+| Unit        | {What}      | {How}    |
+| Integration | {What}      | {How}    |
+| E2E         | {What}      | {How}    |
 
-## Migración / Despliegue
+## Migration / Deployment
 
-{Si este cambio requiere migración de datos, feature flags o despliegue por fases, describe el plan.
-Si no aplica, indicar "No se requiere migración."}
+{If this change requires data migration, feature flags, or phased deployment, describe the plan.
+If not applicable, indicate "No migration required."}
 
-## Preguntas Abiertas
+## Open Questions
 
-- [ ] {Cualquier pregunta técnica no resuelta}
-- [ ] {Cualquier decisión que requiera input del equipo}
+- [ ] {Any unresolved technical question}
+- [ ] {Any decision requiring team input}
 ```
 
-### Paso 3: Devolver Resumen
+## Rules
 
-Devuelve al orquestador:
+- ALWAYS read the actual codebase before designing — never assume.
+- Every decision MUST have a justification (the "why").
+- Include concrete file paths, not abstract descriptions.
+- Use the ACTUAL patterns and conventions of the project, not generic best practices.
+- If the codebase uses a different pattern than you would recommend, note it but FOLLOW the existing pattern unless the change specifically addresses it.
+- Keep ASCII diagrams simple — clarity over aesthetics.
+- Apply any `rules.design` from `openspec/config.yaml`.
+- If you have open questions that BLOCK the design, state them clearly — do not assume.
 
-```markdown
-## Diseño Creado
+- ### Size Budget
 
-**Cambio**: {nombre-del-cambio}
-**Ubicación**: openspec/changes/{nombre-del-cambio}/design.md
+  - Your output MUST NOT exceed 800 words. Use tables for architecture decisions.
 
-### Resumen
-- **Enfoque**: {enfoque técnico en una línea}
-- **Decisiones Clave**: {N decisiones documentadas}
-- **Archivos Afectados**: {N nuevos, M modificados, K eliminados}
-- **Estrategia de Testing**: {cobertura unitaria/integración/e2e planificada}
+## Binding Protocol (CRITICAL)
 
-### Preguntas Abiertas
-{Lista de preguntas no resueltas, o "Ninguna"}
-
-### Próximo Paso
-Listo para tareas (sdd-tasks).
-
-### Lock Phase
-
-lock_phase_next: tasks
-```
-
-## Reglas
-
-- SIEMPRE leer el código base real antes de diseñar — nunca asumir
-- Toda decisión DEBE tener una justificación (el "por qué")
-- Incluir rutas de archivos concretas, no descripciones abstractas
-- Usar los patrones y convenciones REALES del proyecto, no mejores prácticas genéricas
-- Si el código base usa un patrón diferente al que recomendarías, anotarlo pero SEGUIR el patrón existente a menos que el cambio lo aborde específicamente
-- Mantener los diagramas ASCII simples — claridad sobre estética
-- Aplicar cualquier `rules.design` de `openspec/config.yaml`
-- Si tenés preguntas abiertas que BLOQUEAN el diseño, decirlo claramente — no asumir
-- **LOCK PHASE**: la última sección del resumen de retorno SIEMPRE DEBE ser `### Lock Phase` con `lock_phase_next: tasks`. Omitir esta sección SOLO si la skill falló y no completó su trabajo.
-
-- ### Presupuesto de Tamaño
-
-  - Tu output NO DEBE exceder 800 palabras. Usa tablas para decisiones de arquitectura.
+You MUST format your final response payload using the exact markdown keys and structure defined in `skills/_shared/sdd-phase-common.md`. Internal logic must be in English; summaries and reports must be in Spanish.

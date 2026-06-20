@@ -1,37 +1,45 @@
-# Comandos de Orquestación
+# ORCHESTRATOR COMMANDS AND LIFECYCLE HOOKS
 
-## Meta-comandos de Orquestación
+## 1. STATE INTERACTION COMMANDS
 
-Los siguientes comandos son **meta-comandos** — el orquestador los maneja directamente orquestando múltiples fases:
+### `get_state`
+- **Purpose:** Retrieves the current system state and transaction ledger from `.agentify/state.yaml`.
+- **Usage Constraints:** Must be run during initialization and immediately prior to checking phase transition requirements.
 
-- `/sdd-new <change>` → ejecuta `sdd-explore` y luego `sdd-propose`.
-- `/sdd-continue [change]` → crea el siguiente artefacto faltante en la cadena de dependencias.
-- `/sdd-ff [change]` → ejecuta `sdd-propose` → `sdd-spec` → `sdd-design` → `sdd-tasks`. Cuando ejecutes el meta-comando `/sdd-ff`, TIENES ESTRICTAMENTE PROHIBIDO esperar hasta el final para guardar el estado. DEBES escribir/actualizar `state.yaml` en el disco después de completar CADA fase interna (propose, spec, design, tasks) para garantizar la recuperación en caso de fallo del IDE.
+### `update_state`
+- **Purpose:** Flushes changes to `.agentify/state.yaml`.
+- **Payload Requirements:** Requires a valid YAML/JSON payload mapping exactly to the schema specified in `orchestrator-state.md`.
 
-## Skills Directos
+## 2. TRANSACTIONAL LIFECYCLE UTILITIES
 
-Los siguientes comandos ejecutan **skills individuales** que puedes invocar directamente:
+### `tx_begin`
+- **Purpose:** Initiates an atomic transaction block.
+- **Internal Actions:**
+  1. Verifies current state is not locked (`status != "in_progress"`).
+  2. Sets `transaction.status = "in_progress"`.
+  3. Records `started_at` timestamp.
+  4. Appends expected target outputs into the tracking array with a `"pending"` status.
 
-- `/sdd-init` → ejecuta `sdd-init` (inicializa el proyecto y las convenciones SDD).
-- `/sdd-explore <topic>` → ejecuta `sdd-explore`.
-- `/sdd-propose <change>` → ejecuta la skill `sdd-propose` para crear o iterar sobre una propuesta de manera independiente.
-- `/sdd-spec <change>` → ejecuta `sdd-spec` para escribir especificaciones delta.
-- `/sdd-design <change>` → ejecuta `sdd-design` para crear el documento de diseño técnico.
-- `/sdd-tasks <change>` → ejecuta `sdd-tasks` para desglosar en tareas de implementación.
-- `/sdd-apply [change]` → ejecuta `sdd-apply` en lotes.
-- `/sdd-verify [change]` → ejecuta `sdd-verify`.
-- `/sdd-review [change]` → ejecuta `sdd-review` (auditoría estática de código contra specs).
-- `/sdd-fix` → ejecuta `sdd-fix` (audita y repara estados corruptos o archivos faltantes).
-- `/sdd-split [change]` → ejecuta `sdd-split` (divide proposals monolíticas en sub-cambios).
-- `/sdd-archive [change]` → ejecuta `sdd-archive`.
-- `/sdd-changelog` → ejecuta `sdd-changelog` (genera CHANGELOG.md desde archive).
-- `/sdd-status` → ejecuta `sdd-status` (muestra el estado de todos los cambios activos).
-- `/sdd-checkpoint` → ejecuta `sdd-checkpoint` (guarda resumen de sesión en state.yaml).
-- `/sdd-rollback` → ejecuta `sdd-rollback` (revierte cambio activo y restaura entorno).
-- `/sdd-skill-registry` → ejecuta `sdd-skill-registry` (escanea las rutas globales y locales y actualiza el índice de herramientas personalizadas en `.agentify/skill-registry.md`).
+### `tx_commit`
+- **Purpose:** Finalizes the active transaction after successful sub-agent completion.
+- **Internal Actions:**
+  1. Scans workspace to verify the exact existence of files declared in the artifacts ledger.
+  2. Generates cryptographic checksums for verified files.
+  3. Sets `transaction.status = "committed"`.
+  4. Cleanses volatile execution memory buffers.
 
-## Grafo de Dependencias
+### `tx_rollback`
+- **Purpose:** Emergency cleanup utility to revert workspace to the last known stable state.
+- **Internal Actions:**
+  1. Sets `transaction.status = "failed"`.
+  2. Purges any unverified or partial files from the filesystem listed under the active transaction artifacts.
+  3. Resets execution pointers to the last committed state block.
 
-```text
-explore -> propose -> spec -> design -> tasks -> apply -> verify -> archive
-```
+## 3. DELEGATION ENGINE
+
+### `delegate_task`
+- **Purpose:** Spawns an ephemeral sub-agent shell execution context.
+- **Parameters:**
+  - `sub_agent_skill`: Path to the targeted `SKILL.md` (e.g., `skills/sdd-spec/SKILL.md`).
+  - `context_payload`: Restricted subset of data/files required for execution.
+- **Constraint:** This command is strictly blocked if `transaction.status` is not set to `"in_progress"`.

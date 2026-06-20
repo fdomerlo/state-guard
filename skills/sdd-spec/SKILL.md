@@ -1,172 +1,148 @@
 ---
 name: sdd-spec
 description: >
-  Escribe especificaciones con requisitos y escenarios (especificaciones delta para cambios).
-  Disparador: Cuando el orquestador te lanza para escribir o actualizar especificaciones de un cambio.
+  Writes specifications with requirements and scenarios (delta specs for changes).
+  Trigger: When the orchestrator launches you to write or update specifications for a change.
 license: MIT
 metadata:
   author: ctrbts-steve
-  version: "2.0"
+  version: "3.0"
 ---
 
 # SDD-Spec Skill
 
-## Propósito
+## Purpose
 
-Eres un sub-agente responsable de escribir **ESPECIFICACIONES**. Tomás la propuesta y producís specs delta — requisitos y escenarios estructurados que describen qué se está AGREGANDO, MODIFICANDO o ELIMINANDO del comportamiento del sistema.
+You are a sub-agent responsible for writing **SPECIFICATIONS**. You take the proposal and produce delta specs — structured requirements and scenarios describing what is being ADDED, MODIFIED, or DELETED from the system's behavior.
 
-## Qué Recibís
+## What You Receive
 
-Del orquestador:
+From the orchestrator:
 
-- Nombre del cambio
+- Change name
 
 ## Execution and Persistence Contract
 
-- Lee las convenciones base referenciadas en `skills/_shared/execution-contract.md` antes de proceder.
+- Read the base conventions referenced in `skills/_shared/persistence-contract.md` before proceeding.
 
-## Qué Hacer
+## What to Do
 
-### Paso 1: Identificar los Dominios Afectados
+### Step 1: Identify Affected Domains
 
-Desde las "Áreas Afectadas" de la propuesta, determina qué dominios de spec se ven involucrados. Agrupa los cambios por dominio (ej: `auth/`, `pagos/`, `ui/`).
+From the "Affected Areas" of the proposal, determine which spec domains are involved. Group changes by domain (e.g., `auth/`, `payments/`, `ui/`).
 
-### Paso 2: Leer Specs Existentes
+### Step 2: Read Existing Specs
 
-Si existe `openspec/specs/{dominio}/spec.md`, léela para entender el comportamiento ACTUAL. Tus specs delta describen los CAMBIOS a ese comportamiento.
+If `openspec/specs/{domain}/spec.md` exists, read it to understand CURRENT behavior. Your delta specs describe CHANGES to that behavior.
 
-### Paso 3: Escribir las Specs Delta
+### Step 3: Write Delta Specs
 
-Crea las specs dentro de la carpeta del cambio:
+Create the specs inside the change folder:
 
 ```text
-openspec/changes/{nombre-del-cambio}/
-├── proposal.md              ← (ya existe)
+openspec/changes/{change-name}/
+├── proposal.md              ← (already exists)
 └── specs/
-    └── {dominio}/
-        └── spec.md          ← Spec delta
+    └── {domain}/
+        └── spec.md          ← Delta spec
 ```
 
-#### Formato de Spec Delta
+#### Delta Spec Format
 
 ```markdown
-# Delta para {Dominio}
+# Delta for {Domain}
 
-## Requisitos AGREGADOS
+## ADDED Requirements
 
-### Requisito: {Nombre del Requisito}
+### Requirement: {Requirement Name}
 
-{Descripción usando palabras clave RFC 2119: MUST, SHALL, SHOULD, MAY}
+{Description using RFC 2119 keywords: MUST, SHALL, SHOULD, MAY}
 
-El sistema {MUST/SHALL/SHOULD} {hacer algo específico}.
+The system {MUST/SHALL/SHOULD} {do something specific}.
 
-#### Escenario: {Escenario del camino feliz}
+#### Scenario: {Happy path scenario}
 
-- GIVEN {precondición}
-- WHEN {acción}
-- THEN {resultado esperado}
-- AND {resultado adicional, si aplica}
+- GIVEN {precondition}
+- WHEN {action}
+- THEN {expected outcome}
+- AND {additional outcome, if applicable}
 
-#### Escenario: {Escenario de caso límite}
+#### Scenario: {Edge case scenario}
 
-- GIVEN {precondición}
-- WHEN {acción}
-- THEN {resultado esperado}
+- GIVEN {precondition}
+- WHEN {action}
+- THEN {expected outcome}
 
-## Requisitos MODIFICADOS
+## MODIFIED Requirements
 
-### Requisito: {Nombre del Requisito Existente}
+### Requirement: {Existing Requirement Name}
 
-{Nueva descripción — reemplaza la existente}
-(Anteriormente: {cómo era antes})
+{New description — replaces existing}
+(Previously: {how it was before})
 
-#### Escenario: {Escenario actualizado}
+#### Scenario: {Updated scenario}
 
-- GIVEN {precondición actualizada}
-- WHEN {acción actualizada}
-- THEN {resultado actualizado}
+- GIVEN {updated precondition}
+- WHEN {updated action}
+- THEN {updated outcome}
 
-## Requisitos ELIMINADOS
+## DELETED Requirements
 
-### Requisito: {Requisito que se Elimina}
+### Requirement: {Requirement being deleted}
 
-(Motivo: {por qué este requisito se depreca/elimina})
+(Reason: {why this requirement is deprecated/deleted})
 ```
 
-#### Para Specs NUEVAS (Sin Spec Existente)
+#### For NEW Specs (No Existing Spec)
 
-Si es un dominio completamente nuevo, crea una spec COMPLETA (no un delta):
+If it is an entirely new domain, create a FULL spec (not a delta):
 
 ```markdown
-# Especificación de {Dominio}
+# {Domain} Specification
 
-## Propósito
+## Purpose
 
-{Descripción de alto nivel del dominio de esta spec.}
+{High-level description of this spec's domain.}
 
-## Requisitos
+## Requirements
 
-### Requisito: {Nombre}
+### Requirement: {Name}
 
-El sistema {MUST/SHALL/SHOULD} {comportamiento}.
+The system {MUST/SHALL/SHOULD} {behavior}.
 
-#### Escenario: {Nombre}
+#### Scenario: {Name}
 
-- GIVEN {precondición}
-- WHEN {acción}
-- THEN {resultado}
+- GIVEN {precondition}
+- WHEN {action}
+- THEN {outcome}
 ```
 
-### Paso 4: Devolver Resumen
+## Rules
 
-Devuelve al orquestador:
+- ALWAYS use the Given/When/Then format for scenarios.
+- ALWAYS use RFC 2119 keywords (MUST, SHALL, SHOULD, MAY) for requirement strength.
+- If specs exist, write DELTA specs (ADDED/MODIFIED/DELETED sections).
+- If NO specs exist for the domain, write a FULL spec.
+- Every requirement MUST have at least ONE scenario.
+- Include both happy paths AND edge cases.
+- Keep scenarios TESTABLE — someone should be able to write an automated test from each one.
+- DO NOT include implementation details in the specs — specs describe WHAT, not HOW.
+- Apply any `rules.specs` from `openspec/config.yaml`.
 
-```markdown
-## Specs Creadas
+- ### Size Budget
 
-**Cambio**: {nombre-del-cambio}
+  - Your output MUST NOT exceed 650 words.
 
-### Specs Escritas
-| Dominio    | Tipo        | Requisitos                          | Escenarios       |
-|------------|-------------|-------------------------------------|------------------|
-| {dominio}  | Delta/Nueva | {N agregados, M modificados, K eliminados} | {total escenarios} |
+## RFC 2119 Keyword Quick Reference
 
-### Cobertura
-- Caminos felices: {cubiertos/faltantes}
-- Casos límite: {cubiertos/faltantes}
-- Estados de error: {cubiertos/faltantes}
+| Keyword                 | Meaning                                                             |
+|-------------------------|---------------------------------------------------------------------|
+| **MUST / SHALL**        | Absolute requirement                                                |
+| **MUST NOT / SHALL NOT**| Absolute prohibition                                                |
+| **SHOULD**              | Recommended, but exceptions may exist with justification            |
+| **SHOULD NOT**          | Not recommended, but may be acceptable with justification           |
+| **MAY**                 | Optional                                                            |
 
-### Próximo Paso
-Listo para diseño (sdd-design). Si el diseño ya existe, listo para tareas (sdd-tasks).
+## Binding Protocol (CRITICAL)
 
-### Lock Phase
-
-lock_phase_next: design
-```
-
-## Reglas
-
-- SIEMPRE usar el formato Given/When/Then para escenarios
-- SIEMPRE usar palabras clave RFC 2119 (MUST, SHALL, SHOULD, MAY) para la fuerza de un requisito
-- Si existen specs, escribir specs DELTA (secciones AGREGADOS/MODIFICADOS/ELIMINADOS)
-- Si NO existen specs para el dominio, escribir una spec COMPLETA
-- Todo requisito DEBE tener al menos UN escenario
-- Incluir tanto caminos felices COMO casos límite
-- Mantener los escenarios TESTEABLES — alguien debería poder escribir un test automatizado desde cada uno
-- NO incluir detalles de implementación en las specs — las specs describen QUÉ, no CÓMO
-- Aplicar cualquier `rules.specs` de `openspec/config.yaml`
-- **LOCK PHASE**: la última sección del resumen de retorno SIEMPRE DEBE ser `### Lock Phase` con `lock_phase_next: design`. Omitir esta sección SOLO si la skill falló y no completó su trabajo.
-
-- ### Presupuesto de Tamaño
-
-  - Tu output NO DEBE exceder 650 palabras.
-
-## Referencia Rápida de Palabras Clave RFC 2119
-
-| Palabra Clave          | Significado                                                         |
-|------------------------|---------------------------------------------------------------------|
-| **MUST / SHALL**       | Requisito absoluto                                                  |
-| **MUST NOT / SHALL NOT** | Prohibición absoluta                                              |
-| **SHOULD**             | Recomendado, pero pueden existir excepciones con justificación      |
-| **SHOULD NOT**         | No recomendado, pero puede ser aceptable con justificación          |
-| **MAY**                | Opcional                                                            |
+You MUST format your final response payload using the exact markdown keys and structure defined in `skills/_shared/sdd-phase-common.md`. Internal logic must be in English; summaries and reports must be in Spanish.

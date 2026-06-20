@@ -1,52 +1,75 @@
-# Gestión de Estado (state.yaml)
+# ORCHESTRATOR STATE & TRANSACTION PROTOCOL
 
-## Obligatoriedad
+## 1. PURPOSE
+This contract enforces strict state management and fault tolerance across agent invocations using a pseudo-ACID transaction lifecycle. The orchestrator must record state changes *before* and *after* delegating execution to sub-agents to prevent data corruption or missing history during environment crashes.
 
-**Después de CADA transición de fase**, escribí o actualizá el archivo `openspec/changes/{nombre-del-cambio}/state.yaml`. Este archivo es el único mecanismo de recuperación ante pérdida de contexto y NO es delegable a un sub-agente — es tu responsabilidad como orquestador.
-
-## Cuándo actualizar state.yaml
-
-| Evento | Acción |
-|--------|--------|
-| `/sdd-new` lanza el primer sub-agente | Crear el archivo con `started_at` = ahora |
-| Sub-agente retorna `status: ok` o `warning` | Mover fase a `completed_phases`, actualizar `current_phase` y `pending_phases` |
-| Una fase queda bloqueada | Setear status: blocked, escribir blocked_reason |
-| sdd-archive exitoso | Setear status: done y mantener current_phase en archive, vaciar pending_phases |
-
-## Schema
+## 2. STATE STORAGE SPECIFICATION
+The execution state must be persisted in `.agentify/state.yaml` using the following exact structure:
 
 ```yaml
-# openspec/changes/{nombre-del-cambio}/state.yaml
-change: {nombre-del-cambio}
-started_at: "2026-03-14T10:00:00"    # ISO 8601 — solo al crear, nunca modificar
-last_updated: "2026-03-14T12:30:00"  # ISO 8601 — actualizar en cada transición
-current_phase: tasks  # explore|propose|spec|design|tasks|apply|verify|archive
-status: active        # active | done | blocked (default: active)
-completed_phases:
-  - explore
-  - propose
-  - spec
-  - design
-pending_phases:
-  - tasks
-  - apply
-  - verify
-  - archive
-blocked_reason: null   # null, o string describiendo el bloqueo
+current_phase: "sdd-phase-name" # e.g., sdd-spec, sdd-design
+transaction:
+  id: "tx_uuid_or_timestamp"
+  status: "idle" # idle | in_progress | committed | failed
+  started_at: "timestamp"
+  updated_at: "timestamp"
+  sub_agent: "efhemeral-agent-name"
+artifacts:
+  - path: "relative/path/to/file"
+    checksum: "sha256_hash_or_none"
+    status: "pending" # pending | written | verified
+
 ```
 
-## Cuándo leer state.yaml
+## 3. TRANSACTION LIFECYCLE PROTOCOL
 
-- Al ejecutar `/sdd-continue` sin argumento → leer todos los `state.yaml` activos para identificar qué cambio continuar y cuál es la siguiente fase.
-- Después de una recarga del IDE → leer para recuperar el estado completo antes de responder.
+### Phase 1: TRANSACTION_BEGIN (Pre-Delegation)
 
----
+Before spawning any sub-agent or issuing an external tool call:
 
-# Regla de Recuperación (Recovery)
+1. Read the current `.agentify/state.yaml`.
+2. Verify that `transaction.status` is `idle` or `committed`.
+3. Update `transaction.status` to `in_progress`.
+4. Set `transaction.started_at` to the current timestamp.
+5. Define the target paths in the `artifacts` list and set their status to `pending`.
+6. Flush the `state.yaml` changes to disk using the appropriate file utility.
 
-Si perdés el rastro del estado del SDD (ej. tras una recarga del IDE), **antes de responder cualquier otra cosa**:
+### Phase 2: DELEGATION & TRACKING
 
-1. Leé `openspec/changes/*/state.yaml` para todos los cambios presentes.
-2. Usá `current_phase` para saber dónde continuar.
-3. Usá `completed_phases` para saber qué NO repetir.
-4. Si no existe ningún `state.yaml`, explorá el filesystem de `openspec/changes/` para inferir el estado a partir de qué archivos existen.
+1. Invoke the sub-agent passing only the narrow context required for its specific task.
+2. Monitor the tool execution. The main orchestrator must not modify any target codebase files during this phase.
+
+### Phase 3: TRANSACTION_COMMIT (Post-Success)
+
+Upon successful return from the sub-agent:
+
+1. Verify the existence and non-emptiness of all files listed in the `artifacts` array.
+2. Calculate and update the `checksum` for each generated artifact.
+3. Set the artifact status to `verified`.
+4. Update `transaction.status` to `committed`.
+5. Update `transaction.updated_at`.
+6. Flush `state.yaml` to disk.
+
+### Phase 4: TRANSACTION_ROLLBACK (On Failure)
+
+If the sub-agent fails, returns an error, or a system timeout occurs:
+
+1. Set `transaction.status` to `failed`.
+2. For each artifact in the `artifacts` list with a status of `pending` or `written` (but unverified):
+* Delete the partial or corrupted file from disk to prevent invalid state leakage.
+
+
+3. Revert `current_phase` to the last known stable checkpoint if applicable.
+4. Update `transaction.updated_at` and flush `state.yaml` to disk.
+
+## 4. CRITICAL RECOVERY PROTOCOL (On Boot / Resume)
+
+Every time the orchestrator initializes a new session, it MUST parse `.agentify/state.yaml` before accepting user input:
+
+* **IF** `transaction.status` is `committed` or `idle`: Proceed normally.
+* **IF** `transaction.status` is `in_progress`: An unhandled crash or connection drop occurred mid-execution. Trigger an automatic **ROLLBACK** sequence immediately to clean the workspace before letting the user retry.
+
+## 5. USER INTERACTION BOUNDARY (LOCALIZATION)
+
+* **INTERNAL LOGIC:** All internal reasoning steps (`Thought`), file parsing, state keys, and tool payloads MUST be evaluated in English to optimize token utilization and constraint adherence.
+* **USER OUTPUT:** All messages, progress updates, error explanations, and interactive choices presented to the developer MUST be written strictly in Spanish.

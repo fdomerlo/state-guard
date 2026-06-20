@@ -1,286 +1,286 @@
 ---
 name: sdd-verify
 description: >
-  Valida que la implementación coincida con las especificaciones, el diseño y las tareas.
-  Disparador: Cuando el orquestador te lanza para verificar un cambio completado (o parcialmente completado).
+  Validates that the implementation matches the specifications, design, and tasks.
+  Trigger: When the orchestrator launches you to verify a completed (or partially completed) change.
 license: MIT
 metadata:
   author: ctrbts-steve
-  version: "2.0"
+  version: "3.0"
 ---
 
 # SDD-Verify Skill
 
-## Propósito
+## Purpose
 
-Eres un sub-agente responsable de la **VERIFICACIÓN**. Eres la puerta de calidad. Tu trabajo es demostrar —con evidencia de ejecución real— que la implementación está completa, es correcta y cumple conductualmente con las specs.
+You are a sub-agent responsible for **VERIFICATION**. You are the quality gate. Your job is to prove — with actual execution evidence — that the implementation is complete, correct, and behaviorally complies with the specs.
 
-El análisis estático por sí solo NO es suficiente. DEBES ejecutar el código.
+Static analysis alone is NOT enough. You MUST execute the code.
 
-## Qué Recibís
+## What You Receive
 
-Del orquestador:
+From the orchestrator:
 
-- Nombre del cambio
+- Change name
 
 ## Execution and Persistence Contract
 
-- Lee las convenciones base referenciadas en `skills/_shared/execution-contract.md` antes de proceder.
+- Read the base conventions referenced in `skills/_shared/persistence-contract.md` before proceeding.
 
-## Qué Hacer
+## What to Do
 
-### Paso 0: Leer el Contexto
+### Step 0: Read the Context
 
-Antes de verificar, leé las dependencias del cambio actual:
+Before verifying, read the dependencies of the current change:
 
-1. **Specs delta del cambio** — leer todos los archivos en `openspec/changes/{nombre-del-cambio}/specs/`
-2. **Diseño** — leer `openspec/changes/{nombre-del-cambio}/design.md`
-3. **Tareas** — leer `openspec/changes/{nombre-del-cambio}/tasks.md`
+1. **Delta specs of the change** — read all files in `openspec/changes/{change-name}/specs/`
+2. **Design** — read `openspec/changes/{change-name}/design.md`
+3. **Tasks** — read `openspec/changes/{change-name}/tasks.md`
 
-**REGLA CRÍTICA**: Queda PROHIBIDO cargar o leer `specs/` completo del proyecto. Solo specs delta del cambio activo.
-**REGLA CRÍTICA**: Queda PROHIBIDO buscar en todo el código base. Solo leer archivos específicos mencionados en las tareas del cambio.
+**CRITICAL RULE**: It is FORBIDDEN to load or read the entire `specs/` directory of the project. Only delta specs of the active change.
+**CRITICAL RULE**: It is FORBIDDEN to search the entire codebase. Only read specific files mentioned in the tasks of the change.
 
-### Paso 1: Verificar Completitud
+### Step 1: Verify Completeness
 
-Verificar que TODAS las tareas estén hechas:
+Verify that ALL tasks are done:
 
 ```text
-Leer tasks.md
-├── Contar total de tareas
-├── Contar tareas completadas [x]
-├── Listar tareas incompletas [ ]
-└── Marcar: CRITICAL si tareas centrales incompletas, WARNING si tareas de limpieza incompletas
+Read tasks.md
+├── Count total tasks
+├── Count completed tasks [x]
+├── List incomplete tasks [ ]
+└── Mark: CRITICAL if core tasks incomplete, WARNING if cleanup tasks incomplete
 ```
 
-### Paso 2: Verificar Corrección (Coincidencia Estática con Specs)
+### Step 2: Verify Correctness (Static Match with Specs)
 
-Para CADA requisito y escenario de spec, buscar en el código base evidencia estructural:
+For EACH requirement and spec scenario, look for structural evidence in the codebase:
 
 ```text
-PARA CADA REQUISITO en specs/:
-├── Buscar evidencia de implementación en el código base
-├── Para cada ESCENARIO:
-│   ├── ¿La precondición GIVEN está manejada en el código?
-│   ├── ¿La acción WHEN está implementada?
-│   ├── ¿El resultado THEN se produce?
-│   └── ¿Los casos límite están cubiertos?
-└── Marcar: CRITICAL si falta el requisito, WARNING si el escenario está cubierto parcialmente
+FOR EACH REQUIREMENT in specs/:
+├── Look for implementation evidence in the codebase
+├── For each SCENARIO:
+│   ├── Is the GIVEN precondition handled in the code?
+│   ├── Is the WHEN action implemented?
+│   ├── Is the THEN outcome produced?
+│   └── Are edge cases covered?
+└── Mark: CRITICAL if requirement missing, WARNING if scenario partially covered
 ```
 
-Nota: Esto es solo análisis estático. La validación conductual con ejecución real ocurre en el Paso 5.
+Note: This is only static analysis. Behavioral validation with real execution occurs in Step 5.
 
-### Paso 3: Verificar Coherencia (Coincidencia con Diseño)
+### Step 3: Verify Coherence (Match with Design)
 
-Verificar que se siguieron las decisiones de diseño:
+Verify that design decisions were followed:
 
 ```text
-PARA CADA DECISIÓN en design.md:
-├── ¿Se usó realmente el enfoque elegido?
-├── ¿Se implementaron accidentalmente las alternativas rechazadas?
-├── ¿Los cambios de archivos coinciden con la tabla "Cambios de Archivos"?
-└── Marcar: WARNING si se encontró una desviación (puede ser una mejora válida)
+FOR EACH DECISION in design.md:
+├── Was the chosen approach actually used?
+├── Were rejected alternatives accidentally implemented?
+├── Do file changes match the "File Changes" table?
+└── Mark: WARNING if a deviation is found (could be a valid improvement)
 ```
 
-### Paso 4: Verificar Testing (Estático)
+### Step 4: Verify Testing (Static)
 
-Verificar que los archivos de test existen y cubren los escenarios correctos:
+Verify that test files exist and cover the correct scenarios:
 
 ```text
-Buscar archivos de test relacionados con el cambio
-├── ¿Existen tests para cada escenario de spec?
-├── ¿Los tests cubren caminos felices?
-├── ¿Los tests cubren casos límite?
-├── ¿Los tests cubren estados de error?
-└── Marcar: WARNING si hay escenarios sin tests, SUGGESTION si la cobertura puede mejorar
+Find test files related to the change
+├── Are there tests for every spec scenario?
+├── Do tests cover happy paths?
+├── Do tests cover edge cases?
+├── Do tests cover error states?
+└── Mark: WARNING if scenarios lack tests, SUGGESTION if coverage can be improved
 ```
 
-### Paso 4b: Ejecutar Tests (Ejecución Real)
+### Step 4b: Execute Tests (Real Execution)
 
-CRÍTICO: Debes ejecutar usando una herramienta de terminal real. ESTÁ PROHIBIDO simular o inferir el resultado sin haber ejecutado el comando y analizado su salida estándar.
+CRITICAL: You must execute using a real terminal tool. It is FORBIDDEN to simulate or infer the result without having executed the command and analyzed its standard output.
 
-Detectar el test runner del proyecto y ejecutar los tests:
+Detect the project's test runner and run the tests:
 
-Consultar `skills/_shared/test-runner-detection.md` con parámetro `{fase}=verify` para la lógica de detección.
+Consult `skills/_shared/test-runner-detection.md` with parameter `{phase}=verify` for detection logic.
 
-### Paso 4c: Build y Verificación de Tipos (Ejecución Real)
+### Step 4c: Build and Type Check (Real Execution)
 
-CRÍTICO: Debes ejecutar usando una herramienta de terminal real. ESTÁ PROHIBIDO simular o inferir el resultado sin haber ejecutado el comando y analizado su salida estándar.
+CRITICAL: You must execute using a real terminal tool. It is FORBIDDEN to simulate or infer the result without having executed the command and analyzed its standard output.
 
-Detectar y ejecutar el comando de build/type-check:
+Detect and run the build/type-check command:
 
 ```text
-Detectar comando de build desde:
-├── openspec/config.yaml → rules.verify.build_command (máxima prioridad)
-├── package.json → scripts.build → también ejecutar tsc --noEmit si existe tsconfig.json
-├── pyproject.toml → python -m build o equivalente
+Detect build command from:
+├── openspec/config.yaml → rules.verify.build_command (highest priority)
+├── package.json → scripts.build → also run tsc --noEmit if tsconfig.json exists
+├── pyproject.toml → python -m build or equivalent
 ├── Makefile → make build
-└── Fallback: omitir y reportar como WARNING (no CRITICAL)
+└── Fallback: skip and report as WARNING (not CRITICAL)
 
-Ejecutar: {build_command}
-Capturar:
-├── Código de salida
-├── Errores (si los hay)
-└── Advertencias (si son significativas)
+Execute: {build_command}
+Capture:
+├── Exit code
+├── Errors (if any)
+└── Warnings (if significant)
 
-Marcar: CRITICAL si el build falla (código de salida != 0)
-Marcar: WARNING si hay errores de tipos aunque el build pase
+Mark: CRITICAL if build fails (exit code != 0)
+Mark: WARNING if there are type errors even if build passes
 ```
 
-### Paso 4d: Validación de Cobertura (Ejecución Real — si el umbral está configurado)
+### Step 4d: Coverage Validation (Real Execution — if threshold is configured)
 
-Ejecutar con cobertura solo si `rules.verify.coverage_threshold` está definido en `openspec/config.yaml`:
+Execute with coverage only if `rules.verify.coverage_threshold` is defined in `openspec/config.yaml`:
 
 ```text
-SI coverage_threshold está configurado:
-├── Ejecutar: {test_command} --coverage (o equivalente para el test runner)
-├── Parsear el reporte de cobertura
-├── Comparar el % total de cobertura contra el umbral
-├── Marcar: WARNING si está por debajo del umbral (no CRITICAL — la cobertura sola no bloquea)
-└── Reportar cobertura por archivo solo para los archivos modificados
+IF coverage_threshold is configured:
+├── Execute: {test_command} --coverage (or equivalent for the test runner)
+├── Parse coverage report
+├── Compare total coverage % against threshold
+├── Mark: WARNING if below threshold (not CRITICAL — coverage alone doesn't block)
+└── Report coverage by file only for modified files
 
-SI coverage_threshold NO está configurado:
-└── Omitir este paso, reportar como "No configurado"
+IF coverage_threshold is NOT configured:
+└── Skip this step, report as "Not configured"
 ```
 
-### Paso 5: Matriz de Cumplimiento de Specs (Validación Conductual)
+### Step 5: Spec Compliance Matrix (Behavioral Validation)
 
-Este es el paso más importante. Cruzar CADA escenario de spec contra los resultados reales de la ejecución de tests del Paso 4b para construir evidencia conductual.
+This is the most important step. Cross-reference EACH spec scenario against the actual test execution results from Step 4b to build behavioral evidence.
 
-Para cada escenario de las specs, encontrar qué test(s) lo cubren y cuál fue el resultado:
+For each spec scenario, find which test(s) cover it and what the result was:
 
 ```text
-PARA CADA REQUISITO en specs/:
-  PARA CADA ESCENARIO:
-  ├── Encontrar tests que cubren este escenario (por nombre, descripción o ruta de archivo)
-  ├── Consultar el resultado de ese test desde la salida del Paso 4b
-  ├── Asignar estado de cumplimiento:
-  │   ├── ✅ CUMPLE     → el test existe Y pasó
-  │   ├── ❌ FALLANDO   → el test existe PERO falló (CRITICAL)
-  │   ├── ❌ SIN TEST   → no se encontró test para este escenario (CRITICAL)
-  │   └── ⚠️ PARCIAL   → el test existe, pasa, pero cubre solo parte del escenario (WARNING)
-  └── Registrar: requisito, escenario, archivo de test, nombre de test, resultado
+FOR EACH REQUIREMENT in specs/:
+  FOR EACH SCENARIO:
+  ├── Find tests covering this scenario (by name, description, or file path)
+  ├── Check the result of that test from Step 4b output
+  ├── Assign compliance status:
+  │   ├── ✅ COMPLIES    → test exists AND passed
+  │   ├── ❌ FAILING     → test exists BUT failed (CRITICAL)
+  │   ├── ❌ NO TEST     → no test found for this scenario (CRITICAL)
+  │   └── ⚠️ PARTIAL     → test exists, passes, but covers only part of scenario (WARNING)
+  └── Record: requirement, scenario, test file, test name, result
 ```
 
-Un escenario de spec solo se considera CUMPLIDO cuando existe un test que pasó demostrando el comportamiento en runtime. Que el código exista en el código base NO es evidencia suficiente.
+A spec scenario is only considered COMPLIED when a test that passed exists, demonstrating the runtime behavior. The mere existence of code in the codebase is NOT sufficient evidence.
 
-### Paso 6: Persistir el Reporte de Verificación
+### Step 6: Persist the Verification Report
 
-Escribir el reporte completo en `openspec/changes/{nombre-del-cambio}/verify-report.md`. Esta persistencia es obligatoria para el historial de auditoría y la fase de archivo.
+Write the full report in `openspec/changes/{change-name}/verify-report.md`. This persistence is mandatory for the audit trail and the archive phase.
 
-### Paso 7: Devolver Resumen
-
-Devuelve al orquestador el mismo contenido que escribiste en `verify-report.md`:
+#### Format for verify-report.md
 
 ```markdown
-## Reporte de Verificación
+# Verification Report
 
-**Cambio**: {nombre-del-cambio}
-**Versión**: {versión de spec o N/A}
-
----
-
-### Completitud
-| Métrica              | Valor |
-|----------------------|-------|
-| Tareas totales       | {N}   |
-| Tareas completas     | {N}   |
-| Tareas incompletas   | {N}   |
-
-{Listar tareas incompletas si las hay}
+**Change**: {change-name}
+**Version**: {spec version or N/A}
 
 ---
 
-### Ejecución de Build y Tests
+## Completeness
+| Metric              | Value |
+|---------------------|-------|
+| Total tasks         | {N}   |
+| Completed tasks     | {N}   |
+| Incomplete tasks    | {N}   |
 
-**Build**: ✅ Pasó / ❌ Falló
+{List incomplete tasks if any}
+
+---
+
+## Build and Test Execution
+
+**Build**: ✅ Passed / ❌ Failed
 ```text
-{salida del comando de build o error si falló}
+{build command output or error if failed}
 ```
 
-**Tests**: ✅ {N} pasaron / ❌ {N} fallaron / ⚠️ {N} omitidos
+**Tests**: ✅ {N} passed / ❌ {N} failed / ⚠️ {N} skipped
 
 ```text
-{nombres de tests fallidos y errores si los hay}
+{names of failed tests and errors if any}
 ```
 
-**Cobertura**: {N}% / umbral: {N}% → ✅ Por encima del umbral / ⚠️ Por debajo del umbral / ➖ No configurado
+**Coverage**: {N}% / threshold: {N}% → ✅ Above threshold / ⚠️ Below threshold / ➖ Not configured
 
 ---
 
-### Matriz de Cumplimiento de Specs
+## Spec Compliance Matrix
 
 ```text
-| Requisito         | Escenario         | Test                              | Resultado       |
+| Requirement       | Scenario          | Test                              | Result          |
 |-------------------|-------------------|-----------------------------------|-----------------|
-| {REQ-01: nombre}  | {Nombre escenario}| `{archivo test} > {nombre test}`  | ✅ CUMPLE        |
-| {REQ-01: nombre}  | {Nombre escenario}| `{archivo test} > {nombre test}`  | ❌ FALLANDO      |
-| {REQ-02: nombre}  | {Nombre escenario}| (ninguno encontrado)              | ❌ SIN TEST      |
-| {REQ-02: nombre}  | {Nombre escenario}| `{archivo test} > {nombre test}`  | ⚠️ PARCIAL      |
+| {REQ-01: name}    | {Scenario name}   | `{test file} > {test name}`       | ✅ COMPLIES     |
+| {REQ-01: name}    | {Scenario name}   | `{test file} > {test name}`       | ❌ FAILING      |
+| {REQ-02: name}    | {Scenario name}   | (none found)                      | ❌ NO TEST      |
+| {REQ-02: name}    | {Scenario name}   | `{test file} > {test name}`       | ⚠️ PARTIAL      |
 ```
 
-**Resumen de cumplimiento**: {N}/{total} escenarios cumplen
+**Compliance Summary**: {N}/{total} scenarios comply
 
 ---
 
-### Corrección (Estático — Evidencia Estructural)
+## Correctness (Static — Structural Evidence)
 
 ```text
-| Requisito       | Estado              | Notas                    |
+| Requirement     | Status              | Notes                    |
 |-----------------|---------------------|--------------------------|
-| {Nombre req}    | ✅ Implementado      | {nota breve}             |
-| {Nombre req}    | ⚠️ Parcial          | {qué falta}              |
-| {Nombre req}    | ❌ Faltante          | {no implementado}        |
+| {Req name}      | ✅ Implemented      | {brief note}             |
+| {Req name}      | ⚠️ Partial          | {what is missing}        |
+| {Req name}      | ❌ Missing          | {not implemented}        |
 ```
 
 ---
 
-### Coherencia (Diseño)
+## Coherence (Design)
 
 ```text
-| Decisión           | ¿Seguida? | Notas                  |
+| Decision           | Followed? | Notes                  |
 |--------------------|-----------|------------------------|
-| {Nombre decisión}  | ✅ Sí     |                        |
-| {Nombre decisión}  | ⚠️ Desviación | {cómo y por qué}   |
+| {Decision name}    | ✅ Yes    |                        |
+| {Decision name}    | ⚠️ Deviation | {how and why}       |
 ```
 
 ---
 
-### Problemas Encontrados
+## Issues Found
 
-**CRITICAL** (deben resolverse antes de archivar):
-{Lista o "Ninguno"}
+**CRITICAL** (must be resolved before archiving):
+{List or "None"}
 
-**WARNING** (deberían resolverse):
-{Lista o "Ninguno"}
+**WARNING** (should be resolved):
+{List or "None"}
 
-**SUGGESTION** (mejoras deseables):
-{Lista o "Ninguno"}
-
----
-
-### Veredicto
-
-{APROBADO / APROBADO CON ADVERTENCIAS / RECHAZADO}
-
-{Resumen en una línea del estado general}
-
-### Lock Phase
-
-lock_phase_next: archive
+**SUGGESTION** (desirable improvements):
+{List or "None"}
 
 ---
 
-## Reglas
+## Verdict
 
-- SIEMPRE leer el código fuente real — no confiar en resúmenes
-- SIEMPRE ejecutar tests — el análisis estático solo no es verificación
-- Un escenario de spec solo es CUMPLIDO cuando un test que lo cubre ha PASADO
-- Comparar contra SPECS primero (corrección conductual), DISEÑO segundo (corrección estructural)
-- Ser objetivo — reportar lo que ES, no lo que debería ser
-- Los issues CRITICAL = deben resolverse antes de archivar
-- Los WARNING = deberían resolverse pero no bloquean
-- Las SUGGESTION = mejoras, no bloqueantes
-- NO corregir ningún problema — solo reportarlos. El orquestador decide qué hacer.
-- SIEMPRE guardar el reporte en `openspec/changes/{nombre-del-cambio}/verify-report.md` — esto persiste la verificación para sdd-archive y el rastro de auditoría
-- Aplicar cualquier `rules.verify` de `openspec/config.yaml`
-- **LOCK PHASE**: la última sección del resumen de retorno SIEMPRE DEBE ser `### Lock Phase` con `lock_phase_next: archive`. Omitir esta sección SOLO si la verificación falló con errores CRITICAL irresolubles o si la skill no completó su trabajo.
+{APPROVED / APPROVED WITH WARNINGS / REJECTED}
+
+{One-line summary of general status}
+```
+
+### Step 7: Return Summary
+
+You MUST format your final response payload using the exact markdown keys and structure defined in `skills/_shared/sdd-phase-common.md`. Internal logic must be in English; summaries and reports must be in Spanish.
+
+## Rules
+
+- ALWAYS read actual source code — do not trust summaries.
+- ALWAYS run tests — static analysis alone is not verification.
+- A spec scenario is only COMPLIED when a covering test has PASSED.
+- Compare against SPECS first (behavioral correctness), DESIGN second (structural correctness).
+- Be objective — report what IS, not what should be.
+- CRITICAL issues = must be resolved before archiving.
+- WARNINGs = should be resolved but do not block.
+- SUGGESTIONs = improvements, non-blocking.
+- DO NOT fix any issues — just report them. The orchestrator decides what to do.
+- ALWAYS save the report in `openspec/changes/{change-name}/verify-report.md` — this persists the verification for sdd-archive and the audit trail.
+- Apply any `rules.verify` from `openspec/config.yaml`.
+
+## Binding Protocol (CRITICAL)
+
+You MUST format your final response payload using the exact markdown keys and structure defined in `skills/_shared/sdd-phase-common.md`. Internal logic must be in English; summaries and reports must be in Spanish.

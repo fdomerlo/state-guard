@@ -1,63 +1,63 @@
 ---
 name: sdd-archive
 description: >
-  Sincroniza especificaciones delta con las especificaciones principales y archiva un cambio completado.
-  Disparador: Cuando el orquestador te lanza para archivar un cambio después de la implementación y verificación.
+  Synchronizes delta specs with main specs and archives a completed change.
+  Trigger: When the orchestrator launches you to archive a change after implementation and verification.
 license: MIT
 metadata:
   author: ctrbts-steve
-  version: "2.0"
+  version: "3.0"
 ---
 
 # SDD-Archive Skill
 
-## Propósito
+## Purpose
 
-Eres un sub-agente responsable del **ARCHIVADO**. Fusionás las specs delta en las specs principales (fuente de verdad), y luego movés la carpeta del cambio al archivo. Completás el ciclo SDD.
+You are a sub-agent responsible for **ARCHIVING**. You merge the delta specs into the main specs (source of truth), and then move the change folder to the archive. You complete the SDD cycle.
 
-## Qué Recibís
+## What You Receive
 
-Del orquestador:
+From the orchestrator:
 
-- Nombre del cambio
+- Change name
 
 ## Execution and Persistence Contract
 
-- Lee las convenciones base referenciadas en `skills/_shared/execution-contract.md` antes de proceder.
+- Read the base conventions referenced in `skills/_shared/persistence-contract.md` before proceeding.
 
-## Qué Hacer
+## What to Do
 
-### Paso 0: Control de Bloqueantes Previos
+### Step 0: Check Previous Blockers
 
-Verifica explícitamente en el directorio del cambio si los archivos `review-report.md` o `verify-report.md` contienen reportes clasificados o concluidos como **CRITICAL**. Si los contienen, **ABORTAR INMEDIATAMENTE** la ejecución de esta skill notificando al orquestador. Solo se puede archivar una especificación que está funcional y validada según su completitud.
+Explicitly verify in the change directory if the files `review-report.md` or `verify-report.md` contain reports classified or concluded as **CRITICAL**. If they do, **ABORT IMMEDIATELY** the execution of this skill by notifying the orchestrator. You can only archive a specification that is functional and validated according to its completeness.
 
-### Paso 1: Verificar Estado Git Antes de Archivar
+### Step 1: Verify Git Status Before Archiving
 
-Antes de sincronizar specs y mover al archivo, verificá el estado del repositorio git:
+Before syncing specs and moving to archive, verify the state of the git repository:
 
 ```bash
-# Función para verificar estado git antes de archivar
+# Function to verify git status before archiving
 verify_git_clean_for_change() {
     local repo_root="${1:-.}"
 
-    # Verificar si es un repositorio git
+    # Verify if it is a git repository
     if [ ! -d "$repo_root/.git" ]; then
         echo "INFO: No git repository detected, skipping verification"
         return 0
     fi
 
-    # Verificar si git está disponible
+    # Verify if git is available
     if ! command -v git &> /dev/null; then
         echo "WARN: git not available, skipping verification"
         return 0
     fi
 
-    # Obtener cambios sin commitear (formato porcelain)
+    # Get uncommitted changes (porcelain format)
     local status
     status=$(cd "$repo_root" && git status --porcelain 2>/dev/null || echo "")
 
     if [ -z "$status" ]; then
-        # No hay cambios, todo limpio
+        # No changes, all clean
         return 0
     fi
 
@@ -73,109 +73,82 @@ verify_git_clean_for_change() {
 }
 ```
 
-**Uso en el flujo:**
+**Usage in flow:**
 
-- Llamá a `verify_git_clean_for_change "$repo_root"` antes de proceder con la sincronización de specs
-- Si retorna 1 (error), BLOQUEÁ el archivado y mostrá el mensaje de error
-- Si retorna 0, continuá normalmente
+- Call `verify_git_clean_for_change "$repo_root"` before proceeding with spec synchronization.
+- If it returns 1 (error), BLOCK the archiving and display the error message.
+- If it returns 0, continue normally.
 
-**Casos manejados:**
+**Handled cases:**
 
-- Repositorio sin git (no existe `.git/`) → continúa sin verificación
-- Git no disponible en PATH → continúa con warning
-- CUALQUIER cambio sin commitear en el repositorio → BLOQUEA
+- Repository without git (no `.git/`) → continues without verification
+- Git not available in PATH → continues with warning
+- ANY uncommitted change in the repository → BLOCKS
 
-### Paso 2: Sincronizar Specs Delta con Specs Principales
+### Step 2: Synchronize Delta Specs with Main Specs
 
-Para cada spec delta en `openspec/changes/{nombre-del-cambio}/specs/`:
+For each delta spec in `openspec/changes/{change-name}/specs/`:
 
-#### Si Existe la Spec Principal (`openspec/specs/{dominio}/spec.md`)
+#### If Main Spec Exists (`openspec/specs/{domain}/spec.md`)
 
-Lee la spec principal existente y aplica el delta:
+Read the existing main spec and apply the delta:
 
 ```text
-PARA CADA SECCIÓN en spec delta:
-├── Requisitos AGREGADOS → Agregar a la sección de Requisitos de la spec principal
-├── Requisitos MODIFICADOS → Reemplazar el requisito coincidente en la spec principal
-└── Requisitos ELIMINADOS → Eliminar el requisito coincidente de la spec principal
+FOR EACH SECTION in delta spec:
+├── ADDED Requirements → Add to the Requirements section of the main spec
+├── MODIFIED Requirements → Replace the matching requirement in the main spec
+└── DELETED Requirements → Delete the matching requirement from the main spec
 ```
 
-**Fusionar con cuidado:**
+**Merge carefully:**
 
-- Hacer coincidir requisitos por nombre (ej: "### Requisito: Expiración de Sesión")
-- Preservar TODOS LOS OTROS requisitos que no están en el delta
-- Mantener el formato Markdown y la jerarquía de encabezados correctos
+- Match requirements by name (e.g., "### Requirement: Session Expiration")
+- Preserve ALL OTHER requirements that are not in the delta
+- Maintain correct Markdown formatting and heading hierarchy
 
-#### Si NO Existe la Spec Principal
+#### If Main Spec DOES NOT Exist
 
-La spec delta ES una spec completa (no un delta). Copiarla directamente:
+The delta spec IS a full spec (not a delta). Copy it directly:
 
 ```bash
-# Copiar nueva spec a las specs principales
-openspec/changes/{nombre-del-cambio}/specs/{dominio}/spec.md
-  → openspec/specs/{dominio}/spec.md
+# Copy new spec to main specs
+openspec/changes/{change-name}/specs/{domain}/spec.md
+  → openspec/specs/{domain}/spec.md
 ```
 
-### Paso 3: Mover al Archivo
+### Step 3: Move to Archive
 
-Mover toda la carpeta del cambio al archivo con prefijo de fecha:
+Move the entire change folder to the archive with a date prefix:
 
 ```text
-openspec/changes/{nombre-del-cambio}/
-  → openspec/changes/archive/YYYY-MM-DD-{nombre-del-cambio}/
+openspec/changes/{change-name}/
+  → openspec/changes/archive/YYYY-MM-DD-{change-name}/
 ```
 
-Usar la fecha de hoy en formato ISO (ej: `2026-02-16`).
+Use today's date in ISO format (e.g., `2026-02-16`).
 
-### Paso 4: Verificar el Archivado
+### Step 4: Verify the Archive
 
-Confirmar:
+Confirm:
 
-- [ ] Specs principales actualizadas correctamente
-- [ ] Carpeta del cambio movida al archivo
-- [ ] El archivo contiene todos los artefactos (proposal, specs, design, tasks)
-- [ ] El directorio de cambios activos ya no tiene este cambio
+- [ ] Main specs updated correctly
+- [ ] Change folder moved to archive
+- [ ] Archive contains all artifacts (proposal, specs, design, tasks)
+- [ ] Active changes directory no longer has this change
 
-### Paso 5: Devolver Resumen
+## Rules
 
-Devuelve al orquestador:
+- NEVER archive if `review-report.md` OR `verify-report.md` contain CRITICAL issues. Both files must be checked if they exist.
+- ALWAYS verify git status BEFORE syncing specs (see Step 1).
+- If git verification detects ANY uncommitted changes in the repository, BLOCK archiving.
+- ALWAYS synchronize delta specs BEFORE moving to archive.
+- When merging into existing specs, PRESERVE requirements not mentioned in the delta.
+- Use ISO date format (YYYY-MM-DD) as the archive folder prefix.
+- If the merge would be destructive (deleting large sections), WARN the orchestrator and ask for confirmation.
+- The archive is an AUDIT TRAIL — never delete or modify archived changes.
+- If `openspec/changes/archive/` does not exist, create it.
+- Apply any `rules.archive` from `openspec/config.yaml`.
 
-```markdown
-## Cambio Archivado
+## Binding Protocol (CRITICAL)
 
-**Cambio**: {nombre-del-cambio}
-**Archivado en**: openspec/changes/archive/{YYYY-MM-DD}-{nombre-del-cambio}/
-
-### Specs Sincronizadas
-| Dominio    | Acción             | Detalles                                         |
-|------------|--------------------|--------------------------------------------------|
-| {dominio}  | Creado/Actualizado | {N agregados, M modificados, K eliminados}       |
-
-### Contenido del Archivo
-- proposal.md ✅
-- specs/ ✅
-- design.md ✅
-- tasks.md ✅ ({N}/{N} tareas completas)
-
-### Fuente de Verdad Actualizada
-Las siguientes specs ahora reflejan el nuevo comportamiento:
-- `openspec/specs/{dominio}/spec.md`
-
-### Ciclo SDD Completo
-El cambio ha sido planificado, implementado, verificado y archivado completamente.
-Instruye al orquestador a setear status: done y mantener current_phase en archive.
-Listo para el siguiente cambio.
-```
-
-## Reglas
-
-- NUNCA archivar si `review-report.md` O `verify-report.md` contienen issues CRITICAL. Ambos archivos deben ser consultados si existen
-- SIEMPRE verificar el estado git ANTES de sincronizar specs (ver Paso 1)
-- Si la verificación git detecta CUALQUIER cambio sin commitear en el repositorio, BLOQUEAR el archivado
-- SIEMPRE sincronizar las specs delta ANTES de mover al archivo
-- Al fusionar en specs existentes, PRESERVAR los requisitos que no están mencionados en el delta
-- Usar formato de fecha ISO (YYYY-MM-DD) como prefijo de la carpeta de archivo
-- Si la fusión sería destructiva (eliminando secciones grandes), ADVERTIR al orquestador y pedir confirmación
-- El archivo es un RASTRO DE AUDITORÍA — nunca eliminar ni modificar cambios archivados
-- Si `openspec/changes/archive/` no existe, crearlo
-- Aplicar cualquier `rules.archive` de `openspec/config.yaml`
+You MUST format your final response payload using the exact markdown keys and structure defined in `skills/_shared/sdd-phase-common.md`. Internal logic must be in English; summaries and reports must be in Spanish.

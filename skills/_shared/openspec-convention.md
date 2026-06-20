@@ -1,241 +1,91 @@
-# OpenSpec File Convention (compartido entre todas las skills SDD)
+# OPENSPEC FILE SYSTEM & ARTIFACT CONVENTION
 
-## Estructura de Directorios
+## 1. DIRECTORY MATRIX STRUCTURE
 
 ```text
 openspec/
-├── config.yaml              ← Configuración SDD específica del proyecto
-├── specs/                   ← Fuente de verdad (specs actuales del sistema)
-│   └── {dominio}/
+├── config.yaml              ← Project-specific SDD settings, engine configuration, and lint rules
+├── specs/                   ← System Core Source of Truth (Current baseline specifications)
+│   └── {domain}/
 │       └── spec.md
-└── changes/                 ← Cambios activos
-    ├── archive/             ← Cambios completados (YYYY-MM-DD-{change-name}/)
-    └── {change-name}/       ← Carpeta de cambio activo
-        ├── state.yaml       ← Estado del DAG (orquestador — sobrevive a compactación)
-        ├── exploration.md   ← (opcional) de sdd-explore
-        ├── proposal.md      ← de sdd-propose
-        ├── specs/           ← de sdd-spec (specs delta)
-        │   └── {dominio}/
+└── changes/                 ← Active workspaces for transactional changesets
+    ├── archive/             ← Audit trail directory for completed, immutable changes (YYYY-MM-DD-{change-name}/)
+    └── {change-name}/       ← Active transactional directory (naming enforced via strict regex)
+        ├── state.yaml       ← Primary transactional ledger (Maintained exclusively by the Orchestrator)
+        ├── exploration.md   ← Output from sdd-explore phase (Optional)
+        ├── proposal.md      ← Output from sdd-propose phase
+        ├── specs/           ← Incremental specification changesets (Delta specs)
+        │   └── {domain}/
         │       └── spec.md
-        ├── design.md        ← de sdd-design
-        ├── tasks.md         ← de sdd-tasks (actualizado por sdd-apply)
-        └── verify-report.md ← de sdd-verify
+        ├── design.md        ← Technical blueprints from sdd-design phase
+        ├── tasks.md         ← Atomic engineering tasks checklist from sdd-tasks (Checked by sdd-apply)
+        └── verify-report.md ← Test suites and validation matrix outputs from sdd-verify
 ```
 
-## Rutas de Artefactos por Skill
+## 2. ARTIFACT ROUTING MAP BY PHASE
 
-| Skill | Crea / Lee | Ruta |
-|-------|-----------|------|
-| orquestador | Crea/Actualiza | `openspec/changes/{change-name}/state.yaml` |
-| sdd-init | Crea | `openspec/config.yaml`, `openspec/specs/`, `openspec/changes/`, `openspec/changes/archive/` |
-| sdd-explore | Crea (opcional) | `openspec/changes/{change-name}/exploration.md` |
-| sdd-propose | Crea | `openspec/changes/{change-name}/proposal.md` |
-| sdd-spec | Crea | `openspec/changes/{change-name}/specs/{dominio}/spec.md` |
-| sdd-design | Crea | `openspec/changes/{change-name}/design.md` |
-| sdd-tasks | Crea | `openspec/changes/{change-name}/tasks.md` |
-| sdd-apply | Actualiza | `openspec/changes/{change-name}/tasks.md` (marca `[x]`) |
-| sdd-verify | Crea | `openspec/changes/{change-name}/verify-report.md` |
-| sdd-review | Crea (opcional) | `openspec/changes/{change-name}/review-report.md` |
-| sdd-fix | Repara | `openspec/changes/{change-name}/state.yaml` |
-| sdd-archive | Mueve | `openspec/changes/{change-name}/` → `openspec/changes/archive/YYYY-MM-DD-{change-name}/` |
-| sdd-archive | Actualiza | `openspec/specs/{dominio}/spec.md` (fusiona deltas en specs principales) |
+| Phase / Skill | File System Operation | Targeted Relative Path |
+| --- | --- | --- |
+| `orchestrator` | Create / Update | `openspec/changes/{change-name}/state.yaml` |
+| `sdd-init` | Initialize Structure | `openspec/config.yaml`, `openspec/specs/`, `openspec/changes/archive/` |
+| `sdd-explore` | Optional Write | `openspec/changes/{change-name}/exploration.md` |
+| `sdd-propose` | Enforced Write | `openspec/changes/{change-name}/proposal.md` |
+| `sdd-spec` | Enforced Write | `openspec/changes/{change-name}/specs/{domain}/spec.md` |
+| `sdd-design` | Enforced Write | `openspec/changes/{change-name}/design.md` |
+| `sdd-tasks` | Enforced Write | `openspec/changes/{change-name}/tasks.md` |
+| `sdd-apply` | Interactive Mutation | `openspec/changes/{change-name}/tasks.md` (updates checkpoint markers `[x]`) |
+| `sdd-verify` | Enforced Write | `openspec/changes/{change-name}/verify-report.md` |
+| `sdd-review` | Optional Write | `openspec/changes/{change-name}/review-report.md` |
+| `sdd-fix` | System Repair | Re-evaluates and reconstructs `openspec/changes/{change-name}/state.yaml` |
+| `sdd-archive` | FS Migration | Moves path to `openspec/changes/archive/YYYY-MM-DD-{change-name}/` |
+| `sdd-archive` | Upstream Merge | Merges delta `specs/{domain}/spec.md` into the main `openspec/specs/{domain}/spec.md` |
 
-## Schema de state.yaml
+## 3. STATE.YAML TRANSACTION-AWARE SCHEMA
 
-El orquestador es el **único responsable** de escribir y mantener `state.yaml`.
-Las skills de sub-agentes **nunca** escriben ni leen este archivo directamente, con las ÚNICAS EXCEPCIONES de:
-
-- `sdd-status`: autorización para leerlo masivamente.
-- `sdd-checkpoint`: autorización para escribir el campo `session_summary`.
-- `sdd-fix`: autorización para reparar y migrar el archivo completo.
-
-El campo `lock_phase` es responsabilidad exclusiva del orquestador — ningún sub-agente lo escribe directamente.
+The Orchestrator holds absolute exclusive write-access to this ledger. Sub-agents are blocked from reading or mutating this file, except for explicit analytical passes (`sdd-status`), contextual injections (`sdd-checkpoint`), or state rebuilds (`sdd-fix`).
 
 ```yaml
-# openspec/changes/{change-name}/state.yaml
-
-change: {nombre-del-cambio}
-started_at: "YYYY-MM-DDTHH:MM:SS"   # ISO 8601 — se establece al crear, nunca se modifica
-last_updated: "YYYY-MM-DDTHH:MM:SS" # actualizar en cada transición de fase
-current_phase: {fase-actual}         # descriptivo: última fase completada exitosamente
-lock_phase: {fase-siguiente}         # prescriptivo: la ÚNICA fase autorizada a ejecutarse ahora
-                                     # Valores válidos: spec | design | tasks | apply | verify | archive
-                                     # Inicialización: primera fase de pending_phases al crear el cambio
-status: active                       # active | done | blocked (default: active)
-completed_phases:                    # lista ordenada, solo fases con status: ok
-  - explore    # incluir solo si sdd-explore fue ejecutado
-  - propose
-  # agregar fases a medida que se completan
-pending_phases:                      # fases que aún no se ejecutaron
-  - tasks
-  - apply
-  - verify
-  - archive
-blocked: false                       # true si status es blocked y verify reporta CRITICAL sin resolver
-blocked_reason: null                 # descripción del bloqueo, o null si blocked: false
-session_summary:                     # bloque YAML estructurado — límite total: 500 tokens
-  archivos_modificados:              # rutas exactas modificadas en el lote actual (máx 10 entradas)
-    - ruta/al/archivo.ext
-  estado_tareas: "{X}/{Y} — última: [{ID}] {descripción breve}"  # formato estricto
-  decisiones_clave:                  # máxixmo 2 decisiones técnicas para continuar
-    - "{decisión 1 (máx 100 chars)}"
-  proxima_accion: "/sdd-{comando} {nombre-cambio}"  # comando completo ejecutable
+change: "kebab-case-change-name"
+started_at: "YYYY-MM-DDTHH:MM:SS"   # ISO 8601 timestamp set on creation. Immutable.
+last_updated: "YYYY-MM-DDTHH:MM:SS" # Updated automatically on every phase transition.
+current_phase: "phase_name"         # Descriptively tracks the last successfully committed phase.
+lock_phase: "phase_name"            # Prescriptively isolates the ONLY phase allowed to run next.
+status: "active"                     # Enforced values: active | done | blocked
+transaction:
+  id: "tx_uuid_or_timestamp"
+  status: "idle"                     # Enforced values: idle | in_progress | committed | failed
+  started_at: "YYYY-MM-DDTHH:MM:SS"
+  updated_at: "YYYY-MM-DDTHH:MM:SS"
+  sub_agent: "sdd-phase-name"
+completed_phases:
+  - "explore"
+  - "propose"
+pending_phases:
+  - "design"
+  - "tasks"
+blocked: false                       # Enforced true only if status is blocked and sdd-verify reports unresolved errors.
+blocked_reason: null                 # Clear engineering description string or null.
+session_summary:                     # Strict context block. Fixed ceiling: 500 tokens max.
+  modified_files:
+    - "relative/path/to/artifact.ext"
+  task_status: "{X}/{Y} — Last: [{ID}] Short text description"
+  key_decisions:
+    - "Architectural decision string (Max 2 entries, max 100 chars per entry)"
+  next_action: "/sdd-{command} {change-name}" # Fully formed executable terminal command string.
 ```
 
-**Límite de tokens en `session_summary`:** El bloque completo NO DEBE superar 500 tokens
-(~375 palabras). Si se alcanza el límite, truncar aplicando estas prioridades:
+## 4. TOKEN CEILING CONSTRAINTS FOR SESSION_SUMMARY
 
-1. `archivos_modificados` → listar solo los últimos 10 archivos.
-2. `decisiones_clave` → listar máximo 2 ítems, truncar cada uno a 100 caracteres.
-3. `estado_tareas` y `proxima_accion` son inamovibles — nunca se truncan.
+The `session_summary` yaml block MUST NOT exceed 500 runtime tokens. If the data approaches this hard boundary, truncate contents following this strict prioritization sequence:
 
-**Formatos obligatorios por subcampo:**
+1. `modified_files`: Retain only the 10 most recent entries, slice the remainder.
+2. `key_decisions`: Enforce a maximum of 2 array items, truncating each string at 100 characters.
+3. `task_status` and `next_action` are mission-critical control paths; they must NEVER be truncated or altered.
 
-| Subcampo | Tipo | Formato / Restricciones |
-|----------|------|--------------------------|
-| `archivos_modificados` | Lista YAML | Rutas relativas al root; `[]` si sin cambios; máx 10 |
-| `estado_tareas` | String | `"{X}/{Y} — última: [{ID}] {texto}"` o `"N/A"` si no hay tasks.md |
-| `decisiones_clave` | Lista YAML | Máx 2 ítems, cada uno ≤ 100 caracteres |
-| `proxima_accion` | String | Comando completo: `/sdd-{cmd} {nombre-cambio}` |
+## 5. NAMING CONVENTION & VALIDATION RULES
 
-**Valores válidos para `current_phase`, `lock_phase` y elementos de listas:**
-`explore | propose | spec | design | tasks | apply | verify | archive`
+All metadata tracking parameters, directories, and change branch configurations MUST strictly conform to **kebab-case** format (lowercase alphanumeric characters isolated by single hyphens).
 
-**Notas de transición:**
-
-- `spec` y `design` deben aparecer en orden secuencial estricto en `completed_phases` (no se ejecutan en paralelo).
-- `current_phase` refleja la última fase completada (descriptivo/histórico).
-- `lock_phase` indica la única fase que puede ejecutarse en este momento (prescriptivo/restrictivo). Los orquestadores (`sdd-ff`, `sdd-continue`) DEBEN verificar `lock_phase` antes de delegar a cualquier sub-agente.
-- Un cambio recién creado (solo `propose` completo) tiene `current_phase: propose` y `lock_phase: spec`.
-- `sdd-new` DEBE inicializar `lock_phase` con el valor de la primera fase en `pending_phases`.
-- Al archivar exitosamente, el archivo se mueve — no hace falta actualizar `state.yaml`.
-
-**Tabla de transiciones de `lock_phase` (DAG estricto):**
-
-| `current_phase` completada | `lock_phase` resultante |
-|---------------------------|-------------------------|
-| `propose`                  | `spec`                  |
-| `spec`                     | `design`                |
-| `design`                   | `tasks`                 |
-| `tasks`                    | `apply`                 |
-| `apply`                    | `verify`                |
-| `verify`                   | `archive`               |
-
-**Semántica `lock_phase` vs `current_phase`:**
-
-| Campo | Rol | Quién lo escribe | Cuándo cambia |
-|-------|-----|-----------------|---------------|
-| `current_phase` | Descriptivo — última fase completada | Orquestador | Al completar una fase |
-| `lock_phase` | Prescriptivo — única fase ejecutable | Orquestador (a partir de `lock_phase_next` reportado por el sub-agente) | Al completar una fase |
-
-**Error de transición inválida:** Si un orquestador intenta ejecutar una fase distinta a `lock_phase`, DEBE detener la ejecución e informar:
-
-```text
-ERROR: Transición inválida de lock semántico.
-  Fase solicitada : {fase_solicitada}
-  lock_phase actual: {lock_phase}
-  Ejecuta /sdd-fix para auditar y reparar el estado antes de continuar.
-```
-
-## Lectura de Artefactos
-
-Cada skill lee sus dependencias desde el filesystem:
-
-```text
-Propuesta:      openspec/changes/{change-name}/proposal.md
-Specs delta:    openspec/changes/{change-name}/specs/  (todos los subdirectorios de dominio)
-Diseño:         openspec/changes/{change-name}/design.md
-Tareas:         openspec/changes/{change-name}/tasks.md
-Verificación:   openspec/changes/{change-name}/verify-report.md
-Configuración:  openspec/config.yaml
-Specs actuales: openspec/specs/{dominio}/spec.md
-```
-
-## Reglas de Escritura
-
-- SIEMPRE crear el directorio del cambio antes de escribir artefactos.
-- Si un archivo ya existe, LEERLO primero y ACTUALIZARLO (no sobreescribir ciegamente).
-- Si el directorio del cambio ya existe con artefactos, el cambio está siendo CONTINUADO.
-- Usar la sección `rules` de `openspec/config.yaml` para aplicar restricciones del proyecto por fase.
-
-## Referencia del config.yaml
-
-```yaml
-# openspec/config.yaml
-schema: spec-driven
-
-context: |
-  Stack tecnológico: {detectado}
-  Arquitectura: {detectado}
-  Testing: {detectado}
-  Estilo: {detectado}
-
-# Glosario de dominio (opcional — recomendado para proyectos con terminología específica)
-# Los sub-agentes cargan este glosario y usan los términos de forma consistente en todos los artefactos.
-glossary:
-  {término}: >
-    {Definición canónica del concepto en el dominio del proyecto.}
-
-rules:
-  change_naming: kebab-case
-  proposal:
-    - Incluir plan de rollback para cambios riesgosos
-  specs:
-    - Usar Given/When/Then para escenarios
-    - Usar palabras clave RFC 2119 (MUST, SHALL, SHOULD, MAY)
-  design:
-    - Incluir diagramas de secuencia para flujos complejos
-    - Documentar decisiones de arquitectura con justificación
-    - "Explotar razonamiento arquitectónico: DEBES incluir diagramas Mermaid exhaustivos (State, Sequence o Class) para cualquier flujo no trivial."
-    - "Priorizar modularidad extrema: Diseña el sistema asumiendo que el código será escrito por un modelo de IA con ventana de contexto limitada. Interfaces claras y acoplamiento nulo."
-  tasks:
-    - Agrupar por fase, usar numeración jerárquica
-    - Mantener tareas completables en una sesión
-    - "Granularidad Atómica: Cada tarea debe ser lo suficientemente pequeña para implementarse en un solo archivo o módulo lógico. Evitar 'tareas monstruo'."
-  apply:
-    - Seguir los patrones y convenciones de código existentes
-    - "Código Defensivo y Pragmatismo: Aplica principios SOLID, DRY y Clean Code. Prefiere Early Returns (Guard Clauses). NUNCA sobre-ingeniar."
-    - "Completitud: No uses placeholders como '...código restante aquí...'. Si escribes un archivo, escríbelo completo y listo para producción."
-    tdd: false
-    test_command: ""
-  verify:
-    test_command: ""
-    build_command: ""
-    coverage_threshold: 0
-  archive:
-    - Advertir antes de fusionar deltas destructivos
-
-## Regla de Nomenclatura de Cambios
-
-Todos los nombres de cambios SDD DEBEN usar formato **kebab-case** (palabras separadas por guiones, todo en minúsculas).
-
-### Ejemplos válidos:
-- `agregar-modo-oscuro`
-- `fix-auth-bug`
-- `refactor-user-service`
-- `mejora-rendimiento-consultas`
-
-### Ejemplos INVÁLIDOS:
-- `agregarModoOscuro` (camelCase)
-- `AgregarModoOscuro` (PascalCase)
-- `agregar_modo_oscuro` (snake_case)
-- `agregar modo oscuro` (espacios)
-
-### Validación
-
-La regla `change_naming: kebab-case` se aplica en la fase `sdd-propose`. El nombre se valida con la regex: `^[a-z0-9]+(-[a-z0-9]+)*$`
-
-Esta regla está configurada en `openspec/config.yaml` y se aplica automáticamente durante la creación de nuevos cambios.
-```
-
-## Estructura del Archivo Histórico
-
-Al archivar, la carpeta del cambio se mueve a:
-
-```text
-openspec/changes/archive/YYYY-MM-DD-{change-name}/
-```
-
-Usar fecha ISO de hoy. El archivo es un **RASTRO DE AUDITORÍA** — nunca eliminar ni modificar.
-
-**Fusión de Deltas**: Al archivar, los specs delta en `specs/{dominio}/` se fusionan automáticamente con los specs principales en `openspec/specs/{dominio}/spec.md`. Esta fusión actualiza los requisitos principales con los cambios implementados en el cambio archivado.
+* **Valid Examples:** `add-dark-mode`, `fix-auth-bug`, `refactor-user-service`.
+* **Invalid Examples:** `addDarkMode`, `AddDarkMode`, `add_dark_mode`, `add dark mode`.
+* **Regex Enforcement Pattern:** The configuration manager and `sdd-propose` must evaluate the change label matching: `^[a-z0-9]+(-[a-z0-9]+)*$`

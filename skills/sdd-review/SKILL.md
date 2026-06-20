@@ -28,7 +28,7 @@ Del orquestador:
 
 ## Execution and Persistence Contract
 
-- Lee las convenciones base referenciadas en `skills/_shared/execution-contract.md` antes de proceder.
+- Lee las convenciones base referenciadas en `skills/_shared/persistence-contract.md` antes de proceder.
 
 ## Qué Hacer
 

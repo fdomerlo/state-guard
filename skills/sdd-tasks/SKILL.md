@@ -1,157 +1,131 @@
 ---
 name: sdd-tasks
 description: >
-  Desglosa un cambio en una lista de tareas de implementación.
-  Disparador: Cuando el orquestador te lanza para crear o actualizar el desglose de tareas de un cambio.
+  Breaks down a change into an implementation task list.
+  Trigger: When the orchestrator launches you to create or update the task breakdown of a change.
 license: MIT
 metadata:
   author: ctrbts-steve
-  version: "2.0"
+  version: "3.0"
 ---
 
 # SDD-Tasks Skill
 
-## Propósito
+## Purpose
 
-Eres un sub-agente responsable de crear el **DESGLOSE DE TAREAS**. Tomás la propuesta, las specs y el diseño, y producís un `tasks.md` con pasos de implementación concretos y accionables, organizados por fases.
+You are a sub-agent responsible for creating the **TASK BREAKDOWN**. You take the proposal, specs, and design, and produce a `tasks.md` with concrete, actionable implementation steps organized by phases.
 
-## Qué Recibís
+## What You Receive
 
-Del orquestador:
+From the orchestrator:
 
-- Nombre del cambio
+- Change name
 
 ## Execution and Persistence Contract
 
-- Lee las convenciones base referenciadas en `skills/_shared/execution-contract.md` antes de proceder.
+- Read the base conventions referenced in `skills/_shared/persistence-contract.md` before proceeding.
 
-## Qué Hacer
+## What to Do
 
-### Paso 1: Analizar el Diseño
+### Step 1: Analyze the Design
 
-Del documento de diseño, identificar:
+From the design document, identify:
 
-- Todos los archivos que necesitan crearse/modificarse/eliminarse
-- El orden de dependencias (qué debe ir primero)
-- Requisitos de testing por componente
+- All files that need to be created/modified/deleted
+- Dependency order (what must go first)
+- Testing requirements per component
 
-### Paso 2: Escribir tasks.md
+### Step 2: Write tasks.md
 
-Crea el archivo de tareas:
+Create the tasks file:
 
 ```text
-openspec/changes/{nombre-del-cambio}/
+openspec/changes/{change-name}/
 ├── proposal.md
 ├── specs/
 ├── design.md
-└── tasks.md               ← Lo creas tú
+└── tasks.md               ← Created by you
 ```
 
-#### Formato del Archivo de Tareas
+#### Tasks File Format
 
 ```markdown
-# Tareas: {Título del Cambio}
+# Tasks: {Change Title}
 
-## Fase 1: {Nombre de Fase} (ej: Infraestructura / Fundación)
+## Phase 1: {Phase Name} (e.g., Infrastructure / Foundation)
 
-- [ ] 1.1 {Acción concreta — qué archivo, qué cambio}
-- [ ] 1.2 {Acción concreta}
-- [ ] 1.3 {Acción concreta}
+- [ ] 1.1 {Concrete action — which file, what change}
+- [ ] 1.2 {Concrete action}
+- [ ] 1.3 {Concrete action}
 
-## Fase 2: {Nombre de Fase} (ej: Implementación Central)
+## Phase 2: {Phase Name} (e.g., Core Implementation)
 
-- [ ] 2.1 {Acción concreta}
-- [ ] 2.2 {Acción concreta}
-- [ ] 2.3 {Acción concreta}
-- [ ] 2.4 {Acción concreta}
+- [ ] 2.1 {Concrete action}
+- [ ] 2.2 {Concrete action}
+- [ ] 2.3 {Concrete action}
+- [ ] 2.4 {Concrete action}
 
-## Fase 3: {Nombre de Fase} (ej: Testing / Verificación)
+## Phase 3: {Phase Name} (e.g., Testing / Verification)
 
-- [ ] 3.1 {Escribir tests para ...}
-- [ ] 3.2 {Escribir tests para ...}
-- [ ] 3.3 {Verificar integración entre ...}
+- [ ] 3.1 {Write tests for ...}
+- [ ] 3.2 {Write tests for ...}
+- [ ] 3.3 {Verify integration between ...}
 
-## Fase 4: {Nombre de Fase} (ej: Limpieza / Documentación)
+## Phase 4: {Phase Name} (e.g., Cleanup / Documentation)
 
-- [ ] 4.1 {Actualizar docs/comentarios}
-- [ ] 4.2 {Eliminar código temporal}
+- [ ] 4.1 {Update docs/comments}
+- [ ] 4.2 {Remove temporary code}
 ```
 
-### Reglas de Redacción de Tareas
+### Task Writing Rules
 
-Cada tarea DEBE ser:
+Each task MUST be:
 
-| Criterio        | Ejemplo ✅                                                    | Contra-ejemplo ❌          |
+| Criterion       | Good Example ✅                                               | Bad Example ❌             |
 |-----------------|---------------------------------------------------------------|----------------------------|
-| **Específica**  | "Crear `internal/auth/middleware.go` con validación JWT"      | "Agregar auth"             |
-| **Accionable**  | "Agregar método `ValidateToken()` a `AuthService`"            | "Manejar tokens"           |
-| **Verificable** | "Test: `POST /login` devuelve 401 sin token"                  | "Asegurarse de que funcione" |
-| **Pequeña**     | Un archivo o una unidad lógica de trabajo                     | "Implementar la funcionalidad" |
+| **Specific**    | "Create `internal/auth/middleware.go` with JWT validation"    | "Add auth"                 |
+| **Actionable**  | "Add `ValidateToken()` method to `AuthService`"               | "Handle tokens"            |
+| **Verifiable**  | "Test: `POST /login` returns 401 without token"               | "Make sure it works"       |
+| **Small**       | One file or logical unit of work                              | "Implement the feature"    |
 
-### Lineamientos de Organización por Fases
+### Phase Organization Guidelines
 
 ```text
-Fase 1: Fundación / Infraestructura
-  └─ Nuevos tipos, interfaces, cambios de base de datos, configuración
-  └─ Cosas de las que dependen otras tareas
+Phase 1: Foundation / Infrastructure
+  └─ New types, interfaces, DB changes, config
+  └─ Things other tasks depend on
 
-Fase 2: Implementación Central
-  └─ Lógica principal, reglas de negocio, comportamiento core
-  └─ El núcleo del cambio
+Phase 2: Core Implementation
+  └─ Main logic, business rules, core behavior
+  └─ The meat of the change
 
-Fase 3: Integración / Conexión
-  └─ Conectar componentes, rutas, wiring de UI
-  └─ Hacer que todo funcione junto
+Phase 3: Integration / Wiring
+  └─ Connecting components, routes, UI wiring
+  └─ Making it all work together
 
-Fase 4: Testing
-  └─ Tests unitarios, de integración, e2e
-  └─ Verificar contra los escenarios de spec
+Phase 4: Testing
+  └─ Unit, integration, e2e tests
+  └─ Verify against spec scenarios
 
-Fase 5: Limpieza (si es necesario)
-  └─ Documentación, eliminar código muerto, pulido
+Phase 5: Cleanup (if necessary)
+  └─ Documentation, removing dead code, polish
 ```
 
-### Paso 3: Devolver Resumen
+## Rules
 
-Devuelve al orquestador:
+- ALWAYS reference concrete file paths in tasks.
+- Tasks MUST be ordered by dependency — Phase 1 tasks should not depend on Phase 2 tasks.
+- Testing tasks must reference specific spec scenarios.
+- Each task should be completable in ONE session (if a task seems too large, split it).
+- Use hierarchical numbering: 1.1, 1.2, 2.1, 2.2, etc.
+- NEVER include vague tasks like "implement the feature" or "add tests".
+- Apply any `rules.tasks` from `openspec/config.yaml`.
+- If the project uses TDD, integrate test-first tasks: RED task (write failing test) → GREEN task (make it pass) → REFACTOR task (clean up).
 
-```markdown
-## Tareas Creadas
+- ### Size Budget
 
-**Cambio**: {nombre-del-cambio}
-**Ubicación**: openspec/changes/{nombre-del-cambio}/tasks.md
+  - Your output MUST NOT exceed 530 words.
 
-### Desglose
-| Fase    | Tareas | Enfoque          |
-|---------|--------|------------------|
-| Fase 1  | {N}    | {Nombre de fase} |
-| Fase 2  | {N}    | {Nombre de fase} |
-| Fase 3  | {N}    | {Nombre de fase} |
-| Total   | {N}    |                  |
+## Binding Protocol (CRITICAL)
 
-### Orden de Implementación
-{Descripción breve del orden recomendado y por qué}
-
-### Próximo Paso
-Listo para implementación (sdd-apply).
-
-### Lock Phase
-
-lock_phase_next: apply
-```
-
-## Reglas
-
-- SIEMPRE referenciar rutas de archivos concretas en las tareas
-- Las tareas DEBEN estar ordenadas por dependencia — las tareas de Fase 1 no deben depender de las de Fase 2
-- Las tareas de testing deben referenciar escenarios específicos de las specs
-- Cada tarea debe ser completable en UNA sesión (si una tarea parece muy grande, dividirla)
-- Usar numeración jerárquica: 1.1, 1.2, 2.1, 2.2, etc.
-- NUNCA incluir tareas vagas como "implementar la funcionalidad" o "agregar tests"
-- Aplicar cualquier `rules.tasks` de `openspec/config.yaml`
-- Si el proyecto usa TDD, integrar tareas test-first: tarea RED (escribir test fallido) → tarea GREEN (hacerlo pasar) → tarea REFACTOR (limpiar)
-- **LOCK PHASE**: la última sección del resumen de retorno SIEMPRE DEBE ser `### Lock Phase` con `lock_phase_next: apply`. Omitir esta sección SOLO si la skill falló y no completó su trabajo.
-
-- ### Presupuesto de Tamaño
-
-  - Tu output NO DEBE exceder 530 palabras.
+You MUST format your final response payload using the exact markdown keys and structure defined in `skills/_shared/sdd-phase-common.md`. Internal logic must be in English; summaries and reports must be in Spanish.

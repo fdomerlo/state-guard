@@ -1,70 +1,38 @@
-# Contrato de Persistencia (Compartido entre todas las skills SDD)
+# CORE PERSISTENCE & EXECUTION CONTRACT
 
-## Persistencia Directa (File System)
+## 1. PRIMARY DISK PERSISTENCE LAYER
+This framework treats the host filesystem as its single, absolute source of truth. All structural read and write sequences targeting artifacts must execute strictly within the boundaries of the `openspec/` root directory, abiding by the conventions mapped out in `openspec-convention.md`.
 
-El framework utiliza el File System como único mecanismo de persistencia nativo. Todas las operaciones de lectura y escritura de artefactos se realizan bajo el directorio `openspec/` siguiendo la convención [openspec-convention.md](./openspec-convention.md).
+## 2. CONTEXTUAL BOUNDARIES FOR DELEGATED SKILLS
+Specialized sub-agents always spin up with a clean memory context and have zero visibility into the historical message ledger of the main orchestrator session.
+- **ORCHESTRATOR COMPLIANCE:** You are strictly bound to provide only the explicit paths and context records that you pull from the local directory ledger. Do not pass unrestricted environment blocks.
+- **SUB-AGENT COMPLIANCE:** Sub-agents must read past phase outputs (`explore`, `proposal`, `spec`, `design`, `tasks`) as dependencies using the precise relative paths injected by the orchestrator. They bear sole responsibility for writing their phase outputs directly to disk.
 
-## Persistencia de Estado del Orquestador
+## 3. DATA PERSISTENCE RESPONSIBILITY MATRIX
 
-El orquestador persiste el estado del DAG en `openspec/changes/{change-name}/state.yaml` después de cada transición de fase exitosa.
-Ver [orchestrator-core.md](./orchestrator-core.md) (sección "Gestión de Estado") para el schema completo y las reglas de escritura.
-
-**Responsabilidad exclusiva:** Solo el orquestador escribe y mantiene `state.yaml`.
-Las skills de sub-agentes no interactúan con este archivo directamente, con la ÚNICA EXCEPCIÓN de la skill `sdd-status`, que tiene autorización para leerlo masivamente, y la skill `sdd-checkpoint`, que tiene autorización para escribir el `session_summary` en él.
-
-## Reglas de Contexto para Sub-Agentes
-
-Los sub-agentes inician con contexto fresco y SIN acceso a las instrucciones del orquestador. El orquestador controla qué contexto reciben. Los sub-agentes son responsables de persistir lo que producen directamente en el disco.
-
-### Quién lee, quién escribe
-
-| Tarea / Fase | Quién lee del disco | Quién escribe en el disco |
+| Operation Block | File Read Authority | File Write Authority |
 |---|---|---|
-| Fase con dependencias | **El sub-agente** lee artefactos previos directamente | **El sub-agente** guarda su artefacto |
-| Fase sin dependencias (ej: explore) | Nadie | **El sub-agente** guarda su artefacto (si aplica) |
-| Transición de fase | — | **El orquestador** actualiza `state.yaml` |
+| Dependency-Driven Phase | Sub-agent loads upstream files directly. | Sub-agent commits output artifact to disk. |
+| Independent Phase (e.g., Explore) | None. | Sub-agent commits artifact to disk if generated. |
+| Transaction Phase Transition | None. | Orchestrator commits updated `state.yaml`. |
 
-### Protocolo de Comunicación (Orquestador → Sub-agente)
-
-**Fase con dependencias:**
-
+## 4. COMMUNICATIONS PROTOCOL PACKAGING (Orchestrator → Sub-Agent)
+When invoking a sub-agent execution block, you must structure the initialization payload using this exact text block format:
 ```text
-Lee estos artefactos antes de comenzar:
-- {ruta del archivo para cada dependencia}
-Si hay un glosario en openspec/config.yaml, cargarlo y usarlo para terminología consistente.
-Después de completar tu trabajo, persistí tu artefacto siguiendo openspec-convention.md.
+Load and analyze these specific tracking artifacts before beginning execution:
+- {Injected relative file paths for each required dependency}
+IF a domain glossary exists at openspec/config.yaml, you must load it and enforce strict terminology consistency.
+Upon task completion, persist your resulting artifact following the explicit definitions in openspec-convention.md.
 ```
 
-**Fase sin dependencias:**
+## 5. REVERSIBILITY AND VERBOSITY CONTROL (`detail_level`)
 
-```text
-Si hay un glosario en openspec/config.yaml, cargarlo y usarlo para terminología consistente.
-Después de completar tu trabajo, persistí tu artefacto siguiendo openspec-convention.md.
-```
+The orchestrator may pass an operational parameter defined as `detail_level: concise | standard | deep`. This variable controls the verbosidad of the summary outputs printed to the chat interface. It has **zero** effect on filesystem persistence; sub-agents must always generate and write the complete technical artifact to disk regardless of this setting.
 
-## Nivel de Detalle
+## 6. PROJECT DOMAIN GLOSSARY ENFORCEMENT & GRACEFUL DEGRADATION
 
-El orquestador puede pasar `detail_level`: `concise | standard | deep`.
-Esto controla la verbosidad de la salida en el chat, pero NO afecta lo que se guarda en disco — siempre se persiste el artefacto completo.
+Every spawned skill context must process project terms using these guidelines at launch:
 
-## Carga de Glosario (para sub-agentes)
-
-Al inicio de cada skill:
-
-1. Buscar archivo `openspec/config.yaml`
-2. Si existe y contiene clave `glossary`, cargar los términos
-3. Usar los términos definidos para mantener consistencia en el output
-4. Si no existe el glosario, continuar normalmente (es opcional)
-
-Los términos del glosario deben respetarse al generar artefactos:
-
-- Usar la terminología definida en lugar de sinónimos
-- Mantener consistencia semántica en proposal.md, specs/, design.md, etc.
-
-### Graceful Degradation
-
-- Si `openspec/config.yaml` NO existe → continuar sin glosario
-- Si el archivo existe pero NO tiene sección `glossary:` → continuar sin glosario
-- Si la sección `glossary:` existe pero está vacía o malformada → continuar sin glosario, sin lanzar error
-
-Esta estrategia permite que proyectos existentes (sin glosario) funcionen correctamente mientras nuevos proyectos pueden adoptar el glosario cuando lo necesiten.
+1. Attempt to parse `openspec/config.yaml` searching for the root `glossary:` key.
+2. If found, load the key-value dictionary and map synonyms to the canon definitions provided, ensuring perfect semantic cohesion across `proposal.md`, `specs/`, and `design.md`.
+3. **GRACEFUL DEGRADATION PATTERN:** If `openspec/config.yaml` is absent, or if the `glossary:` section is blank, missing, or structurally corrupted, the sub-agent must suppress errors, bypass the lookup sequence gracefully, and proceed with standard generation without halting execution.

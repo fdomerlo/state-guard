@@ -1,212 +1,152 @@
 ---
 name: sdd-apply
 description: >
-  Implementa tareas de un cambio, escribiendo código real siguiendo las especificaciones y el diseño.
-  Disparador: Cuando el orquestador te lanza para implementar una o más tareas de un cambio.
+  Implements tasks for a change, writing actual code following specifications and design.
+  Trigger: When the orchestrator launches you to implement one or more tasks for a change.
 license: MIT
 metadata:
   author: ctrbts-steve
-  version: "2.0"
+  version: "3.0"
 ---
 
 # SDD-Apply Skill
 
-## Propósito
+## Purpose
 
-Eres un sub-agente responsable de la **IMPLEMENTACIÓN**. Recibís tareas específicas de `tasks.md` y las implementás escribiendo código real. Seguís las specs y el diseño de forma estricta.
+You are a sub-agent responsible for **IMPLEMENTATION**. You receive specific tasks from `tasks.md` and implement them by writing real code. You strictly follow the specs and design.
 
-## Qué Recibís
+## What You Receive
 
-Del orquestador:
+From the orchestrator:
 
-- Nombre del cambio
-- Las tareas específicas a implementar (ej: "Fase 1, tareas 1.1-1.3")
+- Change name
+- The specific tasks to implement (e.g., "Phase 1, tasks 1.1-1.3")
 
 ## Execution and Persistence Contract
 
-- Lee las convenciones base referenciadas en `skills/_shared/execution-contract.md` antes de proceder.
+- Read the base conventions referenced in `skills/_shared/persistence-contract.md` before proceeding.
 
-## Qué Hacer
+## What to Do
 
-### Paso 1: Leer el Contexto
+### Step 1: Read the Context
 
-Antes de escribir CUALQUIER código, leé las dependencias del cambio actual:
+Before writing ANY code, read the dependencies of the current change:
 
-1. **Specs delta del cambio** — leer todos los archivos en `openspec/changes/{nombre-del-cambio}/specs/`
-2. **Diseño** — leer `openspec/changes/{nombre-del-cambio}/design.md`
-3. **Tareas** — leer `openspec/changes/{nombre-del-cambio}/tasks.md`
-4. **Código existente** — leer los archivos afectados para seguir patrones actuales
-5. **Convenciones** — leer `config.yaml` para reglas de codificación
+1. **Delta specs of the change** — read all files in `openspec/changes/{change-name}/specs/`
+2. **Design** — read `openspec/changes/{change-name}/design.md`
+3. **Tasks** — read `openspec/changes/{change-name}/tasks.md`
+4. **Existing code** — read affected files to follow current patterns
+5. **Conventions** — read `config.yaml` for coding rules
 
-**NOTA:** SOLO leer specs delta del cambio actual. NUNCA leer `specs/` completo del proyecto.
+**NOTE:** ONLY read delta specs of the current change. NEVER read the entire `specs/` directory of the project.
 
-### Paso 1b: Batching de Tareas
+### Step 1b: Task Batching
 
-El orquestador es responsable de:
+The orchestrator is responsible for:
 
-1. Leer `tasks.md` del cambio actual
-2. Extraer solo las próximas 3 tareas pendientes (no completadas)
-3. Pasarlas como texto inline al sub-agente (no el archivo completo)
+1. Reading `tasks.md` of the current change
+2. Extracting only the next 3 pending (not completed) tasks
+3. Passing them as inline text to the sub-agent (not the full file)
 
-El sub-agente recibe las tareas como texto inline, no como referencia a archivo.
+You receive the tasks as inline text, not as a file reference.
 
-### Paso 2: Detectar el Modo de Implementación
+### Step 2: Detect Implementation Mode
 
-Antes de escribir código, determina si el proyecto usa TDD:
-
-```text
-Detectar modo TDD (en orden de prioridad):
-├── openspec/config.yaml → rules.apply.tdd (true/false — máxima prioridad)
-├── Skills instaladas del usuario (ej: tdd/SKILL.md existe)
-├── Patrones de test existentes en el código base (archivos de test junto al fuente)
-└── Por defecto: modo estándar (escribir código primero, luego verificar)
-
-SI se detecta modo TDD → usar Paso 2a (Flujo TDD)
-SI es modo estándar → usar Paso 2b (Flujo Estándar)
-```
-
-### Paso 2a: Implementar Tareas (Flujo TDD — RED → GREEN → REFACTOR)
-
-CRÍTICO: Debes ejecutar los tests utilizando una herramienta de terminal real. ESTÁ PROHIBIDO simular o inferir que un test pasó sin haber ejecutado el comando y analizado su salida estándar.
-
-Cuando TDD está activo, CADA tarea sigue este ciclo:
+Before writing code, determine if the project uses TDD:
 
 ```text
-PARA CADA TAREA:
-├── 1. ENTENDER
-│   ├── Leer la descripción de la tarea
-│   ├── Leer los escenarios de spec relevantes (son tus criterios de aceptación)
-│   ├── Leer las decisiones de diseño (limitan tu enfoque)
-│   └── Leer los patrones de código y test existentes
-│
-├── 2. RED — Escribir un test fallido PRIMERO
-│   ├── Escribir test(s) que describan el comportamiento esperado según los escenarios de spec
-│   ├── Ejecutar tests — confirmar que FALLAN (esto prueba que el test tiene sentido)
-│   └── Si el test pasa inmediatamente → el comportamiento ya existe o el test es incorrecto
-│
-├── 3. GREEN — Escribir el código mínimo para pasar
-│   ├── Implementar SOLO lo necesario para que los tests fallen pasen
-│   ├── Ejecutar tests — confirmar que PASAN
-│   └── NO agregar funcionalidad extra más allá de lo que el test requiere
-│
-├── 4. REFACTOR — Limpiar sin cambiar el comportamiento
-│   ├── Mejorar estructura del código, nombres, duplicaciones
-│   ├── Ejecutar tests nuevamente — confirmar que SIGUEN PASANDO
-│   └── Ajustarse a las convenciones y patrones del proyecto
-│
-├── 5. Marcar la tarea como completa [x] en tasks.md
-└── 6. Anotar cualquier problema o desviación
+Detect TDD mode (in order of priority):
+├── openspec/config.yaml → rules.apply.tdd (true/false — highest priority)
+├── User installed skills (e.g., tdd/SKILL.md exists)
+├── Existing test patterns in the codebase (test files alongside source)
+└── Default: standard mode (write code first, then verify)
+
+IF TDD mode is detected → use Step 2a (TDD Flow)
+IF standard mode → use Step 2b (Standard Flow)
 ```
 
-Detecta el test runner para la ejecución:
+### Step 2a: Implement Tasks (TDD Flow — RED → GREEN → REFACTOR)
 
-Consultar `skills/_shared/test-runner-detection.md` con parámetro `{fase}=apply` para la lógica de detección.
+CRITICAL: You must execute tests using a real terminal tool. It is FORBIDDEN to simulate or infer that a test passed without having executed the command and analyzed its standard output.
 
-**Importante**: Si hay skills de codificación instaladas (ej: `tdd/SKILL.md`, `pytest/SKILL.md`, `vitest/SKILL.md`), leer y seguir esos patrones para escribir tests.
-
-### Paso 2b: Implementar Tareas (Flujo Estándar)
-
-Cuando TDD no está activo:
+When TDD is active, EACH task follows this cycle:
 
 ```text
-PARA CADA TAREA:
-├── Leer la descripción de la tarea
-├── Leer los escenarios de spec relevantes (son tus criterios de aceptación)
-├── Leer las decisiones de diseño (limitan tu enfoque)
-├── Leer los patrones de código existentes (seguir el estilo del proyecto)
-├── Escribir el código
-├── Marcar la tarea como completa [x] en tasks.md
-└── Anotar cualquier problema o desviación
+FOR EACH TASK:
+├── 1. UNDERSTAND
+│   ├── Read task description
+│   ├── Read relevant spec scenarios (these are your acceptance criteria)
+│   ├── Read design decisions (they constrain your approach)
+│   └── Read existing code and test patterns
+│
+├── 2. RED — Write a failing test FIRST
+│   ├── Write test(s) describing the expected behavior according to spec scenarios
+│   ├── Execute tests — confirm they FAIL (this proves the test is meaningful)
+│   └── If the test passes immediately → the behavior already exists or the test is wrong
+│
+├── 3. GREEN — Write the minimum code to pass
+│   ├── Implement ONLY what is necessary to make failing tests pass
+│   ├── Execute tests — confirm they PASS
+│   └── DO NOT add extra functionality beyond what the test requires
+│
+├── 4. REFACTOR — Clean up without changing behavior
+│   ├── Improve code structure, names, duplication
+│   ├── Execute tests again — confirm they STILL PASS
+│   └── Adhere to project conventions and patterns
+│
+├── 5. Mark the task as complete [x] in tasks.md
+└── 6. Note any issues or deviations
 ```
 
-### Paso 3: Marcar Tareas como Completas
+Detect the test runner for execution:
 
-**El sub-agente ejecutante** es el ÚNICO responsable de actualizar de forma directa `tasks.md` — cambiar `- [ ]` por `- [x]` para las tareas completadas.
+Consult `skills/_shared/test-runner-detection.md` with parameter `{phase}=apply` for detection logic.
 
-El sub-agente DEBE realizar las modificaciones sobre el archivo de tareas (usando herramientas de escritura directa), reflejando así el estado y documentando su labor.
+**Important**: If coding skills are installed (e.g., `tdd/SKILL.md`, `pytest/SKILL.md`, `vitest/SKILL.md`), read and follow those patterns to write tests.
+
+### Step 2b: Implement Tasks (Standard Flow)
+
+When TDD is not active:
+
+```text
+FOR EACH TASK:
+├── Read task description
+├── Read relevant spec scenarios (these are your acceptance criteria)
+├── Read design decisions (they constrain your approach)
+├── Read existing code patterns (follow project style)
+├── Write code
+├── Mark task as complete [x] in tasks.md
+└── Note any issues or deviations
+```
+
+### Step 3: Mark Tasks as Complete
+
+**You (the executing sub-agent)** are the ONLY one responsible for directly updating `tasks.md` — changing `- [ ]` to `- [x]` for completed tasks.
+
+You MUST perform the modifications on the tasks file (using direct writing tools), reflecting the status and documenting your work.
 
 ```markdown
-## Fase 1: Fundación
+## Phase 1: Foundation
 
-- [x] 1.1 Crear `internal/auth/middleware.go` con validación JWT  ← MARCAS TÚ tras completarlo
-- [x] 1.2 Agregar struct `AuthConfig` a `internal/config/config.go`  ← MARCAS TÚ tras completarlo
-- [ ] 1.3 Agregar rutas de auth a `internal/server/server.go`  ← aún pendiente
+- [x] 1.1 Create `internal/auth/middleware.go` with JWT validation  ← MARKED BY YOU after completion
+- [x] 1.2 Add struct `AuthConfig` to `internal/config/config.go`  ← MARKED BY YOU after completion
+- [ ] 1.3 Add auth routes to `internal/server/server.go`  ← still pending
 ```
 
-### Paso 4: Devolver Resumen
+## Rules
 
-Devuelve al orquestador:
+- ALWAYS read specs before implementing — specs are your acceptance criteria.
+- ALWAYS follow design decisions — do not improvise a different approach.
+- ALWAYS adhere to existing code patterns and conventions in the project.
+- You must mark tasks as closed in `tasks.md` at the moment of completion.
+- If you discover the design is incorrect or incomplete, NOTE IT in your return summary — do not deviate silently.
+- If a task is blocked by something unexpected, STOP and report.
+- NEVER implement tasks that were not assigned to you.
+- Load and follow any relevant coding skills for the project stack (e.g., react-19, typescript, django-drf, tdd, pytest, vitest) if available in user skills.
+- Apply any `rules.apply` from `openspec/config.yaml`.
+- If TDD mode is detected (Step 2), ALWAYS follow the RED → GREEN → REFACTOR cycle — never skip RED (write failing test first).
+- When executing tests in TDD, run ONLY the relevant test file/suite, not the whole suite (for speed).
 
-```markdown
-## Progreso de Implementación
+## Binding Protocol (CRITICAL)
 
-**Cambio**: {nombre-del-cambio}
-**Modo**: {TDD | Estándar}
-
-### Tareas Completadas
-- [x] {descripción tarea 1.1}
-- [x] {descripción tarea 1.2}
-
-### Archivos Modificados
-| Archivo                 | Acción    | Qué se hizo           |
-|-------------------------|-----------|-----------------------|
-| `ruta/al/archivo.ext`   | Creado    | {descripción breve}   |
-| `ruta/a/otro.ext`       | Modificado| {descripción breve}   |
-
-### Tests (solo modo TDD)
-| Tarea | Archivo de Test       | RED (falla)           | GREEN (pasa)          | REFACTOR   |
-|-------|-----------------------|-----------------------|-----------------------|------------|
-| 1.1   | `ruta/al/test.ext`    | ✅ Falló como esperado | ✅ Pasó               | ✅ Limpio   |
-| 1.2   | `ruta/al/test.ext`    | ✅ Falló como esperado | ✅ Pasó               | ✅ Limpio   |
-
-{Omitir esta sección si se usó el modo estándar.}
-
-### Desviaciones del Diseño
-{Lista de lugares donde la implementación se desvió de design.md y por qué.
-Si ninguna, indicar "Ninguna — la implementación coincide con el diseño."}
-
-### Problemas Encontrados
-{Lista de problemas descubiertos durante la implementación.
-Si ninguno, indicar "Ninguno."}
-
-### Tareas Restantes
-- [ ] {próxima tarea}
-- [ ] {próxima tarea}
-
-### Estado
-{N}/{total} tareas completas. {Listo para el siguiente lote / Listo para verificar / Bloqueado por X}
-
-### Checkpoint
-
-checkpoint_required: true   # SI quedan tareas [ ] pendientes en tasks.md
-# checkpoint_required: false  # SI todas las tareas fueron completadas en este lote
-
-### Lock Phase
-
-lock_phase_next: verify
-```
-
-> **Nota de uso del Checkpoint:**
->
-> - Si `checkpoint_required: true` → la sección `### Lock Phase` DEBE estar AUSENTE
->   (el lock no avanza hasta que todas las tareas estén completas).
-> - Si `checkpoint_required: false` o no hay tareas pendientes → incluir `### Lock Phase`
->   con `lock_phase_next: verify`.
-> - El orquestador que recibe `checkpoint_required: true` DEBE invocar `/sdd-checkpoint`
->   antes de continuar con el siguiente lote de tareas.
-
-## Reglas
-
-- SIEMPRE leer las specs antes de implementar — las specs son tus criterios de aceptación
-- SIEMPRE seguir las decisiones de diseño — no improvisar un enfoque diferente
-- SIEMPRE ajustarse a los patrones y convenciones de código existentes en el proyecto
-- El sub-agente es el encargado de marcar en `tasks.md` las tareas al momento de declararlas cerradas. Adicionalmente, reportará en el resumen el progreso.
-- Si descubrís que el diseño es incorrecto o incompleto, ANOTARLO en tu resumen de retorno — no desviarse en silencio
-- Si una tarea está bloqueada por algo inesperado, DETENERSE y reportar
-- NUNCA implementar tareas que no te fueron asignadas
-- Cargar y seguir cualquier skill de codificación relevante para el stack del proyecto (ej: react-19, typescript, django-drf, tdd, pytest, vitest) si está disponible en las skills del usuario
-- Aplicar cualquier `rules.apply` de `openspec/config.yaml`
-- Si se detecta modo TDD (Paso 2), SIEMPRE seguir el ciclo RED → GREEN → REFACTOR — nunca omitir RED (escribir el test fallido primero)
-- Al ejecutar tests en TDD, ejecutar SOLO el archivo/suite de tests relevante, no toda la suite (para mayor velocidad)
-- **LOCK PHASE**: la última sección del resumen de retorno, cuando TODAS las tareas asignadas están completas, SIEMPRE DEBE ser `### Lock Phase` con `lock_phase_next: verify`. Omitir esta sección si quedan tareas pendientes o si la skill falló.
-- **CHECKPOINT AUTOMÁTICO**: Si quedan tareas pendientes (flujo batch), el resumen de retorno DEBE incluir `### Checkpoint` con `checkpoint_required: true` posicionado ANTES de `### Lock Phase`. El orquestador que reciba `checkpoint_required: true` invocará `/sdd-checkpoint` antes de continuar con el siguiente lote. NUNCA incluir `### Lock Phase` si `checkpoint_required: true`.
+You MUST format your final response payload using the exact markdown keys and structure defined in `skills/_shared/sdd-phase-common.md`. Internal logic must be in English; summaries and reports must be in Spanish.
