@@ -15,14 +15,6 @@ metadata:
 
 Skill responsable del **ARCHIVADO**. Fusiona las specs delta en las specs principales (fuente de verdad), y luego mueve la carpeta del cambio al archivo. Completa el ciclo SDD.
 
-## Transacción
-
-Seguí el protocolo de transacción definido en `skills/_shared/sdd-phase-common.md`:
-
-- **BEGIN**: `txn_status: in_progress`, `txn_phase: archive`
-- **COMMIT**: Al archivar exitosamente, el archivo se mueve — `state.yaml` se mueve con él. Setear `status: done` antes de mover.
-- **ROLLBACK**: Si falla, restaurar `txn_status: failed` sin mover archivos
-
 ## Qué Hacer
 
 ### Paso 0: Control de Bloqueantes Previos
@@ -77,7 +69,7 @@ Confirmar:
 - [ ] El archivo contiene todos los artefactos
 - [ ] El directorio de cambios activos ya no tiene este cambio
 
-### Paso 5: Persistir y Reportar
+### Paso 5: Reportar
 
 ```markdown
 ## Cambio Archivado

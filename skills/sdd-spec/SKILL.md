@@ -15,14 +15,6 @@ metadata:
 
 Skill responsable de escribir **ESPECIFICACIONES**. Toma la propuesta y produce specs delta — requisitos y escenarios estructurados que describen qué se está AGREGANDO, MODIFICANDO o ELIMINANDO del comportamiento del sistema.
 
-## Transacción
-
-Seguí el protocolo de transacción definido en `skills/_shared/sdd-phase-common.md`:
-
-- **BEGIN**: `txn_status: in_progress`, `txn_phase: spec`
-- **COMMIT**: `current_phase: spec`, `lock_phase: design`
-- **ROLLBACK**: Si falla, restaurar `txn_status: failed` sin modificar phases
-
 ## Qué Hacer
 
 ### Paso 1: Identificar los Dominios Afectados
@@ -115,9 +107,7 @@ El sistema {MUST/SHALL/SHOULD} {comportamiento}.
 - THEN {resultado}
 ```
 
-### Paso 4: Persistir y Reportar
-
-Ejecutá COMMIT en `state.yaml` y reportá al usuario:
+### Paso 4: Reportar
 
 ```markdown
 ## Specs Creadas

@@ -15,16 +15,6 @@ metadata:
 
 Skill responsable de la **EXPLORACIÓN**. Investiga el código base, analiza problemas, compara enfoques y produce un análisis estructurado. Por defecto, solo investiga e informa; únicamente crea `exploration.md` cuando la exploración está vinculada a un cambio con nombre.
 
-## Transacción
-
-Seguí el protocolo de transacción definido en `skills/_shared/sdd-phase-common.md`:
-
-- **BEGIN**: `txn_status: in_progress`, `txn_phase: explore`
-- **COMMIT**: `current_phase: explore`, `lock_phase: propose`
-- **ROLLBACK**: Si falla, restaurar `txn_status: failed` sin modificar phases
-
-**Nota**: Si la exploración es independiente (sin nombre de cambio), no se ejecuta transacción — solo se retorna el análisis.
-
 ## Qué Hacer
 
 ### Paso 1: Comprender la Solicitud
@@ -74,9 +64,7 @@ openspec/changes/{nombre-del-cambio}/
 
 Si no se proporcionó nombre de cambio (`/sdd-explore` independiente), omite la creación del archivo — solo devuelve el análisis.
 
-### Paso 5: Persistir y Reportar
-
-Si se creó `exploration.md`, ejecutá COMMIT en `state.yaml` y reportá al usuario:
+### Paso 5: Reportar
 
 ```markdown
 ## Exploración: {tema}

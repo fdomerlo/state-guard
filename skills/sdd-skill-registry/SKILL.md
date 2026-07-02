@@ -44,8 +44,6 @@ El script:
 
 ### Paso 2: Devolver Resumen
 
-RETORNA el resultado siguiendo estrictamente el formato del Return Envelope definido en `skills/_shared/sdd-phase-common.md`
-
 ## Reglas
 
 - Ejecutar el script desde la raíz del proyecto

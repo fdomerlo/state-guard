@@ -17,51 +17,18 @@ Meta-skill responsable de inicializar un nuevo cambio SDD. Ejecuta secuencialmen
 
 ## Qué Hacer
 
-### Paso 1: Inicializar state.yaml
-
-Crea el directorio del cambio y el archivo `state.yaml` inicial:
-
-```yaml
-schema_version: 2
-change: {nombre-del-cambio}
-started_at: "{timestamp ISO 8601}"
-last_updated: "{timestamp ISO 8601}"
-current_phase: null
-lock_phase: explore
-status: active
-completed_phases: []
-pending_phases:
-  - explore
-  - propose
-  - spec
-  - design
-  - tasks
-  - apply
-  - verify
-  - archive
-blocked: false
-blocked_reason: null
-txn_status: idle
-txn_phase: null
-txn_started_at: null
-session_summary: null
-```
 
 ### Paso 2: Ejecutar sdd-explore (Transacción 1)
 
-Cargá `skills/sdd-explore/SKILL.md` y ejecutá inline. La transacción se maneja según el protocolo:
+Cargá `skills/sdd-explore/SKILL.md` y ejecutá inline:
 
-1. BEGIN: `txn_status: in_progress`, `txn_phase: explore`
-2. Ejecutar la exploración
-3. COMMIT: `current_phase: explore`, `lock_phase: propose`
+1. Ejecutar la exploración
 
 ### Paso 3: Ejecutar sdd-propose (Transacción 2)
 
 Cargá `skills/sdd-propose/SKILL.md` y ejecutá inline:
 
-1. BEGIN: `txn_status: in_progress`, `txn_phase: propose`
-2. Ejecutar la propuesta
-3. COMMIT: `current_phase: propose`, `lock_phase: spec`
+1. Ejecutar la propuesta
 
 ### Paso 4: Reportar al Usuario
 

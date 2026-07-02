@@ -17,16 +17,6 @@ Skill responsable de la **VERIFICACIÓN**. Sos la puerta de calidad. Tu trabajo 
 
 El análisis estático por sí solo NO es suficiente. DEBÉS ejecutar el código.
 
-## Transacción
-
-Seguí el protocolo de transacción definido en `skills/_shared/sdd-phase-common.md`:
-
-- **BEGIN**: `txn_status: in_progress`, `txn_phase: verify`
-- **COMMIT**: `current_phase: verify`, `lock_phase: archive`
-- **ROLLBACK**: Si la verificación falla con errores CRITICAL irresolubles, `txn_status: failed`
-
-**Nota**: El COMMIT solo se ejecuta si la verificación no tiene issues CRITICAL. Si hay CRITICALs, se ejecuta ROLLBACK y se reporta al usuario.
-
 ## Qué Hacer
 
 ### Paso 0: Leer el Contexto
@@ -126,9 +116,8 @@ PARA CADA REQUISITO en specs/:
 
 Escribir el reporte completo en `openspec/changes/{nombre-del-cambio}/verify-report.md`.
 
-### Paso 7: Persistir y Reportar
+### Paso 7: Reportar
 
-Si no hay issues CRITICAL → ejecutá COMMIT (`lock_phase: archive`).
 Si hay issues CRITICAL → ejecutá ROLLBACK y reportá los problemas.
 
 ```markdown

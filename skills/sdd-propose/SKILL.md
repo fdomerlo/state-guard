@@ -15,14 +15,6 @@ metadata:
 
 Skill responsable de crear **PROPUESTAS**. Toma el análisis de exploración (o la descripción directa del usuario) y produce un documento `proposal.md` estructurado dentro de la carpeta del cambio.
 
-## Transacción
-
-Seguí el protocolo de transacción definido en `skills/_shared/sdd-phase-common.md`:
-
-- **BEGIN**: `txn_status: in_progress`, `txn_phase: propose`
-- **COMMIT**: `current_phase: propose`, `lock_phase: spec`
-- **ROLLBACK**: Si falla, restaurar `txn_status: failed` sin modificar phases
-
 ## Qué Hacer
 
 ### Paso 1: Crear el Directorio del Cambio
@@ -90,9 +82,7 @@ Hace referencia al enfoque recomendado de la exploración si está disponible.}
 - [ ] {Resultado medible}
 ```
 
-### Paso 4: Persistir y Reportar
-
-Ejecutá COMMIT en `state.yaml` y reportá al usuario:
+### Paso 4: Reportar
 
 ```markdown
 ## Propuesta Creada

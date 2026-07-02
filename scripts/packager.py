@@ -6,11 +6,15 @@ import re
 import sys
 
 def compile_opencode_prompt(repo_dir, skills_path):
-    content = "Actúas como agente de desarrollo con memoria transaccional usando la metodología Spec-Driven Development (SDD).\n\n"
-    content += "## REGLA DE IDIOMA ESTRICTA (CRÍTICA)\nTodo tu output DEBE ser generado íntegramente en ESPAÑOL (Castellano).\n\n"
-    content += "INSTRUCCIÓN CRÍTICA: Debes usar tu herramienta `read_file` inmediatamente para cargar `{SKILLS_PATH}/_shared/memory-guard.md` antes de tomar cualquier otra acción.\n\n"
-    
-    # We still need to replace {SKILLS_PATH} in the compiled content if it exists
+    content = (
+        "Actúas como agente de desarrollo con memoria transaccional usando la metodología Spec-Driven Development (SDD).\n\n"
+        "## REGLA DE IDIOMA ESTRICTA\n"
+        "Todo tu output DEBE ser generado íntegramente en ESPAÑOL (Castellano).\n\n"
+        "## ESTADO DEL SISTEMA (ACID)\n"
+        "TIENES PROHIBIDO editar el archivo `state.ini` de forma manual. Todo cambio de estado en el DAG DEBE hacerse usando tu herramienta de Bash para invocar el middleware determinista:\n"
+        "Ejemplo: `python3 scripts/sdd_state_manager.py begin --change {nombre-ticket} --phase {fase}`\n\n"
+        "Usa tu herramienta `read_file` para cargar `{SKILLS_PATH}/_shared/memory-guard.md` antes de tomar cualquier otra acción.\n"
+    )
     return content.replace("{SKILLS_PATH}", skills_path)
 
 def compile_lazy_prompt(repo_dir, skills_path):
@@ -31,19 +35,19 @@ def process_opencode_commands(commands_src, commands_target, skills_path):
         with open(src_path, "r", encoding="utf-8") as f:
             content = f.read()
         
-        # Replace {{SKILLS_PATH}} and {SKILLS_PATH} with the resolved path
+        # Reemplazar variables de ruta
         content = content.replace("{{SKILLS_PATH}}", skills_path)
         content = content.replace("{SKILLS_PATH}", skills_path)
         
-        # Reescritura dinámica a lenguaje imperativo
+        # Forzar el tool-calling de lectura de forma directa y menos alarmista
         pattern = re.compile(r"Lee el archivo\s+`([^`]+)`\s+y\s+ejecuta\s+sus\s+instrucciones.*", re.IGNORECASE)
-        replacement = r"INSTRUCCIÓN CRÍTICA: DEBES usar tu herramienta read_file INMEDIATAMENTE en la ruta `\1` y ejecutar sus instrucciones al pie de la letra sin excusas ni retrasos."
+        replacement = r"Usa tu herramienta `read_file` obligatoriamente en la ruta `\1` para cargar el contrato de esta fase."
         
         if pattern.search(content):
             content = pattern.sub(replacement, content)
         else:
-            # Fallback for other potential phrasing
-            content = content.replace("Lee el archivo", "INSTRUCCIÓN CRÍTICA: DEBES usar tu herramienta read_file INMEDIATAMENTE en el archivo")
+            # Fallback
+            content = content.replace("Lee el archivo", "Usa tu herramienta `read_file` obligatoriamente en el archivo")
             
         with open(tgt_path, "w", encoding="utf-8") as f:
             f.write(content)
@@ -104,8 +108,8 @@ def main():
             
         prompt = compile_lazy_prompt(repo_dir, args.skills_path)
         
-        marker_begin = "<!-- BEGIN SDD MEMORY GUARD -->"
-        marker_end = "<!-- END SDD MEMORY GUARD -->"
+        marker_begin = ""
+        marker_end = ""
         
         os.makedirs(os.path.dirname(args.config_target), exist_ok=True)
         
@@ -122,10 +126,6 @@ def main():
                 content += "\n"
             f.write(content)
             f.write(f"{marker_begin}\n{prompt}\n{marker_end}\n")
-            
-    else:
-        # No config injection for project-local or custom by default
-        pass
 
 if __name__ == "__main__":
     main()

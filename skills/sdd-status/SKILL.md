@@ -43,9 +43,7 @@ Para cada archivo encontrado, extrae los siguientes campos:
 - `current_phase`: Fase actual (explore, propose, spec, design, tasks, apply, verify, archive)
 - `status`: Estado actual (active, done, blocked)
 - `started_at`: Fecha de inicio en formato ISO 8601
-- `pending_phases`: Lista de fases pendientes
 - `blocked_reason`: Razón del bloqueo (si aplica)
-- `txn_status`: Estado de transacción (idle, in_progress, failed)
 
 ### Paso 3: Filtrar Cambios Archivados
 
@@ -72,8 +70,6 @@ Aplica la lógica de semáforo:
 | `status == "blocked"` | 🟡 | Bloqueado |
 | `status == "done"` | 🔴 | Completado (no debería aparecer) |
 | `status == "active"` | 🟢 | Activo |
-| `txn_status == "in_progress"` | 🔵 | Transacción en vuelo |
-| `txn_status == "failed"` | 🟠 | Transacción fallida |
 ```
 
 ### Paso 6: Formatear Tabla Markdown

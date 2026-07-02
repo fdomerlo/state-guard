@@ -15,14 +15,6 @@ metadata:
 
 Skill responsable del **DESGLOSE EN TAREAS**. Toma las specs y el diseño, y produce un `tasks.md` con tareas concretas, atómicas y agrupadas por fase.
 
-## Transacción
-
-Seguí el protocolo de transacción definido en `skills/_shared/sdd-phase-common.md`:
-
-- **BEGIN**: `txn_status: in_progress`, `txn_phase: tasks`
-- **COMMIT**: `current_phase: tasks`, `lock_phase: apply`
-- **ROLLBACK**: Si falla, restaurar `txn_status: failed` sin modificar phases
-
 ## Qué Hacer
 
 ### Paso 1: Leer Dependencias
@@ -65,9 +57,7 @@ openspec/changes/{nombre-del-cambio}/
 - [ ] 3.1 {Tarea atómica}
 ```
 
-### Paso 3: Persistir y Reportar
-
-Ejecutá COMMIT en `state.yaml` y reportá al usuario:
+### Paso 3: Reportar
 
 ```markdown
 ## Tareas Creadas

@@ -18,10 +18,7 @@ Skill responsable de **generar un checkpoint de sesión de alta fidelidad**. Det
 
 **Dos modos de operación:**
 
-1. **Automático** (post-COMMIT): El protocolo de transacción genera un `session_summary` compacto después de cada COMMIT. Esto es suficiente para la mayoría de los casos.
 2. **Manual** (`/sdd-checkpoint`): Genera un checkpoint de alta fidelidad con análisis proactivo de todos los artefactos. Útil antes de operaciones riesgosas o para refrescar el contexto.
-
-**Agnosticismo de DAG**: no verifica ni modifica `lock_phase`, `current_phase`, `completed_phases` ni `pending_phases`. Opera transversalmente al DAG de fases.
 
 ## Qué Hacer
 
@@ -30,8 +27,6 @@ Skill responsable de **generar un checkpoint de sesión de alta fidelidad**. Det
 Buscar `state.yaml` con `status: active` en `openspec/changes/*/state.yaml`.
 
 ### Paso 2: Leer Estado Base
-
-Extraer de `state.yaml`: `current_phase`, `status`, `lock_phase` (solo para informar — NO modificar).
 
 ### Paso 3a: Analizar tasks.md → estado_tareas
 
@@ -59,22 +54,7 @@ Máximo 10 archivos, rutas relativas al root.
 
 Si existe `design.md`: extraer las primeras 2 decisiones de la sección `## Decisiones de Arquitectura`, truncar a 100 chars cada una.
 
-### Paso 3d: Construir y Guardar
 
-Escribir **ÚNICAMENTE** `session_summary` y `last_updated` en `state.yaml`:
-
-```yaml
-session_summary:
-  archivos_modificados:
-    - ruta/exacta/archivo.ext
-  estado_tareas: "{X}/{Y} — última: [{ID}] {texto}"
-  decisiones_clave:
-    - "{decisión ≤ 100 chars}"
-  proxima_accion: "/sdd-{siguiente} {nombre-cambio}"
-last_updated: "YYYY-MM-DDTHH:MM:SS"
-```
-
-**NO modificar ningún otro campo.** `lock_phase`, `current_phase`, `completed_phases`, `pending_phases`, `status`, `blocked`, `blocked_reason`, `started_at` y campos `txn_*` son intocables.
 
 ### Paso 4: Reportar
 
@@ -83,7 +63,6 @@ last_updated: "YYYY-MM-DDTHH:MM:SS"
 
 **status**: ok | error
 **Cambio**: {nombre-del-cambio}
-**lock_phase actual**: {valor} (no modificado)
 
 ### session_summary generado
 {bloque YAML generado}
@@ -93,8 +72,5 @@ last_updated: "YYYY-MM-DDTHH:MM:SS"
 
 - Si no hay cambio activo, mostrar error
 - Si no existe `tasks.md`, usar `estado_tareas: "N/A"`
-- Siempre actualizar `last_updated` al guardar
 - El bloque `session_summary` NO debe superar 500 tokens
 - **AGNOSTICISMO DE LOCK**: NUNCA modifica campos del DAG
-- `session_summary` y `last_updated` son la única autorización de escritura
-- Mantener compatibilidad con state.yaml legacy (reemplazar formato antiguo)

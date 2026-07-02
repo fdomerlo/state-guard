@@ -15,14 +15,6 @@ metadata:
 
 Skill responsable del **DISEÑO TÉCNICO**. Toma la propuesta y las specs, y produce un `design.md` que captura CÓMO se implementará el cambio — decisiones de arquitectura, flujo de datos, cambios de archivos y justificación técnica.
 
-## Transacción
-
-Seguí el protocolo de transacción definido en `skills/_shared/sdd-phase-common.md`:
-
-- **BEGIN**: `txn_status: in_progress`, `txn_phase: design`
-- **COMMIT**: `current_phase: design`, `lock_phase: tasks`
-- **ROLLBACK**: Si falla, restaurar `txn_status: failed` sin modificar phases
-
 ## Qué Hacer
 
 ### Paso 1: Leer el Código Base
@@ -110,9 +102,7 @@ Si no aplica, indicar "No se requiere migración."}
 - [ ] {Cualquier decisión que requiera input del equipo}
 ```
 
-### Paso 3: Persistir y Reportar
-
-Ejecutá COMMIT en `state.yaml` y reportá al usuario:
+### Paso 3: Reportar
 
 ```markdown
 ## Diseño Creado

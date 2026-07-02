@@ -15,16 +15,6 @@ metadata:
 
 Skill responsable de la **IMPLEMENTACIÓN**. Recibe tareas específicas de `tasks.md` y las implementa escribiendo código real. Sigue las specs y el diseño de forma estricta.
 
-## Transacción
-
-Seguí el protocolo de transacción definido en `skills/_shared/sdd-phase-common.md`:
-
-- **BEGIN**: `txn_status: in_progress`, `txn_phase: apply`
-- **COMMIT**: `current_phase: apply`, `lock_phase: verify` (solo cuando TODAS las tareas estén completas)
-- **ROLLBACK**: Si falla, restaurar `txn_status: failed` sin modificar phases
-
-**Nota sobre batching**: Si hay muchas tareas, se procesan en lotes. El COMMIT solo avanza `lock_phase` a `verify` cuando la última tarea se completa. Hasta entonces, cada lote ejecuta BEGIN → trabajo → guardado parcial de `state.yaml` (actualizando `session_summary` y `last_updated` sin mover `lock_phase`).
-
 ## Qué Hacer
 
 ### Paso 1: Leer el Contexto
@@ -112,10 +102,7 @@ PARA CADA TAREA:
 
 Actualiza directamente `tasks.md` — cambiar `- [ ]` por `- [x]` para las tareas completadas.
 
-### Paso 4: Persistir y Reportar
-
-Si TODAS las tareas están completas → ejecutá COMMIT (`lock_phase: verify`).
-Si quedan tareas pendientes → actualizá `session_summary` en `state.yaml` sin mover `lock_phase`, y reportá progreso.
+### Paso 4: Reportar
 
 ```markdown
 ## Progreso de Implementación
