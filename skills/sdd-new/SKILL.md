@@ -5,7 +5,7 @@ description: >
   Disparador: Cuando el usuario ejecuta /sdd-new para iniciar un cambio.
 license: MIT
 metadata:
-  author: fdomerlo-steve
+  author: fdomerlo@gmail.com (136bits)
   version: "3.0"
 ---
 

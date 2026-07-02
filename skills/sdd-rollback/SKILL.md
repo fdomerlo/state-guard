@@ -5,7 +5,7 @@ description: >
   restaurar el entorno git al estado anterior. Disparador: Cuando el usuario ejecuta /sdd-rollback para revertir un cambio.
 license: MIT
 metadata:
-  author: fdomerlo-steve
+  author: fdomerlo@gmail.com (136bits)
   version: "2.0"
 ---
 
@@ -21,23 +21,23 @@ Skill responsable de **revertir completamente un cambio activo** en el DAG de SD
 
 ## Referencia
 
-Consultar `skills/_shared/openspec-convention.md` para el schema de `state.yaml` (v2).
+Consultar `skills/_shared/agentify-convention.md` para el schema de `state.ini`.
 
 ## Qué Hacer
 
 ### Paso 1: Detectar Cambio Activo
 
-Buscá el archivo `state.yaml` con `status: active` en el directorio:
+Buscá el archivo `state.ini` con `status: active` en el directorio:
 
 ```text
-openspec/changes/*/state.yaml
+.agentify/changes/*/state.ini
 ```
 
 Si no existe ningún cambio activo, devolvé un error indicando que no hay cambio activo.
 
 ### Paso 2: Obtener Nombre del Cambio
 
-Extrae el nombre del cambio desde el campo `change` del `state.yaml` activo.
+Extrae el nombre del cambio desde el campo `change` del `state.ini` activo.
 
 ### Paso 3: Confirmar con el Usuario
 
@@ -46,7 +46,7 @@ Mostrá el siguiente mensaje de confirmación:
 ```text
 ⚠️ ¿Estás seguro de revertir el cambio "{nombre}"?
 Esta acción es destructiva y eliminará:
-- La carpeta openspec/changes/{nombre}/
+- La carpeta .agentify/changes/{nombre}/
 - Cualquier modificación no comprometida en el directorio de trabajo
 
 Escribe "CONFIRMAR" para proceder o cualquier otra cosa para cancelar.
@@ -59,7 +59,7 @@ Si el usuario no confirma, cancelá la operación y salí sin acción.
 Eliminá el directorio:
 
 ```text
-openspec/changes/{nombre}/
+.agentify/changes/{nombre}/
 ```
 
 ### Paso 5: Restaurar Entorno Git
@@ -82,7 +82,7 @@ Devolvé el resultado en el formato:
 ### detailed_report
 - Cambio revertido: {nombre}
 - Estado: purged & restored
-- Ubicación previa: openspec/changes/{nombre}/
+- Ubicación previa: .agentify/changes/{nombre}/
 ```
 
 ## Reglas

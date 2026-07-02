@@ -5,7 +5,7 @@ description: >
   Disparador: Cuando el usuario ejecuta /sdd-archive para archivar un cambio después de la implementación y verificación.
 license: MIT
 metadata:
-  author: fdomerlo-steve
+  author: fdomerlo@gmail.com (136bits)
   version: "3.0"
 ---
 
@@ -31,9 +31,9 @@ Antes de sincronizar specs y mover al archivo, DEBES verificar estrictamente el 
 
 ### Paso 2: Sincronizar Specs Delta con Specs Principales
 
-Para cada spec delta en `openspec/changes/{nombre-del-cambio}/specs/`:
+Para cada spec delta en `.agentify/changes/{nombre-del-cambio}/specs/`:
 
-#### Si Existe la Spec Principal (`openspec/specs/{dominio}/spec.md`)
+#### Si Existe la Spec Principal (`.agentify/specs/{dominio}/spec.md`)
 
 ```text
 PARA CADA SECCIÓN en spec delta:
@@ -49,13 +49,13 @@ PARA CADA SECCIÓN en spec delta:
 
 #### Si NO Existe la Spec Principal
 
-La spec delta es una spec completa. Copiarla directamente a `openspec/specs/{dominio}/spec.md`.
+La spec delta es una spec completa. Copiarla directamente a `.agentify/specs/{dominio}/spec.md`.
 
 ### Paso 3: Mover al Archivo
 
 ```text
-openspec/changes/{nombre-del-cambio}/
-  → openspec/changes/archive/YYYY-MM-DD-{nombre-del-cambio}/
+.agentify/changes/{nombre-del-cambio}/
+  → .agentify/changes/archive/YYYY-MM-DD-{nombre-del-cambio}/
 ```
 
 Usar la fecha de hoy en formato ISO.
@@ -75,7 +75,7 @@ Confirmar:
 ## Cambio Archivado
 
 **Cambio**: {nombre-del-cambio}
-**Archivado en**: openspec/changes/archive/{YYYY-MM-DD}-{nombre-del-cambio}/
+**Archivado en**: .agentify/changes/archive/{YYYY-MM-DD}-{nombre-del-cambio}/
 
 ### Specs Sincronizadas
 | Dominio    | Acción             | Detalles                                         |
@@ -97,5 +97,5 @@ Listo para el siguiente cambio.
 - Usar formato de fecha ISO (YYYY-MM-DD) como prefijo de la carpeta de archivo
 - Si la fusión sería destructiva (eliminando secciones grandes), ADVERTIR y pedir confirmación
 - El archivo es un RASTRO DE AUDITORÍA — nunca eliminar ni modificar cambios archivados
-- Si `openspec/changes/archive/` no existe, crearlo
-- Aplicar cualquier `rules.archive` de `openspec/config.yaml`
+- Si `.agentify/changes/archive/` no existe, crearlo
+- Aplicar cualquier `rules.archive` de `.agentify/config.yaml`

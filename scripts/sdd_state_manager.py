@@ -5,7 +5,7 @@ import os
 import sys
 from datetime import datetime
 
-STATE_FILE = "openspec/changes/{change}/state.ini"
+STATE_FILE = ".agentify/changes/{change}/state.ini"
 PHASES_ORDER = ["explore", "propose", "spec", "design", "tasks", "hotfix", "apply", "verify", "archive"]
 
 def load_state(change_name):

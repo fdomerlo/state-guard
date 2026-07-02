@@ -5,7 +5,7 @@ description: >
   Disparador: Cuando el usuario ejecuta /sdd-explore para reflexionar sobre una funcionalidad, investigar el código base o aclarar requisitos.
 license: MIT
 metadata:
-  author: fdomerlo-steve
+  author: fdomerlo@gmail.com (136bits)
   version: "3.0"
 ---
 
@@ -16,6 +16,20 @@ metadata:
 Skill responsable de la **EXPLORACIÓN**. Investiga el código base, analiza problemas, compara enfoques y produce un análisis estructurado. Por defecto, solo investiga e informa; únicamente crea `exploration.md` cuando la exploración está vinculada a un cambio con nombre.
 
 ## Qué Hacer
+
+### Paso 0: Auto-descubrimiento del Stack (Cold Boot)
+
+Antes de analizar el problema reportado por el usuario, debes entender el entorno físico del proyecto. 
+
+Ejecuta comandos de terminal para descubrir la arquitectura base:
+
+1. Lista archivos manifiesto en la raíz: `ls package.json pyproject.toml composer.json go.mod Cargo.toml docker-compose.yml 2>/dev/null`
+2. Lee los manifiestos encontrados para identificar:
+   - Lenguaje y versión del runtime (ej. Python, Node, PHP).
+   - Framework principal (ej. Django, Laravel, React).
+   - Herramientas de infraestructura o dependencias clave.
+
+Este contexto DEBE influenciar directamente tu análisis posterior para no sugerir arquitecturas incompatibles con la realidad actual del código.
 
 ### Paso 1: Comprender la Solicitud
 
@@ -58,7 +72,7 @@ Si existen múltiples enfoques, compáralos:
 Si hay un nombre de cambio (es decir, esta exploración forma parte de `/sdd-new`), guarda el análisis en:
 
 ```text
-openspec/changes/{nombre-del-cambio}/
+.agentify/changes/{nombre-del-cambio}/
 └── exploration.md          ← Lo creas tú
 ```
 

@@ -5,7 +5,7 @@ description: >
   Disparador: Cuando el usuario ejecuta /sdd-spec para escribir o actualizar especificaciones de un cambio.
 license: MIT
 metadata:
-  author: fdomerlo-steve
+  author: fdomerlo@gmail.com (136bits)
   version: "3.0"
 ---
 
@@ -23,14 +23,14 @@ Desde las "Áreas Afectadas" de la propuesta, determina qué dominios de spec se
 
 ### Paso 2: Leer Specs Existentes
 
-Si existe `openspec/specs/{dominio}/spec.md`, léela para entender el comportamiento ACTUAL. Tus specs delta describen los CAMBIOS a ese comportamiento.
+Si existe `.agentify/specs/{dominio}/spec.md`, léela para entender el comportamiento ACTUAL. Tus specs delta describen los CAMBIOS a ese comportamiento.
 
 ### Paso 3: Escribir las Specs Delta
 
 Crea las specs dentro de la carpeta del cambio:
 
 ```text
-openspec/changes/{nombre-del-cambio}/
+.agentify/changes/{nombre-del-cambio}/
 ├── proposal.md              ← (ya existe)
 └── specs/
     └── {dominio}/
@@ -138,7 +138,7 @@ Listo para diseño (`/sdd-design`).
 - Incluir tanto caminos felices COMO casos límite
 - Mantener los escenarios TESTEABLES — alguien debería poder escribir un test automatizado desde cada uno
 - NO incluir detalles de implementación en las specs — las specs describen QUÉ, no CÓMO
-- Aplicar cualquier `rules.specs` de `openspec/config.yaml`
+- Aplicar cualquier `rules.specs` de `.agentify/config.yaml`
 
 ## Referencia Rápida de Palabras Clave RFC 2119
 

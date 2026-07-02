@@ -5,7 +5,7 @@ description: >
   Disparador: Cuando el usuario ejecuta /sdd-continue.
 license: MIT
 metadata:
-  author: fdomerlo-steve
+  author: fdomerlo@gmail.com (136bits)
   version: "3.0"
 ---
 
@@ -13,14 +13,14 @@ metadata:
 
 ## Propósito
 
-Meta-skill responsable de continuar un cambio SDD existente. Lee `state.yaml` para determinar la siguiente fase y la ejecuta inline.
+Meta-skill responsable de continuar un cambio SDD existente. Lee `state.ini` para determinar la siguiente fase y la ejecuta inline.
 
 ## Qué Hacer
 
-### Paso 1: Leer state.yaml y Verificar Lock
+### Paso 1: Leer state.ini y Verificar Lock
 
 ```text
-1. Leer `state.yaml` del cambio (o explorar openspec/changes/ si no hay argumento)
+1. Leer `state.ini` del cambio (o explorar .agentify/changes/ si no hay argumento)
    └─ SI no existe → STOP:
       Ejecuta /sdd-fix para migrar el estado antes de continuar.
 

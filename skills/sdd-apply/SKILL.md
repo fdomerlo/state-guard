@@ -5,7 +5,7 @@ description: >
   Disparador: Cuando el usuario ejecuta /sdd-apply para implementar tareas.
 license: MIT
 metadata:
-  author: fdomerlo-steve
+  author: fdomerlo@gmail.com (136bits)
   version: "3.0"
 ---
 
@@ -21,9 +21,9 @@ Skill responsable de la **IMPLEMENTACIÓN**. Recibe tareas específicas de `task
 
 Antes de escribir CUALQUIER código, leé las dependencias del cambio actual:
 
-1. **Specs delta del cambio** — leer todos los archivos en `openspec/changes/{nombre-del-cambio}/specs/`
-2. **Diseño** — leer `openspec/changes/{nombre-del-cambio}/design.md`
-3. **Tareas** — leer `openspec/changes/{nombre-del-cambio}/tasks.md`
+1. **Specs delta del cambio** — leer todos los archivos en `.agentify/changes/{nombre-del-cambio}/specs/`
+2. **Diseño** — leer `.agentify/changes/{nombre-del-cambio}/design.md`
+3. **Tareas** — leer `.agentify/changes/{nombre-del-cambio}/tasks.md`
 4. **Código existente** — leer los archivos afectados para seguir patrones actuales
 5. **Convenciones** — leer `config.yaml` para reglas de codificación
 
@@ -39,7 +39,7 @@ Determina si el proyecto usa TDD:
 
 ```text
 Detectar modo TDD (en orden de prioridad):
-├── openspec/config.yaml → rules.apply.tdd (true/false — máxima prioridad)
+├── .agentify/config.yaml → rules.apply.tdd (true/false — máxima prioridad)
 ├── Skills instaladas del usuario (ej: tdd/SKILL.md existe)
 ├── Patrones de test existentes en el código base (archivos de test junto al fuente)
 └── Por defecto: modo estándar (escribir código primero, luego verificar)
@@ -139,6 +139,6 @@ Actualiza directamente `tasks.md` — cambiar `- [ ]` por `- [x]` para las tarea
 - Si una tarea está bloqueada por algo inesperado, DETENERSE y reportar
 - NUNCA implementar tareas que no te fueron asignadas
 - Cargar y seguir cualquier skill de codificación relevante para el stack del proyecto
-- Aplicar cualquier `rules.apply` de `openspec/config.yaml`
+- Aplicar cualquier `rules.apply` de `.agentify/config.yaml`
 - Si se detecta modo TDD, SIEMPRE seguir el ciclo RED → GREEN → REFACTOR
 - Al ejecutar tests en TDD, ejecutar SOLO el archivo/suite de tests relevante

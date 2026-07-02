@@ -5,7 +5,7 @@ description: >
   Disparador: Cuando el orquestador te lanza para mostrar el estado de cambios activos, o el usuario ejecuta /sdd-status.
 license: MIT
 metadata:
-  author: fdomerlo-steve
+  author: fdomerlo@gmail.com (136bits)
   version: "2.0"
 ---
 
@@ -13,29 +13,29 @@ metadata:
 
 ## Propósito
 
-Eres un sub-agente responsable de **mostrar el estado de los cambios activos** en el DAG de SDD. Lees los archivos `state.yaml` de todos los cambios y generas una tabla Markdown con emojis de semáforo.
+Eres un sub-agente responsable de **mostrar el estado de los cambios activos** en el DAG de SDD. Lees los archivos `state.ini` de todos los cambios y generas una tabla Markdown con emojis de semáforo.
 
 ## Qué Recibís
 
 El orquestador te dará:
 
-- Referencias a los archivos `state.yaml` activos
+- Referencias a los archivos `state.ini` activos
 
 ## Referencia
 
-Consultar `skills/_shared/openspec-convention.md` para el schema de `state.yaml` (v2).
+Consultar `skills/_shared/agentify-convention.md` para el schema de `state.ini`.
 
 ## Qué Hacer
 
 ### Paso 1: Encontrar Archivos de Estado
 
-Busca todos los archivos `state.yaml` en el directorio `openspec/changes/`:
+Busca todos los archivos `state.ini` en el directorio `.agentify/changes/`:
 
 ```text
-openspec/changes/*/state.yaml
+.agentify/changes/*/state.ini
 ```
 
-### Paso 2: Parsear cada State.yaml
+### Paso 2: Parsear cada State.ini
 
 Para cada archivo encontrado, extrae los siguientes campos:
 

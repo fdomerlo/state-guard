@@ -5,7 +5,7 @@ description: >
   Disparador: Cuando el usuario ejecuta /sdd-propose para crear o actualizar una propuesta de cambio.
 license: MIT
 metadata:
-  author: fdomerlo-steve
+  author: fdomerlo@gmail.com (136bits)
   version: "3.0"
 ---
 
@@ -22,13 +22,13 @@ Skill responsable de crear **PROPUESTAS**. Toma el análisis de exploración (o 
 Crea la estructura de carpetas del cambio:
 
 ```text
-openspec/changes/{nombre-del-cambio}/
+.agentify/changes/{nombre-del-cambio}/
 └── proposal.md
 ```
 
 ### Paso 2: Leer Specs Existentes
 
-Si `openspec/specs/` tiene specs relevantes, léelas para entender el comportamiento actual que este cambio podría afectar.
+Si `.agentify/specs/` tiene specs relevantes, léelas para entender el comportamiento actual que este cambio podría afectar.
 
 ### Paso 3: Escribir proposal.md
 
@@ -88,7 +88,7 @@ Hace referencia al enfoque recomendado de la exploración si está disponible.}
 ## Propuesta Creada
 
 **Cambio**: {nombre-del-cambio}
-**Ubicación**: openspec/changes/{nombre-del-cambio}/proposal.md
+**Ubicación**: .agentify/changes/{nombre-del-cambio}/proposal.md
 
 ### Resumen
 - **Intención**: {resumen en una línea}
@@ -108,5 +108,5 @@ Listo para specs (`/sdd-spec`) o diseño (`/sdd-design`).
 - Toda propuesta DEBE tener un plan de rollback
 - Toda propuesta DEBE tener criterios de éxito
 - Usar rutas de archivos concretas en "Áreas Afectadas" cuando sea posible
-- Aplicar cualquier `rules.proposal` de `openspec/config.yaml`
+- Aplicar cualquier `rules.proposal` de `.agentify/config.yaml`
 - **VALIDAR el nombre del cambio contra la regla `change_naming` (kebab-case)** si está configurada en config.yaml

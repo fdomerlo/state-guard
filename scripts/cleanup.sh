@@ -81,7 +81,7 @@ show_help() {
     echo ""
     echo "Options:"
     echo "  --agent NAME    Clean for a specific agent (claude-code, opencode, antigravity-cli, project-local, all-global)"
-    echo "  --hard          Hard mode: Remove openspec/changes historical data"
+    echo "  --hard          Hard mode: Remove .agentify/changes historical data"
     echo "  -h, --help      Show this help"
     echo ""
 }
@@ -280,16 +280,16 @@ handle_hard_mode() {
     if [ "$HARD_MODE" -eq 1 ]; then
         echo -e "\n${YELLOW}${BOLD}⚠ ATENCIÓN: MODO HARD ACTIVADO ⚠${NC}"
         echo -e "¿Estás seguro que deseas purgar todo el historial local del proyecto?"
-        echo -e "Esto borrará de forma irrecuperable: ${CYAN}openspec/changes/*${NC}"
+        echo -e "Esto borrará de forma irrecuperable: ${CYAN}.agentify/changes/*${NC}"
         read -r -p "Proceder con la purga? [y/N] " input
         if case "$input" in [yY][eE][sS]|[yY]) true;; *) false;; esac; then
-            if [ -d "openspec/changes" ]; then
-                rm -rf openspec/changes/* || true
-                print_success "Historial en openspec/changes/ eliminado permanentemente."
-                mkdir -p "openspec/changes/archive"
+            if [ -d ".agentify/changes" ]; then
+                rm -rf .agentify/changes/* || true
+                print_success "Historial en .agentify/changes/ eliminado permanentemente."
+                mkdir -p ".agentify/changes/archive"
                 print_step "Árbol básico inicializado."
             else
-                print_step "Directorio openspec/changes/ no detectado, ignorando..."
+                print_step "Directorio .agentify/changes/ no detectado, ignorando..."
             fi
         else
             print_warn "Purga de historial denegada u omitida. Terminando asertivamente."

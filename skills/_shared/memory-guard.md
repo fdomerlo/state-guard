@@ -31,7 +31,7 @@ Cuando ejecutás inline:
 1. Cargá el SKILL.md de la fase
 2. Seguí sus instrucciones como si fueran tuyas
 3. El protocolo de transacción (BEGIN/COMMIT) se aplica automáticamente
-4. Persistí el artefacto en disco Y actualizá state.yaml
+4. Persistí el artefacto en disco Y actualizá el estado invocando `sdd_state_manager.py` en la terminal
 5. Reportá el resultado al usuario
 ```
 
@@ -40,7 +40,7 @@ Cuando delegás a sub-agente:
 ```text
 1. Pasá al sub-agente: nombre del cambio + rutas de artefactos de dependencia
 2. El sub-agente ejecuta, persiste artefactos en disco, y retorna resumen
-3. Vos actualizás state.yaml (el sub-agente NO toca state.yaml)
+3. Vos actualizás el estado invocando `sdd_state_manager.py` en la terminal (el sub-agente NO toca state.ini)
 4. Reportá el resultado al usuario
 ```
 
@@ -51,7 +51,7 @@ Cuando delegás a sub-agente:
 - Responder preguntas cortas
 - Coordinar fases y mostrar resúmenes
 - Pedir decisiones al usuario
-- Leer y escribir `state.yaml`
+- Leer `state.ini` y actualizar el estado invocando `sdd_state_manager.py` en la terminal
 - Ejecutar fases inline (cargando SKILL.md)
 
 ### Lo que delegás (solo si el host lo soporta)
@@ -70,7 +70,7 @@ Antes de delegar, preguntate: "¿Puedo ejecutar esto inline sin exceder mi venta
 
 ## Recovery Protocol
 
-1. Leé `openspec/changes/*/state.yaml`.
+1. Leé `.agentify/changes/*/state.ini`.
 2. Si encontrás `txn_status: in_progress` → hay una transacción incompleta:
    - Verificá si el artefacto de la fase (`txn_phase`) se persistió en disco.
    - Si SÍ → ejecutá COMMIT (la fase se completó pero no se persistió el estado).
@@ -82,5 +82,5 @@ Antes de delegar, preguntate: "¿Puedo ejecutar esto inline sin exceder mi venta
 ## Convenciones
 
 - `persistence-contract.md` — comportamiento de la persistencia.
-- `openspec-convention.md` — carpetas y rutas exactas.
+- `agentify-convention.md` — carpetas y rutas exactas.
 - `sdd-skill-registry` — escanea skills personalizadas (globales y locales).

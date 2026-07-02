@@ -2,11 +2,11 @@
 name: sdd-checkpoint
 description: >
   Genera un resumen de alta fidelidad del estado del cambio activo y lo guarda en el campo
-  session_summary del state.yaml. Permite recuperación rápida de sesión tras reload del IDE.
+  session_summary del state.ini. Permite recuperación rápida de sesión tras reload del IDE.
   Disparador: Cuando el usuario ejecuta /sdd-checkpoint para guardar estado, o automáticamente post-COMMIT.
 license: MIT
 metadata:
-  author: fdomerlo-steve
+  author: fdomerlo@gmail.com (136bits)
   version: "3.0"
 ---
 
@@ -14,7 +14,7 @@ metadata:
 
 ## Propósito
 
-Skill responsable de **generar un checkpoint de sesión de alta fidelidad**. Detecta el cambio activo, ejecuta un análisis proactivo de sus artefactos (`tasks.md`, `design.md`) y del contexto actual, y guarda un bloque YAML estructurado en el campo `session_summary` del `state.yaml`.
+Skill responsable de **generar un checkpoint de sesión de alta fidelidad**. Detecta el cambio activo, ejecuta un análisis proactivo de sus artefactos (`tasks.md`, `design.md`) y del contexto actual, y guarda un bloque estructurado en el campo `session_summary` del `state.ini`.
 
 **Dos modos de operación:**
 
@@ -24,7 +24,7 @@ Skill responsable de **generar un checkpoint de sesión de alta fidelidad**. Det
 
 ### Paso 1: Detectar Cambio Activo
 
-Buscar `state.yaml` con `status: active` en `openspec/changes/*/state.yaml`.
+Buscar `state.ini` con `status: active` en `.agentify/changes/*/state.ini`.
 
 ### Paso 2: Leer Estado Base
 

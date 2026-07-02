@@ -6,7 +6,7 @@ description: >
   Disparador: Cuando el usuario ejecuta /sdd-hotfix para un cambio directo.
 license: MIT
 metadata:
-  author: fdomerlo-steve
+  author: fdomerlo@gmail.com (136bits)
   version: "2.0"
 ---
 
@@ -24,9 +24,9 @@ Esta skill proporciona un modo Bypass / Fast-Track para evitar la burocracia de 
 
 ### Paso 1: Inicialización del Estado (Bypass)
 
-1. Usa `bash` para crear el directorio si es un ticket nuevo: `mkdir -p openspec/changes/{nombre-del-cambio}`
+1. Crea el directorio si es un ticket nuevo: `mkdir -p .agentify/changes/{nombre-del-cambio}`
 
-2. Usa `write_file` para crear un archivo base `openspec/changes/{nombre-del-cambio}/state.ini` con este contenido exacto:
+2. Usa `write_file` para crear un archivo base `.agentify/changes/{nombre-del-cambio}/state.ini` con este contenido exacto:
 
 ```ini
 [Transaction]
@@ -39,7 +39,7 @@ completed_phases = explore, propose, spec, design, tasks
 pending_phases = apply, verify, archive
 ```
 
-3. Inicia la transacción obligatoria mediante Bash:
+3. Inicia la transacción obligatoria en la terminal:
 `python3 scripts/sdd_state_manager.py begin --change {nombre-del-cambio} --phase apply`
 
 ### Paso 2: Ejecución del Código (Apply)

@@ -7,7 +7,7 @@ Este helper contiene el pseudocódigo compartido para detectar el test runner de
 ## Pseudocódigo
 
 Detectar test runner desde:
-├── openspec/config.yaml → rules.{fase}.test_command (máxima prioridad)
+├── .agentify/config.yaml → rules.{fase}.test_command (máxima prioridad)
 ├── package.json → scripts.test
 ├── pyproject.toml / pytest.ini → pytest
 ├── Makefile → make test

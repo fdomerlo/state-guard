@@ -5,7 +5,7 @@ description: >
   Disparador: Cuando el usuario ejecuta /sdd-tasks para crear el checklist de tareas.
 license: MIT
 metadata:
-  author: fdomerlo-steve
+  author: fdomerlo@gmail.com (136bits)
   version: "3.0"
 ---
 
@@ -21,15 +21,15 @@ Skill responsable del **DESGLOSE EN TAREAS**. Toma las specs y el diseño, y pro
 
 Lee los artefactos del cambio:
 
-1. **Specs delta** — `openspec/changes/{nombre-del-cambio}/specs/`
-2. **Diseño** — `openspec/changes/{nombre-del-cambio}/design.md`
+1. **Specs delta** — `.agentify/changes/{nombre-del-cambio}/specs/`
+2. **Diseño** — `.agentify/changes/{nombre-del-cambio}/design.md`
 
 ### Paso 2: Escribir tasks.md
 
 Crea el archivo de tareas:
 
 ```text
-openspec/changes/{nombre-del-cambio}/
+.agentify/changes/{nombre-del-cambio}/
 ├── proposal.md
 ├── specs/
 ├── design.md
@@ -82,4 +82,4 @@ Listo para implementar (`/sdd-apply`).
 - Cada tarea DEBE incluir rutas de archivos concretas cuando sea posible
 - Las tareas deben ser completables en una sesión
 - Referenciar escenarios de spec específicos como criterios de aceptación
-- Aplicar cualquier `rules.tasks` de `openspec/config.yaml`
+- Aplicar cualquier `rules.tasks` de `.agentify/config.yaml`

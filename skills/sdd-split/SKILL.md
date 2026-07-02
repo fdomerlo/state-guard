@@ -5,7 +5,7 @@ description: >
   Disparador: Cuando el orquestador lanza esta skill para dividir una proposal demasiado grande en iteraciones manejables.
 license: MIT
 metadata:
-  author: fdomerlo-steve
+  author: fdomerlo@gmail.com (136bits)
   version: "1.0"
 ---
 
@@ -23,7 +23,7 @@ Del orquestador:
 
 ## Referencia
 
-Consultar `skills/_shared/openspec-convention.md` para el schema de `state.yaml` (v2).
+Consultar `skills/_shared/agentify-convention.md` para el schema de `state.ini`.
 
 ## Criterios de Partición
 
@@ -42,7 +42,7 @@ Recibir el nombre del cambio a dividir:
 
 ```text
 cambio = {nombre-del-cambio}
-artefactos = openspec/changes/{cambio}/
+artefactos = .agentify/changes/{cambio}/
 └── proposal.md      # Proposal original a dividir
 ```
 
@@ -127,7 +127,7 @@ PARA CADA SUB-CAMBIO:
 
 ### Paso 7: Persistir el Plan
 
-- **openspec**: Guardar en `openspec/changes/{nombre-del-cambio}/split-plan.md`
+- **agentify**: Guardar en `.agentify/changes/{nombre-del-cambio}/split-plan.md`
 - **none**: Devolver el plan inline
 
 ### Paso 8: Retornar Resultado

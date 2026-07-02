@@ -1,11 +1,11 @@
 ---
 name: sdd-changelog
 description: >
-  Genera automáticamente un CHANGELOG.md en la raíz del proyecto a partir de los cambios archivados en openspec/changes/archive/.
+  Genera automáticamente un CHANGELOG.md en la raíz del proyecto a partir de los cambios archivados en .agentify/changes/archive/.
   Disparador: Cuando el usuario ejecuta /sdd-changelog o quiere generar un changelog desde los cambios archivados.
 license: MIT
 metadata:
-  author: fdomerlo-steve
+  author: fdomerlo@gmail.com (136bits)
   version: "1.0"
 ---
 
@@ -13,7 +13,7 @@ metadata:
 
 ## Propósito
 
-Eres un sub-agente responsable de **generar el changelog** del proyecto. Leés todos los cambios archivados en `openspec/changes/archive/` y generás un archivo `CHANGELOG.md` estructurado en la raíz del proyecto.
+Eres un sub-agente responsable de **generar el changelog** del proyecto. Leés todos los cambios archivados en `.agentify/changes/archive/` y generás un archivo `CHANGELOG.md` estructurado en la raíz del proyecto.
 
 ## Qué Recibís
 
@@ -23,7 +23,7 @@ Del orquestador:
 
 ## Referencia
 
-Consultar `skills/_shared/openspec-convention.md` para el schema de `state.yaml` (v2).
+Consultar `skills/_shared/agentify-convention.md` para el schema de `state.ini`.
 
 ## Qué Hacer
 
@@ -33,7 +33,7 @@ Determiná la raíz del proyecto y el directorio de archive:
 
 ```text
 PROJECT_ROOT=.
-ARCHIVE_DIR=openspec/changes/archive/
+ARCHIVE_DIR=.agentify/changes/archive/
 ```
 
 ### Paso 2: Listar Cambios Archivados
@@ -41,7 +41,7 @@ ARCHIVE_DIR=openspec/changes/archive/
 Listá todas las carpetas en el directorio de archive que coincidan con el patrón `YYYY-MM-DD-*`:
 
 ```text
-openspec/changes/archive/
+.agentify/changes/archive/
 ├── 2026-01-15-fix-auth-bug/
 ├── 2026-02-01-agregar-modo-oscuro/
 └── 2026-03-01-mejora-rendimiento/
@@ -132,4 +132,4 @@ Devuelve al orquestador:
 - Si el directorio de archive no existe, crear CHANGELOG.md vacío
 - Si ya existe un CHANGELOG.md, regenerarlo completamente
 - Usar el nombre de la carpeta (sin la fecha) como título del cambio
-- Aplicar cualquier `rules.changelog` de `openspec/config.yaml` si existe
+- Aplicar cualquier `rules.changelog` de `.agentify/config.yaml` si existe

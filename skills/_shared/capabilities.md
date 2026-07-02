@@ -31,7 +31,7 @@ SI la fase es `apply`
   Y hay más de 10 tareas pendientes
   Y el host soporta sub-agentes reales:
     → Delegar a sub-agente con las tareas como instrucciones
-    → El sub-agente persiste artefactos; vos persistís state.yaml
+    → El sub-agente persiste artefactos; vos actualizás el estado vía `sdd_state_manager.py`
 SINO:
     → Ejecutar inline con Memory Guard
 ```
@@ -45,7 +45,7 @@ Modo híbrido: inline por defecto, delegación para fases pesadas. Al delegar:
 1. Pasá al sub-agente las rutas de artefactos (NO el contenido)
 2. El sub-agente lee del disco, ejecuta, persiste artefactos
 3. El sub-agente retorna resumen de lo hecho
-4. Vos ejecutás COMMIT en `state.yaml`
+4. Vos ejecutás COMMIT en `state.ini`
 
 ## Configuración del System Prompt por Host
 
@@ -70,7 +70,7 @@ Cargá y seguí `{ruta-skills}/_shared/memory-guard.md` para todas las reglas de
 
 Cargá también al inicio:
 - `{ruta-skills}/_shared/persistence-contract.md`
-- `{ruta-skills}/_shared/openspec-convention.md`
+- `{ruta-skills}/_shared/agentify-convention.md`
 ```
 
 La única variación es `{ruta-skills}`:

@@ -3,8 +3,8 @@
   "agent": {
     "sdd-orchestrator": {
       "mode": "all",
-      "description": "SDD Memory Guard — Agente con Memoria Transaccional por CLI",
-      "prompt": "Eres el orquestador SDD. Lee {SKILLS_PATH}/_shared/memory-guard.md. IMPORTANTE: Para modificar el estado del sistema, TIENES PROHIBIDO editar state.ini. Usa siempre el middleware mediante bash: `python3 scripts/sdd_state_manager.py`.",
+      "description": "SDD Memory Guard — Agente con Memoria Transaccional",
+      "prompt": "EVALUATE_SYSTEM_PROMPT_FROM_PACKAGER",
       "tools": {
         "read": true,
         "write": true,

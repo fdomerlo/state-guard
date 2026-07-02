@@ -5,7 +5,7 @@ description: >
   Disparador: Cuando el usuario ejecuta /sdd-design para escribir o actualizar el diseño técnico de un cambio.
 license: MIT
 metadata:
-  author: fdomerlo-steve
+  author: fdomerlo@gmail.com (136bits)
   version: "3.0"
 ---
 
@@ -31,7 +31,7 @@ Antes de diseñar, lee el código real que será afectado:
 Crea el documento de diseño:
 
 ```text
-openspec/changes/{nombre-del-cambio}/
+.agentify/changes/{nombre-del-cambio}/
 ├── proposal.md
 ├── specs/
 └── design.md              ← Lo creas tú
@@ -108,7 +108,7 @@ Si no aplica, indicar "No se requiere migración."}
 ## Diseño Creado
 
 **Cambio**: {nombre-del-cambio}
-**Ubicación**: openspec/changes/{nombre-del-cambio}/design.md
+**Ubicación**: .agentify/changes/{nombre-del-cambio}/design.md
 
 ### Resumen
 - **Enfoque**: {enfoque técnico en una línea}
@@ -131,5 +131,5 @@ Listo para tareas (`/sdd-tasks`).
 - Usar los patrones y convenciones REALES del proyecto, no mejores prácticas genéricas
 - Si el código base usa un patrón diferente al que recomendarías, anotarlo pero SEGUIR el patrón existente a menos que el cambio lo aborde específicamente
 - Usar tablas para decisiones de arquitectura
-- Aplicar cualquier `rules.design` de `openspec/config.yaml`
+- Aplicar cualquier `rules.design` de `.agentify/config.yaml`
 - Si tenés preguntas abiertas que BLOQUEAN el diseño, decirlo claramente — no asumir

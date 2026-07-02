@@ -7,13 +7,11 @@ import sys
 
 def compile_opencode_prompt(repo_dir, skills_path):
     content = (
-        "Actúas como agente de desarrollo con memoria transaccional usando la metodología Spec-Driven Development (SDD).\n\n"
-        "## REGLA DE IDIOMA ESTRICTA\n"
-        "Todo tu output DEBE ser generado íntegramente en ESPAÑOL (Castellano).\n\n"
-        "## ESTADO DEL SISTEMA (ACID)\n"
-        "TIENES PROHIBIDO editar el archivo `state.ini` de forma manual. Todo cambio de estado en el DAG DEBE hacerse usando tu herramienta de Bash para invocar el middleware determinista:\n"
-        "Ejemplo: `python3 scripts/sdd_state_manager.py begin --change {nombre-ticket} --phase {fase}`\n\n"
-        "Usa tu herramienta `read_file` para cargar `{SKILLS_PATH}/_shared/memory-guard.md` antes de tomar cualquier otra acción.\n"
+        "Actúas como agente de desarrollo SDD.\n\n"
+        "## PROTOCOLO DE ESTADO (ACID)\n"
+        "1. PROHIBIDO editar state.ini manualmente.\n"
+        f"2. Delega la mutación del estado usando siempre la terminal con este comando exacto: `python3 {skills_path}/bin/sdd_state_manager.py [comando]`\n"
+        "3. Carga siempre `{SKILLS_PATH}/_shared/agentify-convention.md` al iniciar.\n"
     )
     return content.replace("{SKILLS_PATH}", skills_path)
 
@@ -101,31 +99,5 @@ def main():
         if args.commands_src and args.commands_target:
             process_opencode_commands(args.commands_src, args.commands_target, args.skills_path)
             
-    elif args.target in ["claude-code", "antigravity-cli"]:
-        if not args.config_target:
-            print(f"Missing --config-target for {args.target}")
-            sys.exit(1)
-            
-        prompt = compile_lazy_prompt(repo_dir, args.skills_path)
-        
-        marker_begin = ""
-        marker_end = ""
-        
-        os.makedirs(os.path.dirname(args.config_target), exist_ok=True)
-        
-        content = ""
-        if os.path.exists(args.config_target):
-            with open(args.config_target, "r", encoding="utf-8") as f:
-                content = f.read()
-                
-            pattern = re.compile(rf"{re.escape(marker_begin)}.*?{re.escape(marker_end)}\n*", re.DOTALL)
-            content = pattern.sub("", content)
-            
-        with open(args.config_target, "w", encoding="utf-8") as f:
-            if content and not content.endswith("\n"):
-                content += "\n"
-            f.write(content)
-            f.write(f"{marker_begin}\n{prompt}\n{marker_end}\n")
-
 if __name__ == "__main__":
     main()

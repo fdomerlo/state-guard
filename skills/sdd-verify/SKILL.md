@@ -5,7 +5,7 @@ description: >
   Disparador: Cuando el usuario ejecuta /sdd-verify para verificar un cambio completado.
 license: MIT
 metadata:
-  author: fdomerlo-steve
+  author: fdomerlo@gmail.com (136bits)
   version: "3.0"
 ---
 
@@ -23,9 +23,9 @@ El análisis estático por sí solo NO es suficiente. DEBÉS ejecutar el código
 
 Antes de verificar, leé las dependencias del cambio actual:
 
-1. **Specs delta del cambio** — leer todos los archivos en `openspec/changes/{nombre-del-cambio}/specs/`
-2. **Diseño** — leer `openspec/changes/{nombre-del-cambio}/design.md`
-3. **Tareas** — leer `openspec/changes/{nombre-del-cambio}/tasks.md`
+1. **Specs delta del cambio** — leer todos los archivos en `.agentify/changes/{nombre-del-cambio}/specs/`
+2. **Diseño** — leer `.agentify/changes/{nombre-del-cambio}/design.md`
+3. **Tareas** — leer `.agentify/changes/{nombre-del-cambio}/tasks.md`
 
 **REGLA CRÍTICA**: Queda PROHIBIDO cargar o leer `specs/` completo del proyecto. Solo specs delta del cambio activo.
 **REGLA CRÍTICA**: Queda PROHIBIDO buscar en todo el código base. Solo leer archivos específicos mencionados en las tareas del cambio.
@@ -84,7 +84,7 @@ Detectar el test runner consultando `skills/_shared/test-runner-detection.md` co
 
 ```text
 Detectar comando de build desde:
-├── openspec/config.yaml → rules.verify.build_command (máxima prioridad)
+├── .agentify/config.yaml → rules.verify.build_command (máxima prioridad)
 ├── package.json → scripts.build → también ejecutar tsc --noEmit si existe tsconfig.json
 ├── pyproject.toml → python -m build o equivalente
 ├── Makefile → make build
@@ -93,7 +93,7 @@ Detectar comando de build desde:
 
 ### Paso 4d: Validación de Cobertura (si configurado)
 
-Solo ejecutar si `rules.verify.coverage_threshold` está definido en `openspec/config.yaml`.
+Solo ejecutar si `rules.verify.coverage_threshold` está definido en `.agentify/config.yaml`.
 
 ### Paso 5: Matriz de Cumplimiento de Specs (Validación Conductual)
 
@@ -114,7 +114,7 @@ PARA CADA REQUISITO en specs/:
 
 ### Paso 6: Persistir el Reporte de Verificación
 
-Escribir el reporte completo en `openspec/changes/{nombre-del-cambio}/verify-report.md`.
+Escribir el reporte completo en `.agentify/changes/{nombre-del-cambio}/verify-report.md`.
 
 ### Paso 7: Reportar
 
@@ -162,5 +162,5 @@ Si hay issues CRITICAL → ejecutá ROLLBACK y reportá los problemas.
 - Los WARNING = deberían resolverse pero no bloquean
 - Las SUGGESTION = mejoras, no bloqueantes
 - NO corregir ningún problema — solo reportarlos
-- SIEMPRE guardar el reporte en `openspec/changes/{nombre-del-cambio}/verify-report.md`
-- Aplicar cualquier `rules.verify` de `openspec/config.yaml`
+- SIEMPRE guardar el reporte en `.agentify/changes/{nombre-del-cambio}/verify-report.md`
+- Aplicar cualquier `rules.verify` de `.agentify/config.yaml`

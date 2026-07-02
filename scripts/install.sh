@@ -263,6 +263,18 @@ install_skills() {
         count=$((count + 1))
     done
 
+    mkdir -p "$target_dir/bin" 2>/dev/null || {
+        make_writable "$target_dir/bin"
+    }
+    
+    if [ -f "$SCRIPT_DIR/sdd_state_manager.py" ]; then
+        cp "$SCRIPT_DIR/sdd_state_manager.py" "$target_dir/bin/"
+        chmod +x "$target_dir/bin/sdd_state_manager.py"
+        print_skill "sdd_state_manager.py (ACID Middleware) -> bin/"
+    else
+        print_warn "No se encontró sdd_state_manager.py en $SCRIPT_DIR"
+    fi
+
     echo -e "\n  ${GREEN}${BOLD}$count skills installed${NC} → $target_dir"
 }
 

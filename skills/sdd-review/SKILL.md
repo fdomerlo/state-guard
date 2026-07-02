@@ -5,7 +5,7 @@ description: >
   Disparador: Cuando el orquestador lanza esta skill para auditar un cambio contra sus especificaciones sin ejecutar código.
 license: MIT
 metadata:
-  author: fdomerlo-steve
+  author: fdomerlo@gmail.com (136bits)
   version: "1.0"
 ---
 
@@ -28,7 +28,7 @@ Del orquestador:
 
 ## Referencia
 
-Consultar `skills/_shared/openspec-convention.md` para el schema de `state.yaml` (v2).
+Consultar `skills/_shared/agentify-convention.md` para el schema de `state.ini`.
 
 ## Qué Hacer
 
@@ -38,7 +38,7 @@ Recibir del orquestador el nombre del cambio a auditar. Determinar la ubicación
 
 ```text
 cambio = {nombre-del-cambio}
-artefactos = openspec/changes/{cambio}/
+artefactos = .agentify/changes/{cambio}/
 ├── proposal.md      # Propuesta original
 ├── specs/           # Especificaciones (si existen)
 ├── design.md        # Decisiones de diseño
@@ -116,7 +116,7 @@ El reporte debe seguir este formato estructurado:
 
 ### Paso 6: Persistir el Reporte
 
-- **openspec**: Guardar en `openspec/changes/{nombre-del-cambio}/review-report.md`
+- **agentify**: Guardar en `.agentify/changes/{nombre-del-cambio}/review-report.md`
 - **none**: Devolver el reporte inline
 
 ### Paso 7: Retornar Resultado

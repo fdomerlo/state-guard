@@ -10,7 +10,7 @@ Toda skill de fase DEBE seguir este ciclo:
 
 ### 1. BEGIN — Al inicio de la fase
 
-Escribir en `state.yaml`:
+Actualiza el estado invocando `sdd_state_manager.py` en la terminal:
 
 ```yaml
 txn_status: in_progress
@@ -20,11 +20,11 @@ txn_started_at: "{timestamp ISO 8601}"
 
 ### 2. EXECUTE — Trabajo de la fase
 
-Ejecutar las instrucciones del SKILL.md. Persistir el artefacto resultante en disco **antes** de actualizar `state.yaml`.
+Ejecutar las instrucciones del SKILL.md. Persistir el artefacto resultante en disco **antes** de actualizar `state.ini`.
 
 ### 3. COMMIT — Al completar exitosamente
 
-Actualizar `state.yaml` en una sola escritura:
+Actualiza el estado invocando `sdd_state_manager.py` en la terminal:
 
 ```yaml
 current_phase: {fase recién completada}
@@ -68,7 +68,7 @@ Después de ejecutar COMMIT, reportá al usuario un resumen conciso. No hay form
 
 ## Regla de Glosario
 
-Si existe `openspec/config.yaml` con sección `glossary`, cargar los términos y usarlos consistentemente en todos los artefactos generados. Si no existe, continuar normalmente (es opcional).
+Si existe `.agentify/config.yaml` con sección `glossary`, cargar los términos y usarlos consistentemente en todos los artefactos generados. Si no existe, continuar normalmente (es opcional).
 
 ## Referencia en Skills
 

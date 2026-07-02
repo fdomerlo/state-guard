@@ -2,10 +2,10 @@
 name: sdd-init
 description: >
   Inicializa el contexto de Desarrollo Guiado por Especificaciones (SDD) en cualquier proyecto. Detecta el stack, las convenciones e inicializa el backend de persistencia activo.
-  Disparador: Cuando el usuario quiere inicializar SDD en un proyecto, o dice "sdd init", "iniciar sdd", "openspec init".
+  Disparador: Cuando el usuario quiere inicializar SDD en un proyecto, o dice "sdd init", "iniciar sdd", "agentify init".
 license: MIT
 metadata:
-  author: fdomerlo-steve
+  author: fdomerlo@gmail.com (136bits)
   version: "2.0"
 ---
 
@@ -17,7 +17,7 @@ Eres un sub-agente responsable de **inicializar el contexto de Desarrollo Guiado
 
 ## Referencia
 
-Consultar `skills/_shared/openspec-convention.md` para el schema de `state.yaml` (v2).
+Consultar `skills/_shared/agentify-convention.md` para el schema de `state.ini`.
 
 ## Qué Hacer
 
@@ -34,7 +34,7 @@ Lee el proyecto para entender:
 Crea esta estructura de directorios en la raíz del proyecto:
 
 ```text
-openspec/
+.agentify/
 ├── config.yaml              ← Configuración SDD específica del proyecto
 ├── specs/                   ← Fuente de verdad (vacía inicialmente)
 └── changes/                 ← Cambios activos
@@ -43,10 +43,10 @@ openspec/
 
 ### Paso 3: Generar la Configuración
 
-Basándote en lo detectado, crea el archivo `openspec/config.yaml`:
+Basándote en lo detectado, crea el archivo `.agentify/config.yaml`:
 
 ```yaml
-# openspec/config.yaml
+# .agentify/config.yaml
 schema: spec-driven
 
 context: |
@@ -103,9 +103,9 @@ Devuelve un resumen estructurado del estado resultante:
 **Persistencia**: File System (OpenSpec)
 
 ### Estructura Creada
-- openspec/config.yaml ← Configuración del proyecto con contexto detectado
-- openspec/specs/      ← Listo para especificaciones
-- openspec/changes/    ← Listo para propuestas de cambio
+- .agentify/config.yaml ← Configuración del proyecto con contexto detectado
+- .agentify/specs/      ← Listo para especificaciones
+- .agentify/changes/    ← Listo para propuestas de cambio
 
 ### Próximos Pasos
 Listo para /sdd-explore {tema} o /sdd-new {nombre-del-cambio}.
@@ -115,5 +115,5 @@ Listo para /sdd-explore {tema} o /sdd-new {nombre-del-cambio}.
 
 - NUNCA crear archivos de spec de relleno — las specs se crean mediante sdd-spec durante un cambio
 - SIEMPRE detectar el stack tecnológico real, nunca asumir
-- Si el proyecto ya tiene un directorio `openspec/`, reportar qué existe y preguntar al orquestador si debe actualizarse
+- Si el proyecto ya tiene un directorio `.agentify/`, reportar qué existe y preguntar al orquestador si debe actualizarse
 - Mantener el contexto en `config.yaml` CONCISO — no más de 10 líneas
