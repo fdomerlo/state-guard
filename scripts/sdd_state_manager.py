@@ -20,6 +20,16 @@ LOCK_FILE = ".agentify/changes/{change}/.lock"
 WRITE_LOCK_FILE = ".agentify/changes/{change}/.write-lock"
 TASKS_FILE = ".agentify/changes/{change}/tasks.md"
 DEFAULT_TTL = 1800
+MAX_SUMMARY_CHARS = 2000  # ~500 tokens ≈ 2000 chars
+
+# Exit codes diferenciados para que modelos débiles (free-tier) puedan
+# distinguir categorías de error por código numérico, sin depender del
+# parseo correcto del texto de stderr/stdout.
+EXIT_OK = 0
+EXIT_GENERIC = 1        # state.ini no encontrado, error inesperado
+EXIT_LOCK_CONFLICT = 2  # lock activo (otra sesión), reintentable
+EXIT_BAD_TRANSITION = 3 # transición inválida en el DAG, no reintentar
+EXIT_VALIDATION = 4     # datos de entrada inválidos (summary muy largo, etc.)
 
 # Matchea: "- [ ] [T003] Descripción" o "- [x] Descripción" (ID opcional entre corchetes)
 TASK_LINE_RE = re.compile(r"^\s*-\s*\[( |x|X)\]\s*(?:\[([^\]]+)\]\s*)?(.*)$")
@@ -73,14 +83,14 @@ def cmd_begin(args):
 
         if status == "in_progress" and not is_stale(started_at, args.ttl):
             print("ERROR: Ya hay una transacción en progreso.")
-            sys.exit(1)
+            sys.exit(EXIT_LOCK_CONFLICT)
 
         if status == "in_progress" and is_stale(started_at, args.ttl):
             release_lockfile(lock_path)
 
         if not try_acquire_lockfile(lock_path):
             print("ERROR: Ya hay una transacción en progreso (lock activo).")
-            sys.exit(1)
+            sys.exit(EXIT_LOCK_CONFLICT)
 
         config.set("Transaction", "txn_status", "in_progress")
         config.set("Transaction", "txn_phase", args.phase)
@@ -96,7 +106,7 @@ def cmd_commit(args):
         config, path = load_state(args.change)
         if config.get("Transaction", "txn_status", fallback="idle") != "in_progress":
             print("ERROR: No hay transacción en progreso para hacer commit.")
-            sys.exit(1)
+            sys.exit(EXIT_GENERIC)
 
         phase = config.get("Transaction", "txn_phase")
         expected_next = TRANSITIONS.get(phase)
@@ -105,7 +115,7 @@ def cmd_commit(args):
                 f"ERROR: Transición inválida. Desde '{phase}' el DAG solo permite "
                 f"'{expected_next}', no '{args.next_phase}'."
             )
-            sys.exit(1)
+            sys.exit(EXIT_BAD_TRANSITION)
 
         config.set("Graph", "current_phase", phase)
         config.set("Graph", "lock_phase", args.next_phase)
@@ -122,9 +132,25 @@ def cmd_commit(args):
 
         config.set("Transaction", "txn_status", "idle")
         config.set("Transaction", "txn_phase", "None")
+
+        # Auto-checkpoint determinístico: genera un session_summary mínimo
+        # con el estado real del DAG post-commit. Esto garantiza que siempre
+        # exista un checkpoint para warm-boot, sin depender de que el modelo
+        # ejecute /sdd-checkpoint manualmente.
+        auto_summary = (
+            f"fase_completada={phase}\n"
+            f"siguiente_fase={args.next_phase}\n"
+            f"completadas={', '.join(completed)}\n"
+            f"pendientes={', '.join(pending)}"
+        )
+        if not config.has_section("Session"):
+            config.add_section("Session")
+        config.set("Session", "session_summary", auto_summary)
+
         save_state(config, path)
         release_lockfile(LOCK_FILE.format(change=args.change))
-        print(f"SUCCESS|COMMIT exitoso. Nueva lock_phase: {args.next_phase}")
+        print(f"SUCCESS|COMMIT exitoso. lock_phase={args.next_phase}")
+        print(f"⚠️ FASE {phase} COMPLETADA — sus instrucciones ya no aplican.")
 
     with_write_lock(WRITE_LOCK_FILE.format(change=args.change), _do)
 
@@ -134,7 +160,7 @@ def cmd_rollback(args):
         config, path = load_state(args.change)
         if config.get("Transaction", "txn_status", fallback="idle") != "in_progress":
             print("ERROR: No hay transacción en progreso para revertir.")
-            sys.exit(1)
+            sys.exit(EXIT_GENERIC)
         config.set("Transaction", "txn_status", "idle")
         config.set("Transaction", "txn_phase", "None")
         save_state(config, path)
@@ -146,6 +172,13 @@ def cmd_rollback(args):
 
 def cmd_checkpoint(args):
     def _do():
+        if len(args.summary) > MAX_SUMMARY_CHARS:
+            print(
+                f"ERROR: session_summary excede el límite "
+                f"({len(args.summary)}/{MAX_SUMMARY_CHARS} chars). "
+                f"Resumí el contenido y reintentá."
+            )
+            sys.exit(EXIT_VALIDATION)
         config, path = load_state(args.change)
         if not config.has_section("Session"):
             config.add_section("Session")

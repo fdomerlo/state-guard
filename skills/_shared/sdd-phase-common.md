@@ -26,23 +26,17 @@ Ejecutar las instrucciones del SKILL.md. Persistir el artefacto resultante en di
 
 Actualiza el estado invocando `sdd_state_manager.py` en la terminal:
 
-```yaml
-current_phase: {fase recién completada}
-lock_phase: {siguiente fase del DAG}
-completed_phases: [..., {fase recién completada}]
-pending_phases: [... sin la fase recién completada]
-last_updated: "{timestamp ISO 8601}"
-txn_status: idle
-txn_phase: null
-txn_started_at: null
-session_summary:
-  archivos_modificados:
-    - ruta/al/artefacto-creado.md
-  estado_tareas: "N/A"   # o formato estricto si aplica
-  decisiones_clave:
-    - "{decisión relevante de esta fase}"
-  proxima_accion: "/sdd-{siguiente} {nombre-cambio}"
+```text
+sdd_state_manager.py commit --change {nombre-del-cambio} --next-phase {siguiente-fase-segun-DAG}
 ```
+
+El middleware atómicamente:
+- Avanza el DAG (`current_phase`, `lock_phase`, `completed_phases`, `pending_phases`)
+- Restaura `txn_status` a `idle`
+- **Auto-genera un `session_summary` determinístico** con el estado actual del grafo (fase completada, siguiente, completadas, pendientes) — no necesitás construirlo vos
+- Libera el lock de fase
+
+Si necesitás un checkpoint más rico (con `archivos_modificados`, `decisiones_clave`), ejecutá `/sdd-checkpoint` después del COMMIT.
 
 ### 4. ROLLBACK — Si la fase falla
 

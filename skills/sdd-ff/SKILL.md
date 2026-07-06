@@ -31,8 +31,7 @@ Ejecuta en orden, saltando las fases ya completadas:
 PARA CADA fase en la secuencia (propose → spec → design → tasks):
 │   ERROR: Transición inválida de lock semántico.
 │     Fase solicitada : {fase_solicitada}
-│     Ejecuta /sdd-fix para auditar y reparar el estado.
-    Ejecuta /sdd-fix para migrar el estado.
+│     STOP — Reportá el error al usuario para que decida manualmente.
 ```
 
 ### Ejecución por Fase

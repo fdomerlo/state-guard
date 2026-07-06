@@ -16,7 +16,6 @@ Cada transición de fase sigue el ciclo: BEGIN → EXECUTE (persistir artefacto)
 |-------|---------------------------|
 | Memory Guard (transacción) | Todos los campos de fase y transacción |
 | `sdd-checkpoint` | Solo `session_summary` y `last_updated` |
-| `sdd-fix` | Todo el archivo (reparación y migración) |
 
 ## Ejecución Inline vs Delegada
 

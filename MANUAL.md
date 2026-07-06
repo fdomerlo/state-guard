@@ -35,11 +35,11 @@ Los contratos compartidos residen en `skills/_shared/`:
 | Archivo | Propósito |
 |---------|-----------|
 | `memory-guard.md` | Contrato unificado: identidad del agente, ejecución de fases, delegación inteligente, recovery |
-| `transaction-protocol.md` | Protocolo de transacciones: ciclo BEGIN/COMMIT/ROLLBACK, campos txn_* en state.yaml, auto-checkpoint |
+| `transaction-protocol.md` | Protocolo de transacciones: ciclo BEGIN/COMMIT/ROLLBACK, campos txn_* en state.ini, auto-checkpoint |
 | `capabilities.md` | Detección de capacidades del agente host y regla de delegación inteligente |
 | `context-injection.md` | Dependencias de contexto por fase y secuencia de ejecución |
 | `persistence-contract.md` | Contrato de persistencia: inline vs delegada, protocolo de comunicación |
-| `openspec-convention.md` | Convención de filesystem, schema state.yaml v2, tabla de transiciones de lock_phase |
+| `openspec-convention.md` | Convención de filesystem, schema state.ini v2, tabla de transiciones de lock_phase |
 | `sdd-phase-common.md` | Protocolo de transacción común a todas las skills de fase |
 | `test-runner-detection.md` | Pseudocódigo para la detección automática del test runner del proyecto |
 
@@ -52,7 +52,7 @@ El Memory Guard ejecuta fases **inline por defecto**: carga el `SKILL.md` corres
 1. La fase es `sdd-apply` con más de 10 tareas pendientes, **Y**
 2. El agente host detectado soporta sub-agentes reales (Claude Code, OpenCode, Antigravity CLI).
 
-En la ejecución delegada, el sub-agente ejecuta las tareas e interactúa con el disco, pero **nunca** escribe en `state.yaml`. El Memory Guard asume exclusivamente la responsabilidad del COMMIT transaccional al finalizar la delegación.
+En la ejecución delegada, el sub-agente ejecuta las tareas e interactúa con el disco, pero **nunca** escribe en `state.ini`. El Memory Guard asume exclusivamente la responsabilidad del COMMIT transaccional al finalizar la delegación.
 
 ### Skill Registry Dinámico
 
@@ -82,48 +82,33 @@ Para modelos de frontera como Antigravity CLI o Claude Code (`--target antigravi
 
 ## State Machine Transaccional
 
-### Estructura de state.yaml (v2)
+### Estructura de state.ini
 
-El archivo `state.yaml` es el núcleo del sistema de estados. Se encuentra en:
+El archivo `state.ini` es el núcleo del sistema de estados. Se encuentra en:
 
 ```text
-openspec/changes/{nombre-del-cambio}/state.yaml
+.agentify/changes/{nombre-del-cambio}/state.ini
 ```
 
-**Schema (v2):**
+**Schema (formato INI, manejado por `sdd_state_manager.py`):**
 
-```yaml
-schema_version: 2                    # Versión del schema (para migración automática)
-change: {nombre-del-cambio}
-started_at: "YYYY-MM-DDTHH:MM:SS"   # ISO 8601
-last_updated: "YYYY-MM-DDTHH:MM:SS" # Actualizado en cada COMMIT de transacción
-current_phase: {fase-actual}         # Última fase completada exitosamente
-lock_phase: {fase-siguiente}         # Única fase autorizada a ejecutarse ahora
-status: {estado}                     # active | done | blocked
-completed_phases:
-  - explore
-  - propose
-  # fases completadas...
-pending_phases:
-  - tasks
-  - apply
-  - verify
-  - archive
-blocked: false
-blocked_reason: null
+```ini
+[Metadata]
+last_updated = 2026-07-02T10:30:00.000000
 
-# --- Campos transaccionales (v2) ---
-txn_status: idle                     # idle | in_progress | failed
-txn_phase: null                      # Fase en ejecución, o null si idle
-txn_started_at: null                 # ISO 8601 de inicio de transacción
+[Transaction]
+txn_status = idle          ; idle | in_progress
+txn_phase = None           ; fase actual si in_progress, sino None
+txn_started_at = None
 
-session_summary:                     # Bloque YAML estructurado (máx 500 tokens)
-  archivos_modificados:
-    - ruta/al/archivo.ext            # Máx 10 entradas
-  estado_tareas: "{X}/{Y} — última: [{ID}] {descripción breve}"
-  decisiones_clave:
-    - "{decisión clave}"
-  proxima_accion: "/sdd-{comando} {nombre-cambio}"
+[Graph]
+current_phase = propose    ; Descriptivo: última fase completada
+lock_phase = spec          ; Prescriptivo: única fase autorizada a ejecutarse AHORA
+completed_phases = explore, propose
+pending_phases = spec, design, tasks, apply, verify, archive
+
+[Session]
+session_summary = ...      ; opcional — bloque generado por sdd-checkpoint, ≤500 tokens (enforced en código: máx 2000 chars)
 ```
 
 ### Protocolo de Transacciones (transaction-protocol.md)
@@ -138,7 +123,7 @@ El ciclo de vida de la transacción exige la actualización de los nuevos campos
 
 | Paso | Qué ocurre |
 |------|-----------|
-| **BEGIN** | Registra el inicio marcando `txn_status: in_progress`, `txn_phase: {fase}` y capturando el timestamp actual en `txn_started_at` dentro de `state.yaml`. |
+| **BEGIN** | Registra el inicio marcando `txn_status: in_progress`, `txn_phase: {fase}` y capturando el timestamp actual en `txn_started_at` dentro de `state.ini`. |
 | **EXECUTE** | El agente ejecuta la fase encomendada, persistiendo los artefactos generados (código, diseño, specs) en disco de forma segura. |
 | **COMMIT** | Consolida la operación. Actualiza atómicamente `current_phase` y `lock_phase`, mueve la fase a `completed_phases`, y reinicia `txn_status: idle` y `txn_phase: null`. |
 | **ROLLBACK** | Si ocurre un fallo, aborta seteando `txn_status: failed`, dejando sin alterar el registro de fases para preservar la integridad estructural del DAG. |
@@ -148,11 +133,11 @@ El ciclo de vida de la transacción exige la actualización de los nuevos campos
 ### Mitigación de Fuga de Contexto
 
 Como mecanismo crucial post-COMMIT, `transaction-protocol.md` establece un procedimiento para la **mitigación de fuga de contexto**. 
-Una vez que el estado es exitosamente consolidado en `state.yaml`, el protocolo exige emitir una **advertencia de purga de chat**. Esta instrucción sirve para alertar al usuario y al agente sobre la necesidad de limpiar el historial de la conversación (o disparar una recarga de contexto / inicio de un nuevo sub-hilo) antes de proceder con la siguiente fase de desarrollo. Esto erradica la acumulación de directivas obsoletas, evitando severas "alucinaciones" durante transiciones prolongadas.
+Una vez que el estado es exitosamente consolidado en `state.ini`, el protocolo exige emitir una **advertencia de purga de chat**. Esta instrucción sirve para alertar al usuario y al agente sobre la necesidad de limpiar el historial de la conversación (o disparar una recarga de contexto / inicio de un nuevo sub-hilo) antes de proceder con la siguiente fase de desarrollo. Esto erradica la acumulación de directivas obsoletas, evitando severas "alucinaciones" durante transiciones prolongadas.
 
 ### Recovery Automático
 
-Al detectar un `state.yaml` con `txn_status: in_progress` (crash durante ejecución):
+Al detectar un `state.ini` con `txn_status: in_progress` (crash durante ejecución):
 
 1. Verifica si el artefacto de `txn_phase` se persistió en disco
 2. Si **SÍ** → ejecuta COMMIT (la fase se completó pero el estado no se persistió)
@@ -162,9 +147,9 @@ Al detectar un `state.yaml` con `txn_status: in_progress` (crash durante ejecuci
 
 **Atomicidad (Atomicity):** Cada fase se completa completamente o no se completa. El COMMIT solo ocurre después de que el artefacto se persistió en disco exitosamente.
 
-**Consistencia (Consistency):** El schema de `state.yaml` v2 está validado. Las transiciones siguen un orden estricto definido por el grafo de dependencias y los campos transaccionales garantizan detección de estado intermedio.
+**Consistencia (Consistency):** El schema de `state.ini` v2 está validado. Las transiciones siguen un orden estricto definido por el grafo de dependencias y los campos transaccionales garantizan detección de estado intermedio.
 
-**Aislamiento (Isolation):** Cada cambio tiene su propio `state.yaml`. Múltiples cambios pueden ejecutarse en paralelo sin interferir entre sí.
+**Aislamiento (Isolation):** Cada cambio tiene su propio `state.ini`. Múltiples cambios pueden ejecutarse en paralelo sin interferir entre sí.
 
 **Durabilidad (Durability):** El estado persiste en el filesystem del proyecto. Sobrevive a recargas de sesión, compactaciones de contexto y reinicios del IDE. Los campos transaccionales permiten recovery automático.
 
@@ -172,20 +157,14 @@ Al detectar un `state.yaml` con `txn_status: in_progress` (crash durante ejecuci
 
 El Memory Guard detecta cambios concurrentes mediante:
 
-1. Lectura del `state.yaml` antes de cada transacción
+1. Lectura del `state.ini` antes de cada transacción
 2. Verificación del campo `lock_phase` (única fase autorizada)
 3. Bloqueo de fases si `status` es `blocked`
 4. Detección de transacciones incompletas (`txn_status: in_progress`)
 
 ### Migración v1 → v2
 
-Los `state.yaml` sin campo `schema_version` se consideran v1. La migración es automática:
-
-1. Agregar `schema_version: 2`
-2. Agregar `txn_status: idle`, `txn_phase: null`, `txn_started_at: null`
-3. Si falta `lock_phase`, inferirlo desde artefactos (lógica de `sdd-fix`)
-
-La migración la ejecuta `sdd-fix` o el Recovery Protocol al encontrar un state.yaml sin `schema_version`.
+> **Nota histórica:** La migración v1→v2 de `state.ini` a `state.ini` fue completada. Los archivos `state.ini` actuales ya usan el schema basado en INI con secciones `[Transaction]`, `[Graph]` y `[Session]`. No hay migración automática pendiente.
 
 ---
 
@@ -194,7 +173,7 @@ La migración la ejecuta `sdd-fix` o el Recovery Protocol al encontrar un state.
 ### Ubicación
 
 ```text
-openspec/config.yaml
+.agentify/config.yaml
 ```
 
 ### Glosario de Configuraciones
@@ -277,7 +256,7 @@ A diferencia de pedirle al LLM que "haga todas las fases de una vez" en un solo 
 
 El comando `/sdd-checkpoint` genera un **bloque YAML estructurado** analizando proactivamente
 `tasks.md` y `design.md` del cambio activo. El resultado se guarda en el campo `session_summary`
-de `state.yaml`, posibilitando una recuperación de contexto eficiente (**Warm-Boot**).
+de `state.ini`, posibilitando una recuperación de contexto eficiente (**Warm-Boot**).
 
 **Dos modos de operación:**
 
@@ -333,24 +312,6 @@ El comando `/sdd-review` compara el código implementado contra las especificaci
 /sdd-review mi-cambio
 ```
 
-### /sdd-fix — Reparación y Migración
-
-El comando `/sdd-fix` detecta y repara problemas comunes en el proyecto.
-
-**Problemas que detecta y repara:**
-
-- Estado corrupto en `state.yaml`
-- Archivos de spec faltantes
-- Campo `lock_phase` ausente (inferencia desde artefactos)
-- State.yaml v1 sin campos transaccionales (migración automática a v2)
-- Transacciones incompletas (`txn_status: in_progress` o `failed`)
-
-**Ejemplo de uso:**
-
-```text
-/sdd-fix
-```
-
 ### /sdd-rollback — Revertir un Cambio
 
 El comando `/sdd-rollback` purga la carpeta del cambio y restaura los archivos modificados desde git.
@@ -371,11 +332,12 @@ Este comando **elimina permanentemente** todo el trabajo no commiteado en el dir
 
 ---
 
-## Estructura de Archivos OpenSpec
+## Estructura de Archivos
 
 ```text
-openspec/
+.agentify/
 ├── config.yaml                    ← Configuración del proyecto
+├── skill-registry.md              ← Índice dinámico de skills
 ├── specs/                         ← Specs actuales (fuente de verdad)
 │   └── {dominio}/
 │       └── spec.md
@@ -383,7 +345,9 @@ openspec/
     ├── archive/
     │   └── YYYY-MM-DD-{change}/
     └── {change-name}/
-        ├── state.yaml             ← Estado del DAG (v2 con campos txn_*)
+        ├── state.ini              ← Estado del DAG + sesión (manejado por middleware)
+        ├── .lock                  ← Lock de fase (manejado por middleware)
+        ├── .write-lock            ← Mutex de escritura de archivo (manejado por middleware)
         ├── proposal.md            ← Propuesta
         ├── exploration.md         ← Investigación inicial (opcional)
         ├── specs/                 ← Specs delta
@@ -393,10 +357,6 @@ openspec/
         ├── tasks.md               ← Checklist de tareas
         ├── verify-report.md       ← Reporte de verificación
         └── (otros artefactos)
-
-.agentify/                         ← Metadatos del agente
-├── skill-registry.md             ← Índice dinámico de skills
-└── (otros archivos de config)
 ```
 
 ---
@@ -500,22 +460,20 @@ Actúas como un desarrollador y diseñador de componentes Vue/React/HTML...
 
 ### El estado no avanza
 
-1. Verificar que `state.yaml` existe y tiene `schema_version: 2`
-2. Revisar que el campo `status` sea `active`. Si es `blocked`, revisar `blocked_reason`.
-3. Verificar `txn_status`: si es `in_progress`, hay una transacción incompleta; si es `failed`, hubo un error en la última fase.
-4. Ejecutar `/sdd-fix` para reparación automática y migración
+1. Verificar que `state.ini` existe en `.agentify/changes/{change-name}/`
+2. Verificar `txn_status` vía `sdd_state_manager.py status`: si es `in_progress`, hay una transacción incompleta.
+3. Ejecutar `/sdd-continue` para que el Recovery Protocol intente resolver automáticamente.
 
 ### Los artefactos no persisten
 
-1. Confirmar que el modo `openspec` está activo
-2. Verificar que el directorio `openspec/` existe
-3. Revisar permisos de escritura
+1. Verificar que el directorio `.agentify/` existe
+2. Revisar permisos de escritura
+3. Confirmar que el cambio tiene un `state.ini` válido
 
 ### Transacción incompleta detectada
 
 1. El Recovery Protocol intenta resolver automáticamente al ejecutar `/sdd-continue`
-2. Si persiste, ejecutar `/sdd-fix` para reparación manual
-3. Como último recurso, editar manualmente `state.yaml`: setear `txn_status: idle`, `txn_phase: null`
+2. Como último recurso, editar manualmente `state.ini`: setear `txn_status = idle`, `txn_phase = None`
 
 ### Conflictos entre cambios
 

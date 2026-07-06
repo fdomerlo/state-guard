@@ -63,10 +63,15 @@ Cuando delegás a sub-agente:
 
 Antes de delegar, preguntate: "¿Puedo ejecutar esto inline sin exceder mi ventana de contexto?" Si la respuesta es SÍ → ejecutá inline. Solo delegá cuando hay una razón concreta de peso (demasiadas tareas, fase destructiva que necesita aislamiento).
 
-## Limpieza de Contexto Post-Commit (Sesiones Interactivas)
+## Limpieza de Contexto Post-Commit
 
-- **Regla de Mitigación de Saturación:** Inmediatamente después de cada `COMMIT` transaccional exitoso de una fase, DEBÉS emitir una advertencia explícita o instrucción al usuario indicando que limpie o reinicie la ventana del chat interactivo (o invocar una purga nativa de contexto si la API del Harness host lo soporta).
-- **Propósito:** Esto previene la fuga conversacional (*context leakage*) y la acumulación de instrucciones obsoletas de fases previas dentro de la ventana de atención de la nueva transacción activa, eliminando alucinaciones cruzadas.
+El middleware implementa dos mecanismos automáticos al ejecutar COMMIT:
+
+1. **Auto-Checkpoint Determinístico:** `cmd_commit` genera y persiste un `session_summary` mínimo con el estado real del DAG (fase completada, siguiente, completadas, pendientes). Esto garantiza warm-boot sin depender de que vos ejecutes `/sdd-checkpoint`.
+
+2. **Boundary Marker:** El output del COMMIT incluye `⚠️ FASE {X} COMPLETADA — sus instrucciones ya no aplican`, señalando explícitamente que las instrucciones de la fase anterior son obsoletas.
+
+- **Recomendación adicional (sesiones interactivas):** Después de cada COMMIT, emití una advertencia al usuario sugiriendo limpiar o reiniciar la ventana del chat. Esto previene la acumulación de instrucciones obsoletas en la ventana de atención, pero **no es la única defensa** — el auto-checkpoint y el Recovery Protocol garantizan que la siguiente sesión arranque limpia.
 
 ## Recovery Protocol
 

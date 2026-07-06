@@ -17,10 +17,10 @@ Los scripts de instalación compilan y empaquetan la configuración dinámicamen
 bash scripts/install.sh --target opencode
 
 # Para modelos de frontera (Antigravity CLI): usa Context Streaming (lazy loading)
-bash scripts/install.sh --target antigravity-cli
+bash scripts/install.sh --target antigravity
 ```
 
-Opciones para `--target`: `opencode` (por defecto), `antigravity-cli`, `claude-code`.
+Opciones para `--target`: `opencode` (por defecto), `antigravity`, `claude-code`.
 
 ### Windows
 
@@ -35,12 +35,11 @@ powershell .\scripts\install.ps1 -Target opencode
 
 | Comando | Descripción | Tipo |
 |---------|-------------|------|
-| `/sdd-init` | Inicializa el contexto SDD en el proyecto. Detecta el stack y crea la estructura `openspec/`. | Skill Directa |
+| `/sdd-init` | Inicializa el contexto SDD en el proyecto. Detecta el stack y crea la estructura `.agentify/`. | Skill Directa |
 | `/sdd-new <nombre>` | Inicia un nuevo cambio. Ejecuta exploración y propuesta como transacciones secuenciales inline. | Meta-Skill |
-| `/sdd-continue` | Ejecuta la siguiente fase pendiente según `lock_phase` en `state.yaml`. | Meta-Skill |
+| `/sdd-continue` | Ejecuta la siguiente fase pendiente según `lock_phase` en `state.ini`. | Meta-Skill |
 | `/sdd-ff` | Fast-forward de planificación: ejecuta propuesta → specs → diseño → tareas, cada fase como transacción independiente. | Meta-Skill |
 | `/sdd-status` | Muestra el estado de todos los cambios activos, incluyendo estado transaccional. | Skill Directa |
-| `/sdd-fix` | Audita y repara estados corruptos. Migra `state.yaml` v1 → v2 y resuelve transacciones incompletas. | Skill Directa |
 | `/sdd-changelog` | Genera un changelog automático a partir de los cambios archivados. | Skill Directa |
 | `/sdd-explore <tema>` | Investiga una idea antes de comprometerse. Lee el código base, compara enfoques e identifica riesgos. | Fase (Explore) |
 | `/sdd-propose <nombre>` | Crea o itera sobre una propuesta de cambio de manera independiente. | Fase (Propose) |
@@ -52,7 +51,7 @@ powershell .\scripts\install.ps1 -Target opencode
 | `/sdd-archive` | Cierra un cambio: fusiona las specs delta en las specs principales y mueve el cambio al archivo. | Fase (Archive) |
 | `/sdd-split` | Divide proposals monolíticas en sub-cambios manejables. Útil para cambios demasiado grandes. | Skill Directa |
 | `/sdd-review` | Realiza auditoría estática de código comparando contra las especificaciones. | Skill Directa |
-| `/sdd-checkpoint` | Genera un resumen del estado actual de la sesión y lo guarda en `state.yaml`. También se ejecuta automáticamente después de cada fase completada. | Skill Directa |
+| `/sdd-checkpoint` | Genera un resumen del estado actual de la sesión y lo guarda en `state.ini`. También se ejecuta automáticamente después de cada fase completada. | Skill Directa |
 | `/sdd-rollback` | Purga la carpeta del cambio y restaura los archivos modificados desde git. | Skill Directa |
 | `/sdd-skill-registry` | Escanea los directorios global (`$HOME/.skills-custom`) y local (`./skills-custom`) de skills y actualiza el repositorio local. | Skill Directa |
 
@@ -132,7 +131,7 @@ graph TB
     end
 
     subgraph "Almacenamiento"
-        O[("OpenSpec\nstate.yaml v2")]
+        O[("OpenSpec\nstate.ini")]
     end
 
     MG --> TXN
@@ -144,7 +143,7 @@ graph TB
 
 El **Memory Guard** es el contrato central que el agente carga al iniciar. Define cómo ejecutar fases (inline por defecto, delegadas solo cuando es necesario), cómo persistir estado (transacciones atómicas con BEGIN/COMMIT/ROLLBACK), y cómo recuperarse de pérdida de contexto.
 
-**OpenSpec** guarda cada artefacto como archivo Markdown en el repositorio, permitiendo versionado y revisión en Pull Requests. El `state.yaml` v2 incluye campos transaccionales que garantizan la integridad del DAG.
+**OpenSpec** guarda cada artefacto como archivo Markdown en el repositorio, permitiendo versionado y revisión en Pull Requests. El `state.ini` v2 incluye campos transaccionales que garantizan la integridad del DAG.
 
 ---
 
@@ -168,7 +167,7 @@ Todos los agentes ejecutan fases inline por defecto. La delegación a sub-agente
 
 El Memory Guard reemplaza al modelo de "despachador de comandos CLI". En lugar de despachar cada fase a un sub-proceso con contexto fresco, el agente ejecuta las fases directamente (inline) protegido por un protocolo de persistencia transaccional:
 
-- **BEGIN**: Marca la transacción como `in_progress` en `state.yaml` antes de ejecutar la fase.
+- **BEGIN**: Marca la transacción como `in_progress` en `state.ini` antes de ejecutar la fase.
 - **COMMIT**: Actualiza `current_phase`, `lock_phase`, `completed_phases` y `pending_phases` atómicamente después de completar la fase.
 - **ROLLBACK**: Si la fase falla, restaura `txn_status: failed` sin modificar el progreso.
 
@@ -176,11 +175,11 @@ Este protocolo garantiza que el estado sobreviva a cualquier pérdida de context
 
 ### Specs Delta
 
-Los cambios describen qué es diferente del estado actual, no reescriben todo. Al archivar, estos deltas se fusionan automáticamente en `openspec/specs/`.
+Los cambios describen qué es diferente del estado actual, no reescriben todo. Al archivar, estos deltas se fusionan automáticamente en `.agentify/specs/`.
 
 ### State Machine Transaccional
 
-El archivo `state.yaml` (v2) rastrea el estado de cada cambio con campos transaccionales (`txn_status`, `txn_phase`, `txn_started_at`) que permiten recovery automático de transacciones incompletas.
+El archivo `state.ini` (v2) rastrea el estado de cada cambio con campos transaccionales (`txn_status`, `txn_phase`, `txn_started_at`) que permiten recovery automático de transacciones incompletas.
 
 ### Skills como Código
 
@@ -200,13 +199,13 @@ El sistema utiliza **OpenSpec** como estándar de persistencia nativa:
 
 - Los artefactos se almacenan como archivos Markdown en el repositorio
 - Permite versionado y revisión en Pull Requests
-- Carpeta de archivo: `openspec/changes/archive/YYYY-MM-DD-{change-name}/`
+- Carpeta de archivo: `.agentify/changes/archive/YYYY-MM-DD-{change-name}/`
 
 ---
 
 ## Documentación Adicional
 
-- [MANUAL.md](MANUAL.md) — Guía técnica: arquitectura Memory Guard, state.yaml v2, configuración y flujos avanzados.
+- [MANUAL.md](MANUAL.md) — Guía técnica: arquitectura Memory Guard, state.ini, configuración y flujos avanzados.
 
 ---
 
