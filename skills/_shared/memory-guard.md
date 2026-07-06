@@ -85,19 +85,12 @@ lock_state == ACTIVE  y txn_status == in_progress → hay otra sesión trabajand
 lock_state == STALE   y txn_status == in_progress → sesión anterior murió a mitad de transacción.
                                                        Continuar con Pasos 1-4 de abajo (recovery normal).
 
-<<<<<<< HEAD
-lock_state == FREE    y txn_status == in_progress → estado inconsistente (no debería ocurrir con el
-                                                       middleware actual). NO intentes resolverlo con
-                                                       COMMIT o ROLLBACK automático. Ejecutá /sdd-fix
-                                                       y reportá la inconsistencia al usuario.
-=======
 lock_state == FREE y txn_status == in_progress → estado inconsistente (no debería ocurrir con el
                                                    middleware actual; indica intervención externa,
                                                    ej. borrado manual de .lock). NO intentes
                                                    resolverlo con COMMIT o ROLLBACK automático.
                                                    STOP y reportá el contenido crudo de state.ini
                                                    al usuario para que decida manualmente.
->>>>>>> 1cbdc21 (feat: Enhance SDD State Manager with locking mechanism and session management)
 
 lock_state == FREE    y txn_status == idle        → no hay nada que recuperar, proceder normalmente.
 ```

@@ -2,6 +2,7 @@
 import argparse
 import configparser
 import os
+import re
 import sys
 from datetime import datetime
 
@@ -17,7 +18,11 @@ from _lock_utils import (
 STATE_FILE = ".agentify/changes/{change}/state.ini"
 LOCK_FILE = ".agentify/changes/{change}/.lock"
 WRITE_LOCK_FILE = ".agentify/changes/{change}/.write-lock"
+TASKS_FILE = ".agentify/changes/{change}/tasks.md"
 DEFAULT_TTL = 1800
+
+# Matchea: "- [ ] [T003] Descripción" o "- [x] Descripción" (ID opcional entre corchetes)
+TASK_LINE_RE = re.compile(r"^\s*-\s*\[( |x|X)\]\s*(?:\[([^\]]+)\]\s*)?(.*)$")
 
 TRANSITIONS = {
     "explore": "propose",
@@ -151,6 +156,56 @@ def cmd_checkpoint(args):
     with_write_lock(WRITE_LOCK_FILE.format(change=args.change), _do)
 
 
+def cmd_check_completion(args):
+    """Parser determinista de tasks.md — reemplaza el conteo manual que antes
+    le pedíamos al LLM (Paso 3a de sdd-checkpoint). Un modelo débil cuenta mal
+    checkboxes en markdown; una regex no."""
+    path = TASKS_FILE.format(change=args.change)
+    if not os.path.exists(path):
+        print("estado_tareas=N/A")
+        print("total=0")
+        print("completed=0")
+        print("all_complete=false")
+        print("last_completed_id=None")
+        print("last_completed_desc=None")
+        return
+
+    with open(path, "r", encoding="utf-8") as f:
+        lines = f.readlines()
+
+    total = 0
+    completed = 0
+    last_completed_id = None
+    last_completed_desc = None
+
+    for line in lines:
+        m = TASK_LINE_RE.match(line)
+        if not m:
+            continue
+        total += 1
+        checked = m.group(1).lower() == "x"
+        task_id = m.group(2) or ""
+        desc = m.group(3).strip()
+        if checked:
+            completed += 1
+            last_completed_id = task_id if task_id else last_completed_id
+            last_completed_desc = desc[:100] if desc else last_completed_desc
+
+    all_complete = total > 0 and completed == total
+    estado = f"{completed}/{total}"
+    if last_completed_id:
+        estado += f" — última: [{last_completed_id}] {last_completed_desc}"
+    elif last_completed_desc:
+        estado += f" — última: {last_completed_desc}"
+
+    print(f"estado_tareas={estado}")
+    print(f"total={total}")
+    print(f"completed={completed}")
+    print(f"all_complete={'true' if all_complete else 'false'}")
+    print(f"last_completed_id={last_completed_id or 'None'}")
+    print(f"last_completed_desc={last_completed_desc or 'None'}")
+
+
 def cmd_status(args):
     config, _ = load_state(args.change)
     txn_status = config.get("Transaction", "txn_status", fallback="idle")
@@ -168,9 +223,7 @@ def cmd_status(args):
 
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(
-        description="SDD State Manager (INI Format - Zero Dependencies)"
-    )
+    parser = argparse.ArgumentParser(description="SDD State Manager (INI Format - Zero Dependencies)")
     subparsers = parser.add_subparsers(dest="command", required=True)
 
     p_begin = subparsers.add_parser("begin")
@@ -193,6 +246,9 @@ if __name__ == "__main__":
     p_status.add_argument("--change", required=True)
     p_status.add_argument("--ttl", type=int, default=DEFAULT_TTL)
 
+    p_check = subparsers.add_parser("check-completion")
+    p_check.add_argument("--change", required=True)
+
     args = parser.parse_args()
     if args.command == "begin":
         cmd_begin(args)
@@ -204,3 +260,5 @@ if __name__ == "__main__":
         cmd_checkpoint(args)
     elif args.command == "status":
         cmd_status(args)
+    elif args.command == "check-completion":
+        cmd_check_completion(args)

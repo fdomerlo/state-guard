@@ -28,17 +28,15 @@ Buscar `state.ini` con `status: active` en `.agentify/changes/*/state.ini`.
 
 ### Paso 2: Leer Estado Base
 
-### Paso 3a: Analizar tasks.md → estado_tareas
+### Paso 3a: Obtener estado_tareas vía middleware
 
-Si existe `tasks.md`:
+**No cuentes checkboxes manualmente.** Invocá:
 
-1. Contar total de tareas (`- [ ]` y `- [x]`)
-2. Contar completadas (`- [x]`)
-3. Identificar la última tarea completada
+```text
+sdd_state_manager.py check-completion --change {nombre-del-cambio}
+```
 
-Formato: `"{X}/{Y} — última: [{ID}] {descripción breve}"`
-
-Si no existe: `estado_tareas: "N/A"`
+El comando parsea `tasks.md` de forma determinista y devuelve `estado_tareas`, `total`, `completed`, `all_complete`, `last_completed_id`, `last_completed_desc`. Usá el valor de `estado_tareas` tal cual viene — ya tiene el formato `"{X}/{Y} — última: [{ID}] {descripción breve}"`. Si el archivo no existe, devuelve `estado_tareas=N/A` directamente.
 
 ### Paso 3b: Extraer archivos_modificados
 
