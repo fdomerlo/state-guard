@@ -1,0 +1,70 @@
+.
+├── CHANGELOG.md
+├── integrations
+│   └── opencode
+│       ├── commands
+│       └── opencode.json
+├── LICENSE
+├── MANUAL.md
+├── README.md
+├── scripts
+│   ├── cleanup.sh
+│   ├── install.ps1
+│   ├── install.sh
+│   ├── install_test.sh
+│   ├── packager.py
+│   └── sdd_state_manager.py
+├── skills
+│   ├── sdd-apply
+│   │   └── SKILL.md
+│   ├── sdd-archive
+│   │   └── SKILL.md
+│   ├── sdd-changelog
+│   │   └── SKILL.md
+│   ├── sdd-checkpoint
+│   │   └── SKILL.md
+│   ├── sdd-continue
+│   │   └── SKILL.md
+│   ├── sdd-design
+│   │   └── SKILL.md
+│   ├── sdd-explore
+│   │   └── SKILL.md
+│   ├── sdd-ff
+│   │   └── SKILL.md
+│   ├── sdd-hotfix
+│   │   └── SKILL.md
+│   ├── sdd-init
+│   │   └── SKILL.md
+│   ├── sdd-new
+│   │   └── SKILL.md
+│   ├── sdd-propose
+│   │   └── SKILL.md
+│   ├── sdd-review
+│   │   └── SKILL.md
+│   ├── sdd-rollback
+│   │   └── SKILL.md
+│   ├── sdd-skill-registry
+│   │   ├── scan.sh
+│   │   └── SKILL.md
+│   ├── sdd-spec
+│   │   └── SKILL.md
+│   ├── sdd-split
+│   │   └── SKILL.md
+│   ├── sdd-status
+│   │   └── SKILL.md
+│   ├── sdd-tasks
+│   │   └── SKILL.md
+│   ├── sdd-verify
+│   │   └── SKILL.md
+│   └── _shared
+│       ├── agentify-convention.md
+│       ├── capabilities.md
+│       ├── context-injection.md
+│       ├── memory-guard.md
+│       ├── persistence-contract.md
+│       ├── sdd-phase-common.md
+│       ├── test-runner-detection.md
+│       └── transaction-protocol.md
+└── tree.txt
+
+27 directories, 41 files

@@ -11,7 +11,9 @@
 └── changes/                 ← Cambios activos
     ├── archive/             ← Cambios completados (YYYY-MM-DD-{change-name}/)
     └── {change-name}/       ← Carpeta de cambio activo
-        ├── state.ini        ← Estado del DAG transaccional (Manejado por el middleware Python)
+        ├── state.ini        ← Estado del DAG + sesión (manejado por el middleware Python)
+        ├── .lock            ← Lock de fase (manejado por el middleware, no tocar a mano)
+        ├── .write-lock      ← Mutex de escritura de archivo, vida corta (idem)
         ├── exploration.md   ← (opcional) de sdd-explore
         ├── proposal.md      ← de sdd-propose
         ├── specs/           ← de sdd-spec (specs delta)
@@ -22,6 +24,8 @@
         └── verify-report.md ← de sdd-verify
 
 ```
+
+`.lock` y `.write-lock` son artefactos internos del middleware — nunca se referencian desde una skill ni se leen directamente. Se muestran acá solo para que no se los confunda con artefactos de contenido si aparecen al listar el directorio.
 
 ## Rutas de Artefactos por Skill
 
@@ -37,13 +41,15 @@
 | sdd-tasks | Crea | `.agentify/changes/{change-name}/tasks.md` |
 | sdd-apply | Actualiza | `.agentify/changes/{change-name}/tasks.md` (marca `[x]`) |
 | sdd-verify | Crea | `.agentify/changes/{change-name}/verify-report.md` |
+| sdd-checkpoint | Actualiza | `.agentify/changes/{change-name}/state.ini` → sección `[Session]` (vía middleware, ver más abajo) |
+| sdd-continue | Lee | `.agentify/changes/{change-name}/state.ini` (vía `sdd_state_manager.py status`, nunca directo) |
 | sdd-archive | Mueve | `.agentify/changes/{change-name}/` → `archive/YYYY-MM-DD-{change-name}/` |
 
 ## Schema de `state.ini` (Motor ACID)
 
-El **Memory Guard** interactúa con este archivo EXCLUSIVAMENTE a través del script `scripts/sdd_state_manager.py`. **Nunca se debe editar manualmente con herramientas de texto.**
+El **Memory Guard** interactúa con este archivo EXCLUSIVAMENTE a través del script `scripts/sdd_state_manager.py`. **Nunca se debe editar manualmente con herramientas de texto — incluida la sección `[Session]`.**
 
-El archivo rastrea el estado del Grafo Acíclico Dirigido (DAG).
+El archivo rastrea el estado del Grafo Acíclico Dirigido (DAG) y, opcionalmente, un snapshot de sesión no-DAG.
 
 ```ini
 [Metadata]
@@ -60,7 +66,12 @@ lock_phase = spec          ; Prescriptivo: única fase autorizada a ejecutarse A
 completed_phases = explore, propose
 pending_phases = spec, design, tasks, apply, verify, archive
 
+[Session]
+session_summary = ...      ; opcional — bloque generado por sdd-checkpoint, ≤500 tokens
+
 ```
+
+`[Session]` es la sección que antes hubiera requerido un archivo `manifest.json` aparte (patrón heredado de context-guard, ya absorbido). Vive en el mismo `state.ini` para no duplicar la fuente de verdad del cambio, y su escritura no compite con el lock de fase — solo con el write-lock interno de escritura.
 
 **Semántica `lock_phase` vs `current_phase`:**
 
@@ -69,7 +80,7 @@ pending_phases = spec, design, tasks, apply, verify, archive
 | `current_phase` | Descriptivo — última fase completada | Al ejecutar COMMIT transaccional |
 | `lock_phase` | Prescriptivo — única fase ejecutable | Al ejecutar COMMIT (avanza el DAG) |
 
-**Tabla de transiciones de `lock_phase` (DAG estricto):**
+**Tabla de transiciones de `lock_phase` (DAG estricto, validada en código por `TRANSITIONS` en `sdd_state_manager.py`, no solo por convención):**
 
 | Fase completada | `lock_phase` resultante |
 | --- | --- |
@@ -93,12 +104,13 @@ Diseño:         .agentify/changes/{change-name}/design.md
 Tareas:         .agentify/changes/{change-name}/tasks.md
 Configuración:  .agentify/config.yaml
 Specs actuales: .agentify/specs/{dominio}/spec.md
+Estado (DAG+sesión): .agentify/changes/{change-name}/state.ini (vía `sdd_state_manager.py status`)
 
 ```
 
 ## Reglas de Escritura
 
-* SIEMPRE invocar `sdd_state_manager.py` en la terminal para mutar el estado.
+* SIEMPRE invocar `sdd_state_manager.py` en la terminal para mutar el estado — incluyendo `[Session]`.
 * SIEMPRE crear el directorio del cambio antes de escribir artefactos.
 * Si un archivo ya existe, LEERLO primero y ACTUALIZARLO (no sobreescribir ciegamente).
 * Todos los nombres de cambios SDD DEBEN usar formato **kebab-case** (`agregar-modo-oscuro`).

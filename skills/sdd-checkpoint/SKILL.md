@@ -7,14 +7,14 @@ description: >
 license: MIT
 metadata:
   author: fdomerlo@gmail.com (136bits)
-  version: "3.0"
+  version: "3.1"
 ---
 
 # SDD-Checkpoint Skill
 
 ## Propósito
 
-Skill responsable de **generar un checkpoint de sesión de alta fidelidad**. Detecta el cambio activo, ejecuta un análisis proactivo de sus artefactos (`tasks.md`, `design.md`) y del contexto actual, y guarda un bloque estructurado en el campo `session_summary` del `state.ini`.
+Skill responsable de **generar un checkpoint de sesión de alta fidelidad**. Detecta el cambio activo, ejecuta un análisis proactivo de sus artefactos (`tasks.md`, `design.md`) y del contexto actual, y guarda un bloque estructurado en el campo `session_summary` del `state.ini` **a través del middleware**, nunca editando el archivo directamente.
 
 **Dos modos de operación:**
 
@@ -54,9 +54,17 @@ Máximo 10 archivos, rutas relativas al root.
 
 Si existe `design.md`: extraer las primeras 2 decisiones de la sección `## Decisiones de Arquitectura`, truncar a 100 chars cada una.
 
+### Paso 4: Persistir vía middleware
 
+Ensamblá el bloque `session_summary` (estado_tareas + archivos_modificados + decisiones_clave) como un único string. **No lo escribas en ningún archivo directamente.** Invocá en terminal:
 
-### Paso 4: Reportar
+```text
+sdd_state_manager.py checkpoint --change {nombre-del-cambio} --summary "{bloque generado}"
+```
+
+Esperá `SUCCESS|CHECKPOINT` antes de reportar al usuario. Si el comando falla, reportá el error tal cual lo devuelve el middleware — no reintentes editando el archivo como fallback.
+
+### Paso 5: Reportar
 
 ```markdown
 ## Resultado del Checkpoint
@@ -65,7 +73,7 @@ Si existe `design.md`: extraer las primeras 2 decisiones de la sección `## Deci
 **Cambio**: {nombre-del-cambio}
 
 ### session_summary generado
-{bloque YAML generado}
+{bloque generado, el mismo que se pasó a --summary}
 ```
 
 ## Reglas
@@ -73,4 +81,5 @@ Si existe `design.md`: extraer las primeras 2 decisiones de la sección `## Deci
 - Si no hay cambio activo, mostrar error
 - Si no existe `tasks.md`, usar `estado_tareas: "N/A"`
 - El bloque `session_summary` NO debe superar 500 tokens
-- **AGNOSTICISMO DE LOCK**: NUNCA modifica campos del DAG
+- **AGNOSTICISMO DE LOCK**: este skill nunca toma ni verifica el lock de fase (`.lock`/DAG). Puede ejecutarse con una transacción de fase en progreso sin conflicto — el middleware serializa la escritura internamente.
+- **PROHIBIDO** editar `state.ini` con `edit_file`/`write_file` bajo cualquier circunstancia, incluso para este campo no-DAG.

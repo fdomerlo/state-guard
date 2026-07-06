@@ -5,8 +5,31 @@ import os
 import sys
 from datetime import datetime
 
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+from _lock_utils import (
+    try_acquire_lockfile,
+    release_lockfile,
+    is_stale,
+    check_lock_status,
+    with_write_lock,
+)
+
 STATE_FILE = ".agentify/changes/{change}/state.ini"
-PHASES_ORDER = ["explore", "propose", "spec", "design", "tasks", "hotfix", "apply", "verify", "archive"]
+LOCK_FILE = ".agentify/changes/{change}/.lock"
+WRITE_LOCK_FILE = ".agentify/changes/{change}/.write-lock"
+DEFAULT_TTL = 1800
+
+TRANSITIONS = {
+    "explore": "propose",
+    "propose": "spec",
+    "spec": "design",
+    "design": "tasks",
+    "tasks": "apply",
+    "hotfix": "apply",
+    "apply": "verify",
+    "verify": "archive",
+}
+
 
 def load_state(change_name):
     path = STATE_FILE.format(change=change_name)
@@ -14,72 +37,170 @@ def load_state(change_name):
     if not os.path.exists(path):
         print(f"ERROR: No se encontró el state.ini para '{change_name}'")
         sys.exit(1)
-    config.read(path, encoding='utf-8')
+    config.read(path, encoding="utf-8")
     return config, path
 
+
 def save_state(config, path):
-    if not config.has_section('Metadata'):
-        config.add_section('Metadata')
-    config.set('Metadata', 'last_updated', datetime.now().isoformat())
-    with open(path, 'w', encoding='utf-8') as f:
+    if not config.has_section("Metadata"):
+        config.add_section("Metadata")
+    config.set("Metadata", "last_updated", datetime.now().isoformat())
+    with open(path, "w", encoding="utf-8") as f:
         config.write(f)
+
 
 def get_list(config, section, option):
     val = config.get(section, option, fallback="").strip()
-    return [x.strip() for x in val.split(',')] if val else []
+    return [x.strip() for x in val.split(",")] if val else []
+
 
 def set_list(config, section, option, lst):
     config.set(section, option, ", ".join(lst))
 
+
 def cmd_begin(args):
-    config, path = load_state(args.change)
-    if config.get('Transaction', 'txn_status', fallback='idle') == 'in_progress':
-        print("ERROR: Ya hay una transacción en progreso.")
-        sys.exit(1)
-    
-    config.set('Transaction', 'txn_status', 'in_progress')
-    config.set('Transaction', 'txn_phase', args.phase)
-    config.set('Transaction', 'txn_started_at', datetime.now().isoformat())
-    save_state(config, path)
-    print(f"SUCCESS|BEGIN transaccional iniciado para fase: {args.phase}")
+    lock_path = LOCK_FILE.format(change=args.change)
+
+    def _do():
+        config, path = load_state(args.change)
+        status = config.get("Transaction", "txn_status", fallback="idle")
+        started_at = config.get("Transaction", "txn_started_at", fallback=None)
+
+        if status == "in_progress" and not is_stale(started_at, args.ttl):
+            print("ERROR: Ya hay una transacción en progreso.")
+            sys.exit(1)
+
+        if status == "in_progress" and is_stale(started_at, args.ttl):
+            release_lockfile(lock_path)
+
+        if not try_acquire_lockfile(lock_path):
+            print("ERROR: Ya hay una transacción en progreso (lock activo).")
+            sys.exit(1)
+
+        config.set("Transaction", "txn_status", "in_progress")
+        config.set("Transaction", "txn_phase", args.phase)
+        config.set("Transaction", "txn_started_at", datetime.now().isoformat())
+        save_state(config, path)
+        print(f"SUCCESS|BEGIN transaccional iniciado para fase: {args.phase}")
+
+    with_write_lock(WRITE_LOCK_FILE.format(change=args.change), _do)
+
 
 def cmd_commit(args):
-    config, path = load_state(args.change)
-    if config.get('Transaction', 'txn_status', fallback='idle') != 'in_progress':
-        print("ERROR: No hay transacción en progreso para hacer commit.")
-        sys.exit(1)
-    
-    phase = config.get('Transaction', 'txn_phase')
-    config.set('Graph', 'current_phase', phase)
-    config.set('Graph', 'lock_phase', args.next_phase)
-    
-    completed = get_list(config, 'Graph', 'completed_phases')
-    if phase not in completed:
-        completed.append(phase)
-        set_list(config, 'Graph', 'completed_phases', completed)
-        
-    pending = get_list(config, 'Graph', 'pending_phases')
-    if phase in pending:
-        pending.remove(phase)
-        set_list(config, 'Graph', 'pending_phases', pending)
-        
-    config.set('Transaction', 'txn_status', 'idle')
-    config.set('Transaction', 'txn_phase', 'None')
-    save_state(config, path)
-    print(f"SUCCESS|COMMIT exitoso. Nueva lock_phase: {args.next_phase}")
+    def _do():
+        config, path = load_state(args.change)
+        if config.get("Transaction", "txn_status", fallback="idle") != "in_progress":
+            print("ERROR: No hay transacción en progreso para hacer commit.")
+            sys.exit(1)
+
+        phase = config.get("Transaction", "txn_phase")
+        expected_next = TRANSITIONS.get(phase)
+        if expected_next != args.next_phase:
+            print(
+                f"ERROR: Transición inválida. Desde '{phase}' el DAG solo permite "
+                f"'{expected_next}', no '{args.next_phase}'."
+            )
+            sys.exit(1)
+
+        config.set("Graph", "current_phase", phase)
+        config.set("Graph", "lock_phase", args.next_phase)
+
+        completed = get_list(config, "Graph", "completed_phases")
+        if phase not in completed:
+            completed.append(phase)
+            set_list(config, "Graph", "completed_phases", completed)
+
+        pending = get_list(config, "Graph", "pending_phases")
+        if phase in pending:
+            pending.remove(phase)
+            set_list(config, "Graph", "pending_phases", pending)
+
+        config.set("Transaction", "txn_status", "idle")
+        config.set("Transaction", "txn_phase", "None")
+        save_state(config, path)
+        release_lockfile(LOCK_FILE.format(change=args.change))
+        print(f"SUCCESS|COMMIT exitoso. Nueva lock_phase: {args.next_phase}")
+
+    with_write_lock(WRITE_LOCK_FILE.format(change=args.change), _do)
+
+
+def cmd_rollback(args):
+    def _do():
+        config, path = load_state(args.change)
+        if config.get("Transaction", "txn_status", fallback="idle") != "in_progress":
+            print("ERROR: No hay transacción en progreso para revertir.")
+            sys.exit(1)
+        config.set("Transaction", "txn_status", "idle")
+        config.set("Transaction", "txn_phase", "None")
+        save_state(config, path)
+        release_lockfile(LOCK_FILE.format(change=args.change))
+        print("SUCCESS|ROLLBACK ejecutado. txn_status restaurado a idle.")
+
+    with_write_lock(WRITE_LOCK_FILE.format(change=args.change), _do)
+
+
+def cmd_checkpoint(args):
+    def _do():
+        config, path = load_state(args.change)
+        if not config.has_section("Session"):
+            config.add_section("Session")
+        config.set("Session", "session_summary", args.summary)
+        save_state(config, path)
+        print("SUCCESS|CHECKPOINT guardado en session_summary.")
+
+    with_write_lock(WRITE_LOCK_FILE.format(change=args.change), _do)
+
+
+def cmd_status(args):
+    config, _ = load_state(args.change)
+    txn_status = config.get("Transaction", "txn_status", fallback="idle")
+    txn_phase = config.get("Transaction", "txn_phase", fallback="None")
+    started_at = config.get("Transaction", "txn_started_at", fallback=None)
+    lock_phase = config.get("Graph", "lock_phase", fallback="None")
+
+    lock_path = LOCK_FILE.format(change=args.change)
+    lock_state = check_lock_status(lock_path, started_at, args.ttl)
+
+    print(f"txn_status={txn_status}")
+    print(f"txn_phase={txn_phase}")
+    print(f"lock_phase={lock_phase}")
+    print(f"lock_state={lock_state}")
+
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description="SDD State Manager (INI Format - Zero Dependencies)")
+    parser = argparse.ArgumentParser(
+        description="SDD State Manager (INI Format - Zero Dependencies)"
+    )
     subparsers = parser.add_subparsers(dest="command", required=True)
-    
+
     p_begin = subparsers.add_parser("begin")
     p_begin.add_argument("--change", required=True)
     p_begin.add_argument("--phase", required=True)
-    
+    p_begin.add_argument("--ttl", type=int, default=DEFAULT_TTL)
+
     p_commit = subparsers.add_parser("commit")
     p_commit.add_argument("--change", required=True)
     p_commit.add_argument("--next-phase", required=True)
 
+    p_rollback = subparsers.add_parser("rollback")
+    p_rollback.add_argument("--change", required=True)
+
+    p_checkpoint = subparsers.add_parser("checkpoint")
+    p_checkpoint.add_argument("--change", required=True)
+    p_checkpoint.add_argument("--summary", required=True)
+
+    p_status = subparsers.add_parser("status")
+    p_status.add_argument("--change", required=True)
+    p_status.add_argument("--ttl", type=int, default=DEFAULT_TTL)
+
     args = parser.parse_args()
-    if args.command == "begin": cmd_begin(args)
-    elif args.command == "commit": cmd_commit(args)
+    if args.command == "begin":
+        cmd_begin(args)
+    elif args.command == "commit":
+        cmd_commit(args)
+    elif args.command == "rollback":
+        cmd_rollback(args)
+    elif args.command == "checkpoint":
+        cmd_checkpoint(args)
+    elif args.command == "status":
+        cmd_status(args)
