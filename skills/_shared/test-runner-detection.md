@@ -17,5 +17,5 @@ Detectar test runner desde:
 
 Para usar este helper:
 
-- En `sdd-apply`: usar `rules.apply.test_command` como clave de configuración
-- En `sdd-verify`: usar `rules.verify.test_command` como clave de configuración
+- En `agentify-apply`: usar `rules.apply.test_command` como clave de configuración
+- En `agentify-verify`: usar `rules.verify.test_command` como clave de configuración

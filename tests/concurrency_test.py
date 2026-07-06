@@ -5,7 +5,7 @@ import configparser
 from concurrent.futures import ThreadPoolExecutor
 
 CHANGE = "test-change"
-SCRIPT = os.path.join(os.path.dirname(__file__), "scripts", "sdd_state_manager.py")
+SCRIPT = os.path.join(os.path.dirname(__file__), "scripts", "state_manager.py")
 STATE_PATH = f".agentify/changes/{CHANGE}/state.ini"
 
 

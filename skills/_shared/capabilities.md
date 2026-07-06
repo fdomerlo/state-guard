@@ -31,7 +31,7 @@ SI la fase es `apply`
   Y hay más de 10 tareas pendientes
   Y el host soporta sub-agentes reales:
     → Delegar a sub-agente con las tareas como instrucciones
-    → El sub-agente persiste artefactos; vos actualizás el estado vía `sdd_state_manager.py`
+    → El sub-agente persiste artefactos; vos actualizás el estado vía `state_manager.py`
 SINO:
     → Ejecutar inline con Memory Guard
 ```
@@ -52,10 +52,10 @@ Modo híbrido: inline por defecto, delegación para fases pesadas. Al delegar:
 Cada host necesita un system prompt mínimo que cargue el Memory Guard. El contenido es idéntico para todos:
 
 ```markdown
-# SDD Memory Guard
+# Agentify Memory Guard
 
 Actúas como agente de desarrollo con memoria transaccional usando la metodología
-Spec-Driven Development (SDD).
+Entorno de Ejecución con Memoria Transaccional.
 
 ## REGLA DE IDIOMA ESTRICTA (CRÍTICA)
 

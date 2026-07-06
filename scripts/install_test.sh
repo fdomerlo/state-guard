@@ -2,7 +2,7 @@
 set -euo pipefail
 
 # ============================================================================
-# Agentify: SDD Memory Guard — Install Script Tests
+# Agentify: Memory Guard — Install Script Tests
 # Run: bash scripts/install_test.sh
 # ============================================================================
 
@@ -29,26 +29,26 @@ NC='\033[0m'
 
 # All 20 expected skills
 EXPECTED_SKILLS=(
-    sdd-apply
-    sdd-archive
-    sdd-changelog
-    sdd-checkpoint
-    sdd-continue
-    sdd-design
-    sdd-explore
-    sdd-ff
-    sdd-hotfix
-    sdd-init
-    sdd-new
-    sdd-propose
-    sdd-review
-    sdd-rollback
-    sdd-spec
-    sdd-split
-    sdd-status
-    sdd-tasks
-    sdd-verify
-    sdd-skill-registry
+    agentify-apply
+    agentify-archive
+    agentify-changelog
+    agentify-checkpoint
+    agentify-continue
+    agentify-design
+    agentify-explore
+    agentify-ff
+    agentify-hotfix
+    agentify-init
+    agentify-new
+    agentify-propose
+    agentify-review
+    agentify-rollback
+    agentify-spec
+    agentify-split
+    agentify-status
+    agentify-tasks
+    agentify-verify
+    agentify-skill-registry
 )
 
 # ============================================================================
@@ -228,16 +228,16 @@ test_opencode_commands_folder() {
 
 test_opencode_commands_path_substituted() {
     bash "$INSTALL_SCRIPT" --agent opencode > /dev/null 2>&1
-    local cmd_file="$HOME/.config/opencode/commands/sdd-apply.md"
+    local cmd_file="$HOME/.config/opencode/commands/agentify-apply.md"
     assert_file_exists "$cmd_file" || return 1
     # The placeholder {{SKILLS_PATH}} must be replaced with the actual path
     if grep -q '{{SKILLS_PATH}}' "$cmd_file"; then
-        echo "Placeholder {{SKILLS_PATH}} was NOT substituted in sdd-apply.md"
+        echo "Placeholder {{SKILLS_PATH}} was NOT substituted in agentify-apply.md"
         return 1
     fi
     # Must contain the actual skills path
     grep -q '.config/opencode/skills' "$cmd_file" || {
-        echo "Expected .config/opencode/skills path in sdd-apply.md"
+        echo "Expected .config/opencode/skills path in agentify-apply.md"
         return 1
     }
 }
@@ -464,7 +464,7 @@ test_pre_existing_dir_not_clobbered() {
     mkdir -p "$HOME/.claude/skills/my-custom-skill"
     echo "custom content" > "$HOME/.claude/skills/my-custom-skill/SKILL.md"
     bash "$INSTALL_SCRIPT" --agent claude-code > /dev/null 2>&1
-    # SDD skills should be installed
+    # Skills should be installed
     assert_all_skills_installed "$HOME/.claude/skills" || return 1
     # Custom skill should still exist
     assert_file_exists "$HOME/.claude/skills/my-custom-skill/SKILL.md" || return 1
@@ -475,17 +475,17 @@ test_pre_existing_dir_not_clobbered() {
 
 test_overwrite_stale_skill() {
     # Pre-create a stale SKILL.md
-    mkdir -p "$HOME/.claude/skills/sdd-apply"
-    echo "stale" > "$HOME/.claude/skills/sdd-apply/SKILL.md"
+    mkdir -p "$HOME/.claude/skills/agentify-apply"
+    echo "stale" > "$HOME/.claude/skills/agentify-apply/SKILL.md"
     bash "$INSTALL_SCRIPT" --agent claude-code > /dev/null 2>&1
     # Should be replaced with actual content (not "stale")
     local content
-    content=$(head -c 5 "$HOME/.claude/skills/sdd-apply/SKILL.md")
+    content=$(head -c 5 "$HOME/.claude/skills/agentify-apply/SKILL.md")
     if [[ "$content" == "stale" ]]; then
         echo "SKILL.md was NOT overwritten — still contains stale data"
         return 1
     fi
-    assert_file_not_empty "$HOME/.claude/skills/sdd-apply/SKILL.md"
+    assert_file_not_empty "$HOME/.claude/skills/agentify-apply/SKILL.md"
 }
 
 test_nested_custom_path() {
@@ -499,9 +499,9 @@ test_nested_custom_path() {
 # ============================================================================
 
 echo ""
-echo -e "${CYAN}${BOLD}╔═════════════════════════════════════════════════════════════╗${NC}"
-echo -e "${CYAN}${BOLD}║    Agentify: SDD Memory Guard — Install Script Tests        ║${NC}"
-echo -e "${CYAN}${BOLD}╚═════════════════════════════════════════════════════════════╝${NC}"
+echo -e "${CYAN}${BOLD}╔════════════════════════════════════════════════════════════╗${NC}"
+echo -e "${CYAN}${BOLD}║    Agentify: Memory Guard — Install Script Tests           ║${NC}"
+echo -e "${CYAN}${BOLD}╚════════════════════════════════════════════════════════════╝${NC}"
 echo ""
 
 echo -e "${BOLD}Help & Error Handling${NC}"

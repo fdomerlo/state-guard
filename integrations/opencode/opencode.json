@@ -1,9 +1,9 @@
 {
   "$schema": "https://opencode.ai/config.json",
   "agent": {
-    "sdd-orchestrator": {
+    "agentify": {
       "mode": "all",
-      "description": "SDD Memory Guard — Agente con Memoria Transaccional",
+      "description": "Memory Guard — Agente con Memoria Transaccional",
       "prompt": "EVALUATE_SYSTEM_PROMPT_FROM_PACKAGER",
       "tools": {
         "read": true,

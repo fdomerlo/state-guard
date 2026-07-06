@@ -1,6 +1,6 @@
-# Manual Técnico — Agentify SDD
+# Manual Técnico — Agentify
 
-Este manual cubre la arquitectura técnica, configuración y flujos avanzados del sistema Agentify SDD.
+Este manual cubre la arquitectura técnica, configuración y flujos avanzados del sistema Agentify.
 
 ---
 
@@ -8,7 +8,7 @@ Este manual cubre la arquitectura técnica, configuración y flujos avanzados de
 
 ### Contrato Unificado
 
-El Memory Guard es el contrato central que el agente carga al iniciar una sesión SDD. En lugar de un orquestador que despacha comandos CLI a sub-agentes, el agente ejecuta fases directamente (inline) protegido por un protocolo de persistencia transaccional.
+El Memory Guard es el contrato central que el agente carga al iniciar una sesión del agente. En lugar de un orquestador que despacha comandos CLI a sub-agentes, el agente ejecuta fases directamente (inline) protegido por un protocolo de persistencia transaccional.
 
 ```
 Memory Guard (memory-guard.md)
@@ -18,14 +18,14 @@ Memory Guard (memory-guard.md)
     ├── Carga persistence-contract.md → Resuelve el modo de persistencia
     ├── Carga openspec-convention.md  → Prepara rutas y schema
     │
-    ├── Ejecuta inline → sdd-explore   (carga SKILL.md como instrucciones)
-    ├── Ejecuta inline → sdd-propose
-    ├── Ejecuta inline → sdd-spec
-    ├── Ejecuta inline → sdd-design
-    ├── Ejecuta inline → sdd-tasks
-    ├── Ejecuta inline → sdd-apply     (delega si > 10 tareas y host soporta)
-    ├── Ejecuta inline → sdd-verify
-    └── Ejecuta inline → sdd-archive
+    ├── Ejecuta inline → agentify-explore   (carga SKILL.md como instrucciones)
+    ├── Ejecuta inline → agentify-propose
+    ├── Ejecuta inline → agentify-spec
+    ├── Ejecuta inline → agentify-design
+    ├── Ejecuta inline → agentify-tasks
+    ├── Ejecuta inline → agentify-apply     (delega si > 10 tareas y host soporta)
+    ├── Ejecuta inline → agentify-verify
+    └── Ejecuta inline → agentify-archive
 ```
 
 ### Módulos del Memory Guard
@@ -40,7 +40,7 @@ Los contratos compartidos residen en `skills/_shared/`:
 | `context-injection.md` | Dependencias de contexto por fase y secuencia de ejecución |
 | `persistence-contract.md` | Contrato de persistencia: inline vs delegada, protocolo de comunicación |
 | `openspec-convention.md` | Convención de filesystem, schema state.ini v2, tabla de transiciones de lock_phase |
-| `sdd-phase-common.md` | Protocolo de transacción común a todas las skills de fase |
+| `agentify-phase-common.md` | Protocolo de transacción común a todas las skills de fase |
 | `test-runner-detection.md` | Pseudocódigo para la detección automática del test runner del proyecto |
 
 ### Autodetección y Delegación Inteligente
@@ -49,7 +49,7 @@ El agente determina su comportamiento en tiempo de ejecución analizando las reg
 
 El Memory Guard ejecuta fases **inline por defecto**: carga el `SKILL.md` correspondiente y sigue sus instrucciones como propias. Sin embargo, para aislar el contexto y preservar la memoria de la sesión principal, delega el trabajo pesado a un sub-agente real bajo estas estrictas condiciones:
 
-1. La fase es `sdd-apply` con más de 10 tareas pendientes, **Y**
+1. La fase es `agentify-apply` con más de 10 tareas pendientes, **Y**
 2. El agente host detectado soporta sub-agentes reales (Claude Code, OpenCode, Antigravity CLI).
 
 En la ejecución delegada, el sub-agente ejecuta las tareas e interactúa con el disco, pero **nunca** escribe en `state.ini`. El Memory Guard asume exclusivamente la responsabilidad del COMMIT transaccional al finalizar la delegación.
@@ -58,7 +58,7 @@ En la ejecución delegada, el sub-agente ejecuta las tareas e interactúa con el
 
 El sistema incluye un **registry dinámico de skills** que permite el descubrimiento automático de herramientas:
 
-- Script bash POSIX en `skills/sdd-skill-registry/scan.sh`
+- Script bash POSIX en `skills/agentify-skill-registry/scan.sh`
 - Índice generado en `.agentify/skill-registry.md`
 - El Memory Guard lee este índice al iniciar para conocer las herramientas disponibles
 
@@ -73,7 +73,7 @@ El sistema emplea el script empaquetador `scripts/packager.py` para adaptar la a
 ### Compilación Estática (Target OpenCode)
 Los modelos de entrada tienden a sufrir de "pereza de herramientas" y les cuesta inferir que deben leer el contexto dinámicamente si no se les inyecta explícitamente en el *system prompt*.
 Para `--target opencode`, el empaquetador realiza un **inlining masivo**: lee todo el contenido de `memory-guard.md`, `transaction-protocol.md`, `capabilities.md` y `openspec-convention.md`, inyectándolo como un único bloque gigante dentro de la clave `prompt` del archivo `opencode.json`. 
-Además, el empaquetador reescribe dinámicamente las directivas de los *slash commands* (como `sdd-apply.md`) para usar lenguaje imperativo (ej. `INSTRUCCIÓN CRÍTICA: DEBES usar tu herramienta read_file INMEDIATAMENTE en la ruta...`), forzando al modelo a realizar el *tool-calling* esperado.
+Además, el empaquetador reescribe dinámicamente las directivas de los *slash commands* (como `agentify-apply.md`) para usar lenguaje imperativo (ej. `INSTRUCCIÓN CRÍTICA: DEBES usar tu herramienta read_file INMEDIATAMENTE en la ruta...`), forzando al modelo a realizar el *tool-calling* esperado.
 
 ### Context Streaming (Targets Avanzados)
 Para modelos de frontera como Antigravity CLI o Claude Code (`--target antigravity-cli`, `--target claude-code`), el empaquetador evita el inlining pesado. Despliega un *system prompt* minimalista conservando la filosofía de **Lazy Loading** (Context Streaming). El agente carga dinámicamente las habilidades compartidas y específicas bajo demanda, respetando las referencias modulares limpias para mantener la ventana de contexto sumamente ligera.
@@ -90,7 +90,7 @@ El archivo `state.ini` es el núcleo del sistema de estados. Se encuentra en:
 .agentify/changes/{nombre-del-cambio}/state.ini
 ```
 
-**Schema (formato INI, manejado por `sdd_state_manager.py`):**
+**Schema (formato INI, manejado por `state_manager.py`):**
 
 ```ini
 [Metadata]
@@ -108,12 +108,12 @@ completed_phases = explore, propose
 pending_phases = spec, design, tasks, apply, verify, archive
 
 [Session]
-session_summary = ...      ; opcional — bloque generado por sdd-checkpoint, ≤500 tokens (enforced en código: máx 2000 chars)
+session_summary = ...      ; opcional — bloque generado por agentify-checkpoint, ≤500 tokens (enforced en código: máx 2000 chars)
 ```
 
 ### Protocolo de Transacciones (transaction-protocol.md)
 
-Cada fase SDD se ejecuta como una transacción ACID atómica gobernada estrictamente por `transaction-protocol.md`:
+Cada fase del agente se ejecuta como una transacción ACID atómica gobernada estrictamente por `transaction-protocol.md`:
 
 ```text
 IDLE → BEGIN → EXECUTE → COMMIT (éxito) o ROLLBACK (fallo) → IDLE
@@ -180,7 +180,7 @@ El Memory Guard detecta cambios concurrentes mediante:
 
 | Campo | Descripción |
 |-------|-------------|
-| `schema` | Versión del schema SDD. Valor actual: `spec-driven` |
+| `schema` | Versión del schema del agente. Valor actual: `spec-driven` |
 | `context` | Descripción del stack tecnológico del proyecto |
 | `rules` | Reglas específicas por fase (proposal, specs, design, tasks, apply, verify, archive) |
 | `glossary.terms` | (Opcional) Definiciones de términos del dominio |
@@ -218,9 +218,9 @@ Si no se define, la verificación reportará que los tests no pudieron ejecutars
 
 ## Flujos Avanzados
 
-### /sdd-split — División de Proposals
+### /agentify-split — División de Proposals
 
-El comando `/sdd-split` analiza una proposal monolítica y la divide en sub-cambios manejables.
+El comando `/agentify-split` analiza una proposal monolítica y la divide en sub-cambios manejables.
 
 **Cuándo usarlo:**
 
@@ -238,30 +238,30 @@ El comando `/sdd-split` analiza una proposal monolítica y la divide en sub-camb
 **Ejemplo de uso:**
 
 ```text
-/sdd-split mi-cambio-grande
+/agentify-split mi-cambio-grande
 ```
 
-### /sdd-ff — Avance Rápido (Fast-Forward)
+### /agentify-ff — Avance Rápido (Fast-Forward)
 
-El comando `/sdd-ff` permite ejecutar secuencialmente las fases de planificación (`propose`, `spec`, `design`, `tasks`).
+El comando `/agentify-ff` permite ejecutar secuencialmente las fases de planificación (`propose`, `spec`, `design`, `tasks`).
 
 **Cuándo usarlo:**
 
 - Al iniciar un cambio nuevo bien definido donde no necesitas revisar manualmente cada artefacto intermedio.
 
 **Anti-Batching Transaccional:**
-A diferencia de pedirle al LLM que "haga todas las fases de una vez" en un solo prompt (lo que corrompe el DAG), `/sdd-ff` ejecuta 4 transacciones secuenciales independientes. Cada fase tiene su propio ciclo BEGIN → COMMIT, y si el agente crashea entre la transacción 2 y la 3, el Recovery Protocol continúa automáticamente desde donde quedó.
+A diferencia de pedirle al LLM que "haga todas las fases de una vez" en un solo prompt (lo que corrompe el DAG), `/agentify-ff` ejecuta 4 transacciones secuenciales independientes. Cada fase tiene su propio ciclo BEGIN → COMMIT, y si el agente crashea entre la transacción 2 y la 3, el Recovery Protocol continúa automáticamente desde donde quedó.
 
-### /sdd-checkpoint — Guardado de Estado
+### /agentify-checkpoint — Guardado de Estado
 
-El comando `/sdd-checkpoint` genera un **bloque YAML estructurado** analizando proactivamente
+El comando `/agentify-checkpoint` genera un **bloque YAML estructurado** analizando proactivamente
 `tasks.md` y `design.md` del cambio activo. El resultado se guarda en el campo `session_summary`
 de `state.ini`, posibilitando una recuperación de contexto eficiente (**Warm-Boot**).
 
 **Dos modos de operación:**
 
 1. **Automático** (post-COMMIT): El protocolo de transacción genera un `session_summary` compacto después de cada fase. Esto es suficiente para la mayoría de los casos.
-2. **Manual** (`/sdd-checkpoint`): Genera un checkpoint de alta fidelidad con análisis proactivo de todos los artefactos. Útil antes de operaciones riesgosas o para refrescar el contexto.
+2. **Manual** (`/agentify-checkpoint`): Genera un checkpoint de alta fidelidad con análisis proactivo de todos los artefactos. Útil antes de operaciones riesgosas o para refrescar el contexto.
 
 El checkpoint es **agnóstico al DAG**: puede ejecutarse en cualquier momento sin modificar
 `lock_phase`, `current_phase` ni el flujo de fases activo.
@@ -269,30 +269,30 @@ El checkpoint es **agnóstico al DAG**: puede ejecutarse en cualquier momento si
 **Cuándo usarlo manualmente:**
 
 - Antes de realizar operaciones riesgosas
-- Al interrumpir un lote de `sdd-apply` para preservar el estado
+- Al interrumpir un lote de `agentify-apply` para preservar el estado
 - Al restablecer el contexto de trabajo forzando al LLM a recargar el panorama
 
 **Ejemplo de uso:**
 
 ```text
-/sdd-checkpoint
+/agentify-checkpoint
 ```
 
-### /sdd-archive — Cierre de Cambios
+### /agentify-archive — Cierre de Cambios
 
-El comando `/sdd-archive` cierra un cambio: fusiona las specs delta en las specs principales y mueve el cambio al archivo.
+El comando `/agentify-archive` cierra un cambio: fusiona las specs delta en las specs principales y mueve el cambio al archivo.
 
 **Flujo Obligatorio:**
 
-1. Ejecutar `/sdd-verify` y asegurar que todo es correcto.
+1. Ejecutar `/agentify-verify` y asegurar que todo es correcto.
 2. Realizar un `git commit` de todos los cambios de código y especificaciones.
-3. Ejecutar `/sdd-archive`.
+3. Ejecutar `/agentify-archive`.
 
 El comando realizará el **Paso 0** inhibitorio evaluando reportes previos, abortando en seco la operación si detecta resoluciones `CRITICAL`. Verificará el árbol de trabajo git e interrumpirá si detecta diferencias con cambios sin commitear.
 
-### /sdd-review — Auditoría Estática
+### /agentify-review — Auditoría Estática
 
-El comando `/sdd-review` compara el código implementado contra las especificaciones sin ejecutar tests.
+El comando `/agentify-review` compara el código implementado contra las especificaciones sin ejecutar tests.
 
 **Cuándo usarlo:**
 
@@ -309,12 +309,12 @@ El comando `/sdd-review` compara el código implementado contra las especificaci
 **Ejemplo de uso:**
 
 ```text
-/sdd-review mi-cambio
+/agentify-review mi-cambio
 ```
 
-### /sdd-rollback — Revertir un Cambio
+### /agentify-rollback — Revertir un Cambio
 
-El comando `/sdd-rollback` purga la carpeta del cambio y restaura los archivos modificados desde git.
+El comando `/agentify-rollback` purga la carpeta del cambio y restaura los archivos modificados desde git.
 
 **⚠️ ADVERTENCIA: Pérdida de Trabajo**
 
@@ -327,7 +327,7 @@ Este comando **elimina permanentemente** todo el trabajo no commiteado en el dir
 **Ejemplo de uso:**
 
 ```text
-/sdd-rollback mi-cambio
+/agentify-rollback mi-cambio
 ```
 
 ---
@@ -395,7 +395,7 @@ Las specs usan el formato **GIVEN/WHEN/THEN**:
 
 ## Integración con Herramientas
 
-Agentify SDD soporta múltiples agentes de IA. El Memory Guard se adapta automáticamente a las capacidades de cada host:
+Agentify soporta múltiples agentes de IA. El Memory Guard se adapta automáticamente a las capacidades de cada host:
 
 | Herramienta | Ejecución Inline | Sub-agentes | Delegación Inteligente |
 |------------|:----------------:|:-----------:|:---------------------:|
@@ -409,7 +409,7 @@ La instalación varía según la herramienta. Ejecuta `scripts/install.sh` y sel
 
 ## Guía de Integración: Custom Skills
 
-El framework SDD es extensible mediante "Custom Skills", permitiendo integrar herramientas especializadas que no son parte nativa del framework (por ejemplo, herramientas de desarrollo frontend, diseño o base de datos).
+El framework de Agentify es extensible mediante "Custom Skills", permitiendo integrar herramientas especializadas que no son parte nativa del framework (por ejemplo, herramientas de desarrollo frontend, diseño o base de datos).
 
 ### 1. Ubicación Física
 
@@ -428,7 +428,7 @@ Toda skill **DEBE** contener un archivo `SKILL.md` en su raíz. Este archivo act
 Una vez añadida la skill, el desarrollador (o el sistema) debe registrarla para que pueda ser descubierta. Para esto, ejecuta el comando:
 
 ```text
-/sdd-skill-registry
+/agentify-skill-registry
 ```
 
 Esto escaneará las rutas global y local, y actualizará el archivo de repositorio local en `.agentify/skill-registry.md`.
@@ -461,8 +461,8 @@ Actúas como un desarrollador y diseñador de componentes Vue/React/HTML...
 ### El estado no avanza
 
 1. Verificar que `state.ini` existe en `.agentify/changes/{change-name}/`
-2. Verificar `txn_status` vía `sdd_state_manager.py status`: si es `in_progress`, hay una transacción incompleta.
-3. Ejecutar `/sdd-continue` para que el Recovery Protocol intente resolver automáticamente.
+2. Verificar `txn_status` vía `state_manager.py status`: si es `in_progress`, hay una transacción incompleta.
+3. Ejecutar `/agentify-continue` para que el Recovery Protocol intente resolver automáticamente.
 
 ### Los artefactos no persisten
 
@@ -472,15 +472,15 @@ Actúas como un desarrollador y diseñador de componentes Vue/React/HTML...
 
 ### Transacción incompleta detectada
 
-1. El Recovery Protocol intenta resolver automáticamente al ejecutar `/sdd-continue`
+1. El Recovery Protocol intenta resolver automáticamente al ejecutar `/agentify-continue`
 2. Como último recurso, editar manualmente `state.ini`: setear `txn_status = idle`, `txn_phase = None`
 
 ### Conflictos entre cambios
 
-1. Usar `/sdd-status` para ver todos los cambios activos (incluye columna de estado transaccional)
+1. Usar `/agentify-status` para ver todos los cambios activos (incluye columna de estado transaccional)
 2. Archivar cambios completados antes de iniciar nuevos
 3. No trabajar en el mismo cambio desde múltiples sesiones
 
 ---
 
-*Manual técnico — Agentify SDD v2.0 — Arquitectura Memory Guard*
+*Manual técnico — Agentify v2.0 — Arquitectura Memory Guard*

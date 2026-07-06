@@ -1,6 +1,6 @@
-# Agentify SDD — Desarrollo Guiado por Especificaciones con Memoria Transaccional
+# Agentify — Entorno de Desarrollo con Memoria Transaccional
 
-Agentify SDD es un framework de desarrollo de software para agentes de IA que estructura el trabajo en fases formales: explorar, proponer, especificar, diseñar, planificar, implementar, verificar y archivar. Su arquitectura de **Memory Guard** garantiza persistencia transaccional del estado entre sesiones, ejecución inline de fases con delegación inteligente, y optimización de tokens mediante inyección dinámica de contexto.
+Agentify es un framework de desarrollo de software para agentes de IA que estructura el trabajo en fases formales: explorar, proponer, especificar, diseñar, planificar, implementar, verificar y archivar. Su arquitectura de **Memory Guard** garantiza persistencia transaccional del estado entre sesiones, ejecución inline de fases con delegación inteligente, y optimización de tokens mediante inyección dinámica de contexto.
 
 Para equipos que exigen rigor construyendo sobre lineamientos auditables.
 
@@ -35,25 +35,25 @@ powershell .\scripts\install.ps1 -Target opencode
 
 | Comando | Descripción | Tipo |
 |---------|-------------|------|
-| `/sdd-init` | Inicializa el contexto SDD en el proyecto. Detecta el stack y crea la estructura `.agentify/`. | Skill Directa |
-| `/sdd-new <nombre>` | Inicia un nuevo cambio. Ejecuta exploración y propuesta como transacciones secuenciales inline. | Meta-Skill |
-| `/sdd-continue` | Ejecuta la siguiente fase pendiente según `lock_phase` en `state.ini`. | Meta-Skill |
-| `/sdd-ff` | Fast-forward de planificación: ejecuta propuesta → specs → diseño → tareas, cada fase como transacción independiente. | Meta-Skill |
-| `/sdd-status` | Muestra el estado de todos los cambios activos, incluyendo estado transaccional. | Skill Directa |
-| `/sdd-changelog` | Genera un changelog automático a partir de los cambios archivados. | Skill Directa |
-| `/sdd-explore <tema>` | Investiga una idea antes de comprometerse. Lee el código base, compara enfoques e identifica riesgos. | Fase (Explore) |
-| `/sdd-propose <nombre>` | Crea o itera sobre una propuesta de cambio de manera independiente. | Fase (Propose) |
-| `/sdd-spec` | Escribe especificaciones delta para un cambio SDD. | Fase (Spec) |
-| `/sdd-design` | Crea el documento de diseño técnico para un cambio. | Fase (Design) |
-| `/sdd-tasks` | Desglosa un cambio en tareas de implementación. | Fase (Tasks) |
-| `/sdd-apply` | Implementa las tareas de un cambio. Escribe código siguiendo specs y diseño, marca tareas completadas. | Fase (Apply) |
-| `/sdd-verify` | Valida la implementación contra las especificaciones. Ejecuta tests y genera reporte de cumplimiento. | Fase (Verify) |
-| `/sdd-archive` | Cierra un cambio: fusiona las specs delta en las specs principales y mueve el cambio al archivo. | Fase (Archive) |
-| `/sdd-split` | Divide proposals monolíticas en sub-cambios manejables. Útil para cambios demasiado grandes. | Skill Directa |
-| `/sdd-review` | Realiza auditoría estática de código comparando contra las especificaciones. | Skill Directa |
-| `/sdd-checkpoint` | Genera un resumen del estado actual de la sesión y lo guarda en `state.ini`. También se ejecuta automáticamente después de cada fase completada. | Skill Directa |
-| `/sdd-rollback` | Purga la carpeta del cambio y restaura los archivos modificados desde git. | Skill Directa |
-| `/sdd-skill-registry` | Escanea los directorios global (`$HOME/.skills-custom`) y local (`./skills-custom`) de skills y actualiza el repositorio local. | Skill Directa |
+| `/agentify-init` | Inicializa el contexto del agente en el proyecto. Detecta el stack y crea la estructura `.agentify/`. | Skill Directa |
+| `/agentify-new <nombre>` | Inicia un nuevo cambio. Ejecuta exploración y propuesta como transacciones secuenciales inline. | Meta-Skill |
+| `/agentify-continue` | Ejecuta la siguiente fase pendiente según `lock_phase` en `state.ini`. | Meta-Skill |
+| `/agentify-ff` | Fast-forward de planificación: ejecuta propuesta → specs → diseño → tareas, cada fase como transacción independiente. | Meta-Skill |
+| `/agentify-status` | Muestra el estado de todos los cambios activos, incluyendo estado transaccional. | Skill Directa |
+| `/agentify-changelog` | Genera un changelog automático a partir de los cambios archivados. | Skill Directa |
+| `/agentify-explore <tema>` | Investiga una idea antes de comprometerse. Lee el código base, compara enfoques e identifica riesgos. | Fase (Explore) |
+| `/agentify-propose <nombre>` | Crea o itera sobre una propuesta de cambio de manera independiente. | Fase (Propose) |
+| `/agentify-spec` | Escribe especificaciones delta para un cambio transaccional. | Fase (Spec) |
+| `/agentify-design` | Crea el documento de diseño técnico para un cambio. | Fase (Design) |
+| `/agentify-tasks` | Desglosa un cambio en tareas de implementación. | Fase (Tasks) |
+| `/agentify-apply` | Implementa las tareas de un cambio. Escribe código siguiendo specs y diseño, marca tareas completadas. | Fase (Apply) |
+| `/agentify-verify` | Valida la implementación contra las especificaciones. Ejecuta tests y genera reporte de cumplimiento. | Fase (Verify) |
+| `/agentify-archive` | Cierra un cambio: fusiona las specs delta en las specs principales y mueve el cambio al archivo. | Fase (Archive) |
+| `/agentify-split` | Divide proposals monolíticas en sub-cambios manejables. Útil para cambios demasiado grandes. | Skill Directa |
+| `/agentify-review` | Realiza auditoría estática de código comparando contra las especificaciones. | Skill Directa |
+| `/agentify-checkpoint` | Genera un resumen del estado actual de la sesión y lo guarda en `state.ini`. También se ejecuta automáticamente después de cada fase completada. | Skill Directa |
+| `/agentify-rollback` | Purga la carpeta del cambio y restaura los archivos modificados desde git. | Skill Directa |
+| `/agentify-skill-registry` | Escanea los directorios global (`$HOME/.skills-custom`) y local (`./skills-custom`) de skills y actualiza el repositorio local. | Skill Directa |
 
 ---
 
@@ -62,19 +62,19 @@ powershell .\scripts\install.ps1 -Target opencode
 ### 1. Inicializar el proyecto
 
 ```bash
-/sdd-init
+/agentify-init
 ```
 
 ### 2. Crear un nuevo cambio
 
 ```bash
-/sdd-new mi-nueva-funcionalidad
+/agentify-new mi-nueva-funcionalidad
 ```
 
 ### 3. Continuar con las siguientes fases
 
 ```bash
-/sdd-continue
+/agentify-continue
 ```
 
 El Memory Guard ejecutará la siguiente fase según `lock_phase`, persistiendo el estado transaccionalmente después de cada fase.
@@ -82,18 +82,18 @@ El Memory Guard ejecutará la siguiente fase según `lock_phase`, persistiendo e
 ### 4. Implementar
 
 ```bash
-/sdd-apply
+/agentify-apply
 ```
 
 ### 5. Verificar
 
 ```bash
-/sdd-verify
+/agentify-verify
 ```
 
 ### 6. Git Commit (PASO OBLIGATORIO)
 
-Antes de proceder al archivado, es **estrictamente obligatorio** guardar los cambios en el control de versiones. El comando `/sdd-archive` fallará si detecta cambios sin commitear.
+Antes de proceder al archivado, es **estrictamente obligatorio** guardar los cambios en el control de versiones. El comando `/agentify-archive` fallará si detecta cambios sin commitear.
 
 ```bash
 git add .
@@ -105,7 +105,7 @@ git commit -m "feat: implementar mi-nueva-funcionalidad"
 Cierra el ciclo del cambio, fusionando especificaciones y moviendo los artefactos al histórico.
 
 ```bash
-/sdd-archive
+/agentify-archive
 ```
 
 ---
@@ -120,7 +120,7 @@ graph TB
         CAP["capabilities.md\nAdapter por Host"]
     end
 
-    subgraph "Fases SDD"
+    subgraph "Fases del agente"
         E[Explore] --> P[Propose]
         P --> S[Spec]
         S --> D[Design]
@@ -149,7 +149,7 @@ El **Memory Guard** es el contrato central que el agente carga al iniciar. Defin
 
 ## Herramientas CLI Compatibles
 
-Agentify SDD es un framework **Agent-First**. El Memory Guard se adapta automáticamente a las capacidades de cada agente host:
+Agentify es un framework **Agent-First**. El Memory Guard se adapta automáticamente a las capacidades de cada agente host:
 
 | Herramienta | Ejecución Inline | Sub-agentes | Delegación Inteligente |
 |-------------|:----------------:|:-----------:|:---------------------:|

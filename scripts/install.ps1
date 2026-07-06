@@ -1,6 +1,6 @@
 <#
 .SYNOPSIS
-    Agentify: SDD Memory Guard — Install Script for Windows PowerShell
+    Agentify: Memory Guard — Install Script for Windows PowerShell
 .DESCRIPTION
     Copies skills to your AI coding assistant's skill directory
     Cross-platform: Windows PowerShell 5.1+, PowerShell Core
@@ -146,7 +146,7 @@ function Write-Header {
     Write-Host ""
     Write-Host "${CYAN}${BOLD}======================================${NC}" -NoNewline
     Write-Host "${CYAN}${BOLD}╗${NC}"
-    Write-Host "${CYAN}${BOLD}║       Agentify: SDD Memory Guard — Installer     ║${NC}" -NoNewline
+    Write-Host "${CYAN}${BOLD}║       Agentify: Memory Guard — Installer     ║${NC}" -NoNewline
     Write-Host "${CYAN}${BOLD}║${NC}"
     Write-Host "${CYAN}${BOLD}║   Spec-Driven Development for AI Agents  ║${NC}" -NoNewline
     Write-Host "${CYAN}${BOLD}║${NC}"
@@ -243,7 +243,7 @@ function Test-SourceValid {
     if ($missing -gt 0) {
         Write-Host ""
         Write-Host "${RED}${BOLD}Source validation failed.${NC} Is this a complete clone of the repository?"
-        Write-Host "  Try: ${CYAN}git clone https://github.com/fdomerlo/agentify-sdd.git${NC}"
+        Write-Host "  Try: ${CYAN}git clone https://github.com/fdomerlo/agentify.git${NC}"
         Write-Host ""
         exit 1
     }
@@ -288,8 +288,8 @@ function Install-Skills {
         
         $skillMdSrc = Join-Path $skillDir.FullName "SKILL.md"
         
-        # Verify source SKILL.md exists for sdd skills
-        if ($skillName -like "sdd-*" -and -not (Test-Path $skillMdSrc)) {
+        # Verify source SKILL.md exists for skills
+        if ($skillName -like "agentify-*" -and -not (Test-Path $skillMdSrc)) {
             Write-Warn "Skipping $skillName (SKILL.md not found in source)"
             continue
         }
@@ -448,5 +448,5 @@ if (-not [string]::IsNullOrEmpty($targetArg)) {
 }
 
 Write-Host ""
-Write-Host "${GREEN}${BOLD}Done!${NC} Start using SDD with: ${CYAN}/sdd-init${NC} in your project"
+Write-Host "${GREEN}${BOLD}Done!${NC} Start using with: ${CYAN}/agentify-init${NC} in your project"
 Write-Host ""

@@ -16,7 +16,7 @@ Internamente, cada subcomando que escribe (`begin`, `commit`, `rollback`, `check
 
 Antes de empezar el trabajo analítico o de código de cualquier fase, registra la transacción invocando el middleware en tu terminal:
 
-**Comando:** `sdd_state_manager.py begin --change {nombre-del-cambio} --phase {fase-actual} [--ttl {segundos}]`
+**Comando:** `state_manager.py begin --change {nombre-del-cambio} --phase {fase-actual} [--ttl {segundos}]`
 
 *Espera a que el script devuelva `SUCCESS|BEGIN` antes de continuar.*
 
@@ -30,7 +30,7 @@ Ejecuta los objetivos de la fase actual usando tus herramientas normales (leer, 
 
 Cuando hayas terminado todos los entregables de la fase, avanza el grafo metodológico:
 
-**Comando:** `sdd_state_manager.py commit --change {nombre-del-cambio} --next-phase {siguiente-fase-segun-orden-logico}`
+**Comando:** `state_manager.py commit --change {nombre-del-cambio} --next-phase {siguiente-fase-segun-orden-logico}`
 
 El middleware valida la transición contra la tabla del DAG (ver `agentify-convention.md`). Si `--next-phase` no es la fase permitida desde `txn_phase`, el comando falla con `ERROR: Transición inválida` — **este es un rechazo del código, no una convención que dependa de que vos calcules bien la siguiente fase.** Si falla, no reintentes con otro valor arbitrario: leé el mensaje, que indica cuál es la única fase válida.
 
@@ -38,7 +38,7 @@ El middleware valida la transición contra la tabla del DAG (ver `agentify-conve
 
 Si una transacción en progreso no puede completarse (error irrecuperable, cambio de alcance, cancelación explícita del usuario), revertila en lugar de dejarla colgada:
 
-**Comando:** `sdd_state_manager.py rollback --change {nombre-del-cambio}`
+**Comando:** `state_manager.py rollback --change {nombre-del-cambio}`
 
 Restaura `txn_status` a `idle` y libera el lock de fase. No modifica `completed_phases`, `pending_phases` ni `lock_phase` — la transacción simplemente nunca ocurrió a efectos del DAG.
 
@@ -48,14 +48,14 @@ Restaura `txn_status` a `idle` y libera el lock de fase. No modifica `completed_
 
 Guarda un resumen de alta fidelidad en `session_summary`, sin tocar el estado del DAG:
 
-**Comando:** `sdd_state_manager.py checkpoint --change {nombre-del-cambio} --summary "{bloque generado}"`
+**Comando:** `state_manager.py checkpoint --change {nombre-del-cambio} --summary "{bloque generado}"`
 
 Puede ejecutarse en cualquier momento, incluso con una transacción de fase en progreso — no compite por el lock de fase (`.lock`), solo por el write-lock interno de escritura al archivo.
 
 ### STATUS (Lectura de Diagnóstico)
 
-Lectura machine-readable del estado actual, usada por `sdd-continue` y por el Recovery Protocol:
+Lectura machine-readable del estado actual, usada por `agentify-continue` y por el Recovery Protocol:
 
-**Comando:** `sdd_state_manager.py status --change {nombre-del-cambio} [--ttl {segundos}]`
+**Comando:** `state_manager.py status --change {nombre-del-cambio} [--ttl {segundos}]`
 
 Devuelve `txn_status`, `txn_phase`, `lock_phase`, y `lock_state` (`FREE`, `ACTIVE`, o `STALE`). No modifica nada — es seguro invocarlo en cualquier momento para decidir el siguiente paso.

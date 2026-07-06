@@ -2,7 +2,7 @@
 set -euo pipefail
 
 # ============================================================================
-# Agentify: SDD Memory Guard — Cleanup / Uninstall Script
+# Agentify: Memory Guard — Cleanup / Uninstall Script
 # Removes skills and injected configurations safely
 # Cross-platform: macOS, Linux, Windows (Git Bash / WSL)
 # ============================================================================
@@ -64,7 +64,7 @@ setup_colors() {
 print_header() {
     echo ""
     echo -e "${CYAN}${BOLD}╔═════════════════════════════════════════════════╗${NC}"
-    echo -e "${CYAN}${BOLD}║       Agentify: SDD Memory Guard — Cleanup      ║${NC}"
+    echo -e "${CYAN}${BOLD}║       Agentify: Memory Guard — Cleanup          ║${NC}"
     echo -e "${CYAN}${BOLD}╚═════════════════════════════════════════════════╝${NC}"
     echo ""
     echo -e "  ${BOLD}Detected:${NC} $(os_label)"
@@ -143,16 +143,16 @@ remove_directory() {
 remove_injected_blocks() {
     local target_file="$1"
     local name="$2"
-    local marker_begin="<!-- BEGIN SDD MEMORY GUARD -->"
-    local marker_end="<!-- END SDD MEMORY GUARD -->"
+    local marker_begin="<!-- BEGIN MEMORY GUARD -->"
+    local marker_end="<!-- END MEMORY GUARD -->"
 
     if [ -f "$target_file" ]; then
         if grep -q "$marker_begin" "$target_file"; then
             awk "/$marker_begin/{flag=1} /$marker_end/{flag=0; next} !flag" "$target_file" > "${target_file}.tmp"
             mv "${target_file}.tmp" "$target_file"
-            print_success "Bloque SDD Memory Guard purgado exitosamente de $name ($target_file)"
+            print_success "Bloque Memory Guard purgado exitosamente de $name ($target_file)"
         else
-            print_step "No se encontró tag SDD inyectado en $name ($target_file)"
+            print_step "No se encontró tag Memory Guard inyectado en $name ($target_file)"
         fi
     else
         print_step "Archivo de configuración persistente no encontrado para $name ($target_file)"
@@ -190,12 +190,12 @@ import json, sys, os
 target_path = sys.argv[1]
 try:
     with open(target_path, "r", encoding="utf-8") as f: data = json.load(f)
-    if "agent" in data and "sdd-orchestrator" in data["agent"]:
-        del data["agent"]["sdd-orchestrator"]
+    if "agent" in data and "agentify" in data["agent"]:
+        del data["agent"]["agentify"]
         with open(target_path, "w", encoding="utf-8") as f: json.dump(data, f, indent=2, ensure_ascii=False)
-        print("SUCCESS|Bloque agent.sdd-orchestrator json purgado de OpenCode Config")
+        print("SUCCESS|Bloque agent.agentify json purgado de OpenCode Config")
     else:
-        print("STEP|No se halló key agent.sdd-orchestrator en opencode.json")
+        print("STEP|No se halló key agent.agentify en opencode.json")
 except Exception:
     print("WARN|Error al parsear estructura de opencode.json")
 sys.exit(0)

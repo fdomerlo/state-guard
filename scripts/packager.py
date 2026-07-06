@@ -7,10 +7,10 @@ import sys
 
 def compile_opencode_prompt(repo_dir, skills_path):
     content = (
-        "Actúas como agente de desarrollo SDD.\n\n"
+        "Actúas como agente de desarrollo.\n\n"
         "## PROTOCOLO DE ESTADO (ACID)\n"
         "1. PROHIBIDO editar state.ini manualmente.\n"
-        f"2. Delega la mutación del estado usando siempre la terminal con este comando exacto: `python3 {skills_path}/bin/sdd_state_manager.py [comando]`\n"
+        f"2. Delega la mutación del estado usando siempre la terminal con este comando exacto: `python3 {skills_path}/bin/state_manager.py [comando]`\n"
         "3. Carga siempre `{SKILLS_PATH}/_shared/agentify-convention.md` al iniciar.\n"
     )
     return content.replace("{SKILLS_PATH}", skills_path)
@@ -51,7 +51,7 @@ def process_opencode_commands(commands_src, commands_target, skills_path):
             f.write(content)
 
 def main():
-    parser = argparse.ArgumentParser(description="Agentify SDD Packager")
+    parser = argparse.ArgumentParser(description="Agentify Packager")
     parser.add_argument("--target", required=True, help="Target engine: opencode, claude-code, antigravity-cli, project-local, all-global, custom")
     parser.add_argument("--skills-path", required=True, help="Resolved skills path")
     parser.add_argument("--config-target", required=False, help="Path to config file to inject")
@@ -90,8 +90,8 @@ def main():
         if "agent" not in target:
             target["agent"] = {}
             
-        target["agent"]["sdd-orchestrator"] = source["agent"]["sdd-orchestrator"]
-        target["agent"]["sdd-orchestrator"]["prompt"] = prompt
+        target["agent"]["agentify"] = source["agent"]["agentify"]
+        target["agent"]["agentify"]["prompt"] = prompt
         
         with open(args.config_target, "w", encoding="utf-8") as f:
             json.dump(target, f, indent=2, ensure_ascii=False)

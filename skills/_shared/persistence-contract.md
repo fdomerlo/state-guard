@@ -1,4 +1,4 @@
-# Contrato de Persistencia (Compartido entre todas las skills SDD)
+# Contrato de Persistencia (Compartido entre todas las skills del agente)
 
 ## Persistencia Directa (File System)
 
@@ -8,14 +8,14 @@ El framework utiliza el File System como único mecanismo de persistencia nativo
 
 El Memory Guard persiste el estado del DAG en `.agentify/changes/{change-name}/state.ini` mediante el protocolo de transacciones (ver [transaction-protocol.md](./transaction-protocol.md)).
 
-Cada transición de fase sigue el ciclo: BEGIN → EXECUTE (persistir artefacto) → COMMIT (invocar `sdd_state_manager.py commit` en la terminal).
+Cada transición de fase sigue el ciclo: BEGIN → EXECUTE (persistir artefacto) → COMMIT (invocar `state_manager.py commit` en la terminal).
 
 **Responsabilidad de escritura:**
 
 | Quién | Qué muta en state.ini |
 |-------|---------------------------|
 | Memory Guard (transacción) | Todos los campos de fase y transacción |
-| `sdd-checkpoint` | Solo `session_summary` y `last_updated` |
+| `agentify-checkpoint` | Solo `session_summary` y `last_updated` |
 
 ## Ejecución Inline vs Delegada
 
@@ -23,11 +23,11 @@ Cada transición de fase sigue el ciclo: BEGIN → EXECUTE (persistir artefacto)
 
 Cuando ejecutás una fase inline, vos mismo sos responsable de:
 
-1. Ejecutar BEGIN (invocar `sdd_state_manager.py begin` en la terminal)
+1. Ejecutar BEGIN (invocar `state_manager.py begin` en la terminal)
 2. Leer artefactos de dependencia del disco
 3. Ejecutar la fase
 4. Persistir el artefacto resultante en disco
-5. Ejecutar COMMIT (invocar `sdd_state_manager.py commit` en la terminal)
+5. Ejecutar COMMIT (invocar `state_manager.py commit` en la terminal)
 
 ### Ejecución Delegada (fases pesadas)
 

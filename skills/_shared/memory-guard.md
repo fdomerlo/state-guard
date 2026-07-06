@@ -31,7 +31,7 @@ Cuando ejecutás inline:
 1. Cargá el SKILL.md de la fase
 2. Seguí sus instrucciones como si fueran tuyas
 3. El protocolo de transacción (BEGIN/COMMIT) se aplica automáticamente
-4. Persistí el artefacto en disco Y actualizá el estado invocando `sdd_state_manager.py` en la terminal
+4. Persistí el artefacto en disco Y actualizá el estado invocando `state_manager.py` en la terminal
 5. Reportá el resultado al usuario
 ```
 
@@ -40,7 +40,7 @@ Cuando delegás a sub-agente:
 ```text
 1. Pasá al sub-agente: nombre del cambio + rutas de artefactos de dependencia
 2. El sub-agente ejecuta, persiste artefactos en disco, y retorna resumen
-3. Vos actualizás el estado invocando `sdd_state_manager.py` en la terminal (el sub-agente NO toca state.ini)
+3. Vos actualizás el estado invocando `state_manager.py` en la terminal (el sub-agente NO toca state.ini)
 4. Reportá el resultado al usuario
 ```
 
@@ -51,12 +51,12 @@ Cuando delegás a sub-agente:
 - Responder preguntas cortas
 - Coordinar fases y mostrar resúmenes
 - Pedir decisiones al usuario
-- Leer estado (vía `sdd_state_manager.py status`) y actualizar invocando `sdd_state_manager.py` en la terminal
+- Leer estado (vía `state_manager.py status`) y actualizar invocando `state_manager.py` en la terminal
 - Ejecutar fases inline (cargando SKILL.md)
 
 ### Lo que delegás (solo si el host lo soporta)
 
-- Fases pesadas de `sdd-apply` (> 10 tareas)
+- Fases pesadas de `agentify-apply` (> 10 tareas)
 - Tareas que el usuario solicite explícitamente en sub-agente
 
 ### Autoevaluación
@@ -67,7 +67,7 @@ Antes de delegar, preguntate: "¿Puedo ejecutar esto inline sin exceder mi venta
 
 El middleware implementa dos mecanismos automáticos al ejecutar COMMIT:
 
-1. **Auto-Checkpoint Determinístico:** `cmd_commit` genera y persiste un `session_summary` mínimo con el estado real del DAG (fase completada, siguiente, completadas, pendientes). Esto garantiza warm-boot sin depender de que vos ejecutes `/sdd-checkpoint`.
+1. **Auto-Checkpoint Determinístico:** `cmd_commit` genera y persiste un `session_summary` mínimo con el estado real del DAG (fase completada, siguiente, completadas, pendientes). Esto garantiza warm-boot sin depender de que vos ejecutes `/agentify-checkpoint`.
 
 2. **Boundary Marker:** El output del COMMIT incluye `⚠️ FASE {X} COMPLETADA — sus instrucciones ya no aplican`, señalando explícitamente que las instrucciones de la fase anterior son obsoletas.
 
@@ -78,7 +78,7 @@ El middleware implementa dos mecanismos automáticos al ejecutar COMMIT:
 **Paso 0 — Diagnóstico del lock (SIEMPRE primero, antes de decidir nada):**
 
 ```text
-Invocar: sdd_state_manager.py status --change {nombre-del-cambio}
+Invocar: state_manager.py status --change {nombre-del-cambio}
 ```
 
 Esto devuelve `txn_status`, `txn_phase`, `lock_phase` y `lock_state` (`FREE` | `ACTIVE` | `STALE`). **No asumas el estado del lock a partir de `txn_status` solo** — con el lock atómico (`.lock` a nivel de OS), es posible que `txn_status=in_progress` en el INI mientras `lock_state=STALE` (sesión anterior crasheó) o incluso `lock_state=FREE` si el lockfile se perdió por una intervención externa. Este último caso es una inconsistencia que no debe resolverse automáticamente:
@@ -115,4 +115,4 @@ Solo si caíste en el caso `STALE` (segunda fila) seguí con los pasos clásicos
 
 - `persistence-contract.md` — comportamiento de la persistencia.
 - `agentify-convention.md` — carpetas y rutas exactas.
-- `sdd-skill-registry` — escanea skills personalizadas (globales y locales).
+- `agentify-skill-registry` — escanea skills personalizadas (globales y locales).
