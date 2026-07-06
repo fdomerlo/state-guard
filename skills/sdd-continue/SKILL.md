@@ -27,7 +27,11 @@ Si no hay argumento `{nombre}`, explorar `.agentify/changes/` para identificar e
 
 Si `state.ini` no existe para el cambio → STOP:
 ```
+<<<<<<< HEAD
 Ejecutá /sdd-fix para migrar el estado antes de continuar.
+=======
+Reportar al usuario que el estado es inconsistente/corrupto — no hay skill de reparación automática.
+>>>>>>> 1cbdc21 (feat: Enhance SDD State Manager with locking mechanism and session management)
 ```
 
 ### Paso 2: Decidir Según `lock_state`
@@ -41,7 +45,11 @@ lock_state == FREE
   y txn_status == idle → proceder directamente al Paso 3.
   y txn_status == in_progress
                         → esto es un estado inconsistente (lock liberado pero txn abierta).
+<<<<<<< HEAD
                           Ejecutá /sdd-fix para reparar antes de continuar.
+=======
+                          Reportar al usuario que el estado es inconsistente/corrupto — no hay skill de reparación automática.
+>>>>>>> 1cbdc21 (feat: Enhance SDD State Manager with locking mechanism and session management)
 ```
 
 ### Paso 3: Ejecutar Siguiente Fase
