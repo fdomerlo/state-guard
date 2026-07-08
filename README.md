@@ -1,4 +1,5 @@
-# State Guard — Un Framework de Memoria Transaccional para Agentes LLM
+# State Guard
+### Framework de Memoria Transaccional para Agentes LLM
 
 State Guard es un framework de desarrollo de software para agentes de IA que estructura el trabajo en fases formales: explorar, proponer, especificar, diseñar, planificar, implementar, verificar y archivar. Su arquitectura de **Memory Guard** garantiza persistencia transaccional del estado entre sesiones, ejecución inline de fases con delegación inteligente, y optimización de tokens mediante inyección dinámica de contexto.
 
