@@ -31,7 +31,7 @@ SI la fase es `apply`
   Y hay más de 10 tareas pendientes
   Y el host soporta sub-agentes reales:
     → Delegar a sub-agente con las tareas como instrucciones
-    → El sub-agente persiste artefactos; vos actualizás el estado vía `state_manager.py`
+    → El sub-agente persiste artefactos; vos actualizás el estado vía `mmx_state_manager.py`
 SINO:
     → Ejecutar inline con Memory Guard
 ```
@@ -52,7 +52,7 @@ Modo híbrido: inline por defecto, delegación para fases pesadas. Al delegar:
 Cada host necesita un system prompt mínimo que cargue el Memory Guard. El contenido es idéntico para todos:
 
 ```markdown
-# Agentify Memory Guard
+# Memex Memory Guard
 
 Actúas como agente de desarrollo con memoria transaccional usando la metodología
 Entorno de Ejecución con Memoria Transaccional.
@@ -70,7 +70,7 @@ Cargá y seguí `{ruta-skills}/_shared/memory-guard.md` para todas las reglas de
 
 Cargá también al inicio:
 - `{ruta-skills}/_shared/persistence-contract.md`
-- `{ruta-skills}/_shared/agentify-convention.md`
+- `{ruta-skills}/_shared/mmx-convention.md`
 ```
 
 La única variación es `{ruta-skills}`:

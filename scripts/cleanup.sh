@@ -2,7 +2,7 @@
 set -euo pipefail
 
 # ============================================================================
-# Agentify: Memory Guard — Cleanup / Uninstall Script
+# Memex: Memory Guard — Cleanup / Uninstall Script
 # Removes skills and injected configurations safely
 # Cross-platform: macOS, Linux, Windows (Git Bash / WSL)
 # ============================================================================
@@ -64,7 +64,7 @@ setup_colors() {
 print_header() {
     echo ""
     echo -e "${CYAN}${BOLD}╔═════════════════════════════════════════════════╗${NC}"
-    echo -e "${CYAN}${BOLD}║       Agentify: Memory Guard — Cleanup          ║${NC}"
+    echo -e "${CYAN}${BOLD}║       Memex: Memory Guard — Cleanup          ║${NC}"
     echo -e "${CYAN}${BOLD}╚═════════════════════════════════════════════════╝${NC}"
     echo ""
     echo -e "  ${BOLD}Detected:${NC} $(os_label)"
@@ -81,7 +81,7 @@ show_help() {
     echo ""
     echo "Options:"
     echo "  --agent NAME    Clean for a specific agent (claude-code, opencode, antigravity-cli, project-local, all-global)"
-    echo "  --hard          Hard mode: Remove .agentify/changes historical data"
+    echo "  --hard          Hard mode: Remove .memex/changes historical data"
     echo "  -h, --help      Show this help"
     echo ""
 }
@@ -190,12 +190,12 @@ import json, sys, os
 target_path = sys.argv[1]
 try:
     with open(target_path, "r", encoding="utf-8") as f: data = json.load(f)
-    if "agent" in data and "agentify" in data["agent"]:
-        del data["agent"]["agentify"]
+    if "agent" in data and "memex" in data["agent"]:
+        del data["agent"]["memex"]
         with open(target_path, "w", encoding="utf-8") as f: json.dump(data, f, indent=2, ensure_ascii=False)
-        print("SUCCESS|Bloque agent.agentify json purgado de OpenCode Config")
+        print("SUCCESS|Bloque agent.memex json purgado de OpenCode Config")
     else:
-        print("STEP|No se halló key agent.agentify en opencode.json")
+        print("STEP|No se halló key agent.memex en opencode.json")
 except Exception:
     print("WARN|Error al parsear estructura de opencode.json")
 sys.exit(0)
@@ -223,7 +223,7 @@ project-local)
             local target_dir
             target_dir="$(get_tool_path project-local)"
             
-            # GUARD CLAUSE: Prevenir auto-borrado del código fuente de Agentify
+            # GUARD CLAUSE: Prevenir auto-borrado del código fuente de Memex
             if [ "$PWD" = "$REPO_DIR" ]; then
                 print_warn "Ejecución detectada en la raíz del repositorio fuente ($REPO_DIR)."
                 print_error "Protección de seguridad: Se omite la eliminación de './skills' para no destruir el código del framework."
@@ -280,16 +280,16 @@ handle_hard_mode() {
     if [ "$HARD_MODE" -eq 1 ]; then
         echo -e "\n${YELLOW}${BOLD}⚠ ATENCIÓN: MODO HARD ACTIVADO ⚠${NC}"
         echo -e "¿Estás seguro que deseas purgar todo el historial local del proyecto?"
-        echo -e "Esto borrará de forma irrecuperable: ${CYAN}.agentify/changes/*${NC}"
+        echo -e "Esto borrará de forma irrecuperable: ${CYAN}.memex/changes/*${NC}"
         read -r -p "Proceder con la purga? [y/N] " input
         if case "$input" in [yY][eE][sS]|[yY]) true;; *) false;; esac; then
-            if [ -d ".agentify/changes" ]; then
-                rm -rf .agentify/changes/* || true
-                print_success "Historial en .agentify/changes/ eliminado permanentemente."
-                mkdir -p ".agentify/changes/archive"
+            if [ -d ".memex/changes" ]; then
+                rm -rf .memex/changes/* || true
+                print_success "Historial en .memex/changes/ eliminado permanentemente."
+                mkdir -p ".memex/changes/archive"
                 print_step "Árbol básico inicializado."
             else
-                print_step "Directorio .agentify/changes/ no detectado, ignorando..."
+                print_step "Directorio .memex/changes/ no detectado, ignorando..."
             fi
         else
             print_warn "Purga de historial denegada u omitida. Terminando asertivamente."

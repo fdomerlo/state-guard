@@ -2,8 +2,8 @@
 set -euo pipefail
 
 # ============================================================================
-# Agentify — Install Script (unificado)
-# Instala el orquestador (state_manager.py + _lock_utils.py) y las skills,
+# Memex — Install Script (unificado)
+# Instala el orquestador (mmx_state_manager.py + _lock_utils.py) y las skills,
 # e inyecta el bootstrap contract en el archivo de instrucciones globales
 # del harness elegido. Absorbe lo que antes era context-guard standalone:
 # el lock + checkpoint viven en un único motor.
@@ -13,15 +13,15 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_DIR="$(dirname "$SCRIPT_DIR")"
 
 SKILLS_SRC="$REPO_DIR/skills"
-MANAGER_SRC="$SCRIPT_DIR/state_manager.py"
+MANAGER_SRC="$SCRIPT_DIR/mmx_state_manager.py"
 LOCKLIB_SRC="$SCRIPT_DIR/_lock_utils.py"
 
 # Path genérico — cualquier harness compatible con Agent Skills Spec
-INSTALL_ROOT="$HOME/.agents/skills/agentify"
+INSTALL_ROOT="$HOME/.agents/skills/memex"
 BIN_DEST="$INSTALL_ROOT/bin"
 
-MARKER_BEGIN="<!-- agentify:begin -->"
-MARKER_END="<!-- agentify:end -->"
+MARKER_BEGIN="<!-- memex:begin -->"
+MARKER_END="<!-- memex:end -->"
 
 GREEN='\033[0;32m'; YELLOW='\033[1;33m'; CYAN='\033[0;36m'
 BOLD='\033[1m'; NC='\033[0m'
@@ -31,7 +31,7 @@ warn() { echo -e "  ${YELLOW}!${NC} $1"; }
 info() { echo -e "  ${CYAN}→${NC} $1"; }
 
 [ -d "$SKILLS_SRC" ] || { echo "Error: carpeta skills/ no encontrada en $REPO_DIR"; exit 1; }
-[ -f "$MANAGER_SRC" ] || { echo "Error: state_manager.py no encontrado en $SCRIPT_DIR"; exit 1; }
+[ -f "$MANAGER_SRC" ] || { echo "Error: mmx_state_manager.py no encontrado en $SCRIPT_DIR"; exit 1; }
 [ -f "$LOCKLIB_SRC" ] || { echo "Error: _lock_utils.py no encontrado en $SCRIPT_DIR"; exit 1; }
 
 install_core() {
@@ -39,7 +39,7 @@ install_core() {
     mkdir -p "$BIN_DEST"
     cp "$MANAGER_SRC" "$BIN_DEST/"
     cp "$LOCKLIB_SRC" "$BIN_DEST/"
-    chmod +x "$BIN_DEST/state_manager.py"
+    chmod +x "$BIN_DEST/mmx_state_manager.py"
     cp -r "$SKILLS_SRC" "$INSTALL_ROOT/"
     ok "Núcleo instalado en $INSTALL_ROOT"
 }
@@ -75,13 +75,13 @@ inject_bootstrap() {
 
     {
         echo "$MARKER_BEGIN"
-        echo "## ACTIVE PERSISTENCE CONTRACT: agentify (memory-guard)"
+        echo "## ACTIVE PERSISTENCE CONTRACT: memex (memory-guard)"
         echo "MANDATORY BOOTSTRAP — execute before responding to anything:"
         echo "1. Call read_file on \`$INSTALL_ROOT/skills/_shared/memory-guard.md\`."
         echo "2. Follow every instruction in that file as your absolute state contract."
-        echo "3. State manager binary: \`$BIN_DEST/state_manager.py\`"
+        echo "3. State manager binary: \`$BIN_DEST/mmx_state_manager.py\`"
         echo "   Subcomandos: begin | commit | rollback | checkpoint | status"
-        echo "4. Check for an active change at \`.agentify/changes/*/state.ini\`"
+        echo "4. Check for an active change at \`.memex/changes/*/state.ini\`"
         echo "   and act accordingly (Cold Boot, Resume via 'status', or Recovery)."
         echo "$MARKER_END"
     } >> "$target_file"
@@ -124,9 +124,9 @@ inject_opencode_agent() {
         return
     fi
 
-    # Verificar si ya tiene el agente agentify
-    if grep -q '"agentify"' "$config_file"; then
-        ok "Agente agentify ya presente en $config_file (sin modificar)."
+    # Verificar si ya tiene el agente memex
+    if grep -q '"memex"' "$config_file"; then
+        ok "Agente memex ya presente en $config_file (sin modificar)."
         return
     fi
 
@@ -191,7 +191,7 @@ json.dump(cfg, sys.stdout, indent=2, ensure_ascii=False)
 " 2>&1) || { warn "Error al parsear config: $agent_block"; return; }
 
     echo "$agent_block" > "$config_file"
-    ok "Agente agentify inyectado en $config_file"
+    ok "Agente memex inyectado en $config_file"
 }
 
 install_opencode() {
@@ -203,7 +203,7 @@ install_opencode() {
 
 uninstall() {
     local target="$1"
-    info "Desinstalando Agentify..."
+    info "Desinstalando Memex..."
     rm -rf "$INSTALL_ROOT"
     ok "Archivos base eliminados."
 
@@ -235,15 +235,15 @@ uninstall() {
         local cmds_dest="$HOME/.config/opencode/commands"
         if [ -d "$cmds_dest" ]; then
             local count=0
-            for f in "$cmds_dest"/agentify-*.md; do
+            for f in "$cmds_dest"/mmx-*.md; do
                 [ -f "$f" ] && rm "$f" && count=$((count + 1))
             done
             [ $count -gt 0 ] && ok "$count slash commands eliminados."
         fi
 
-        # Remover agente agentify del config
+        # Remover agente memex del config
         local config_file="$HOME/.config/opencode/opencode.jsonc"
-        if [ -f "$config_file" ] && grep -q '"agentify"' "$config_file"; then
+        if [ -f "$config_file" ] && grep -q '"memex"' "$config_file"; then
             python3 -c "
 import json, sys
 
@@ -284,19 +284,19 @@ def strip_jsonc_comments(text):
 
 with open('$config_file') as f:
     cfg = json.loads(strip_jsonc_comments(f.read()))
-if 'agent' in cfg and 'agentify' in cfg['agent']:
-    del cfg['agent']['agentify']
+if 'agent' in cfg and 'memex' in cfg['agent']:
+    del cfg['agent']['memex']
     if not cfg['agent']:
         del cfg['agent']
 json.dump(cfg, sys.stdout, indent=2, ensure_ascii=False)
 print()
 " > "${config_file}.tmp" && mv "${config_file}.tmp" "$config_file"
-            ok "Agente agentify removido de $config_file"
+            ok "Agente memex removido de $config_file"
         fi
     fi
 }
 
-echo -e "\n${CYAN}${BOLD}Agentify — Installer${NC}"
+echo -e "\n${CYAN}${BOLD}Memex — Installer${NC}"
 echo -e "  Install path: $INSTALL_ROOT\n"
 
 TARGET=""

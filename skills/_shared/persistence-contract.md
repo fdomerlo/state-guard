@@ -2,20 +2,20 @@
 
 ## Persistencia Directa (File System)
 
-El framework utiliza el File System como único mecanismo de persistencia nativo. Todas las operaciones de lectura y escritura de artefactos se realizan bajo el directorio `.agentify/` siguiendo la convención [agentify-convention.md](./agentify-convention.md).
+El framework utiliza el File System como único mecanismo de persistencia nativo. Todas las operaciones de lectura y escritura de artefactos se realizan bajo el directorio `.memex/` siguiendo la convención [mmx-convention.md](./mmx-convention.md).
 
 ## Persistencia Transaccional del Estado
 
-El Memory Guard persiste el estado del DAG en `.agentify/changes/{change-name}/state.ini` mediante el protocolo de transacciones (ver [transaction-protocol.md](./transaction-protocol.md)).
+El Memory Guard persiste el estado del DAG en `.memex/changes/{change-name}/state.ini` mediante el protocolo de transacciones (ver [transaction-protocol.md](./transaction-protocol.md)).
 
-Cada transición de fase sigue el ciclo: BEGIN → EXECUTE (persistir artefacto) → COMMIT (invocar `state_manager.py commit` en la terminal).
+Cada transición de fase sigue el ciclo: BEGIN → EXECUTE (persistir artefacto) → COMMIT (invocar `mmx_state_manager.py commit` en la terminal).
 
 **Responsabilidad de escritura:**
 
 | Quién | Qué muta en state.ini |
 |-------|---------------------------|
 | Memory Guard (transacción) | Todos los campos de fase y transacción |
-| `agentify-checkpoint` | Solo `session_summary` y `last_updated` |
+| `mmx-checkpoint` | Solo `session_summary` y `last_updated` |
 
 ## Ejecución Inline vs Delegada
 
@@ -23,11 +23,11 @@ Cada transición de fase sigue el ciclo: BEGIN → EXECUTE (persistir artefacto)
 
 Cuando ejecutás una fase inline, vos mismo sos responsable de:
 
-1. Ejecutar BEGIN (invocar `state_manager.py begin` en la terminal)
+1. Ejecutar BEGIN (invocar `mmx_state_manager.py begin` en la terminal)
 2. Leer artefactos de dependencia del disco
 3. Ejecutar la fase
 4. Persistir el artefacto resultante en disco
-5. Ejecutar COMMIT (invocar `state_manager.py commit` en la terminal)
+5. Ejecutar COMMIT (invocar `mmx_state_manager.py commit` en la terminal)
 
 ### Ejecución Delegada (fases pesadas)
 
@@ -49,28 +49,28 @@ El sub-agente NUNCA escribe en `state.ini`. Solo persiste sus artefactos y retor
 ```text
 Lee estos artefactos antes de comenzar:
 - {ruta del archivo para cada dependencia}
-Si hay un glosario en .agentify/config.yaml, cargarlo y usarlo para terminología consistente.
-Después de completar tu trabajo, persistí tu artefacto siguiendo agentify-convention.md.
+Si hay un glosario en .memex/config.yaml, cargarlo y usarlo para terminología consistente.
+Después de completar tu trabajo, persistí tu artefacto siguiendo mmx-convention.md.
 ```
 
 **Fase sin dependencias:**
 
 ```text
-Si hay un glosario en .agentify/config.yaml, cargarlo y usarlo para terminología consistente.
-Después de completar tu trabajo, persistí tu artefacto siguiendo agentify-convention.md.
+Si hay un glosario en .memex/config.yaml, cargarlo y usarlo para terminología consistente.
+Después de completar tu trabajo, persistí tu artefacto siguiendo mmx-convention.md.
 ```
 
 ## Carga de Glosario
 
 Al inicio de cada skill:
 
-1. Buscar archivo `.agentify/config.yaml`
+1. Buscar archivo `.memex/config.yaml`
 2. Si existe y contiene clave `glossary`, cargar los términos
 3. Usar los términos definidos para mantener consistencia en el output
 4. Si no existe el glosario, continuar normalmente (es opcional)
 
 ### Graceful Degradation
 
-- Si `.agentify/config.yaml` NO existe → continuar sin glosario
+- Si `.memex/config.yaml` NO existe → continuar sin glosario
 - Si el archivo existe pero NO tiene sección `glossary:` → continuar sin glosario
 - Si la sección `glossary:` existe pero está vacía o malformada → continuar sin glosario, sin lanzar error

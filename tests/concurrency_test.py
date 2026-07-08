@@ -5,8 +5,8 @@ import configparser
 from concurrent.futures import ThreadPoolExecutor
 
 CHANGE = "test-change"
-SCRIPT = os.path.join(os.path.dirname(__file__), "scripts", "state_manager.py")
-STATE_PATH = f".agentify/changes/{CHANGE}/state.ini"
+SCRIPT = os.path.join(os.path.dirname(__file__), "scripts", "mmx_state_manager.py")
+STATE_PATH = f".memex/changes/{CHANGE}/state.ini"
 
 
 def run(args):
@@ -29,7 +29,7 @@ def reset_state():
             "pending_phases = spec, design, tasks, apply, verify, archive\n"
         )
     for f in [".lock", ".write-lock"]:
-        p = os.path.join(os.path.dirname(__file__), f".agentify/changes/{CHANGE}/{f}")
+        p = os.path.join(os.path.dirname(__file__), f".memex/changes/{CHANGE}/{f}")
         if os.path.exists(p):
             os.remove(p)
 

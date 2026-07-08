@@ -1,6 +1,6 @@
-# Agentify
+# Memex
 .agent/
-.agentify/
+.memex/
 # Ignorar solo cambios locales activos (evita subir borradores)
 openspec/changes/*
 # Permitir persistir el archivo histórico (archive)

@@ -7,7 +7,7 @@ Este helper contiene el pseudocódigo compartido para detectar el test runner de
 ## Pseudocódigo
 
 Detectar test runner desde:
-├── .agentify/config.yaml → rules.{fase}.test_command (máxima prioridad)
+├── .memex/config.yaml → rules.{fase}.test_command (máxima prioridad)
 ├── package.json → scripts.test
 ├── pyproject.toml / pytest.ini → pytest
 ├── Makefile → make test
@@ -17,5 +17,5 @@ Detectar test runner desde:
 
 Para usar este helper:
 
-- En `agentify-apply`: usar `rules.apply.test_command` como clave de configuración
-- En `agentify-verify`: usar `rules.verify.test_command` como clave de configuración
+- En `mmx-apply`: usar `rules.apply.test_command` como clave de configuración
+- En `mmx-verify`: usar `rules.verify.test_command` como clave de configuración
