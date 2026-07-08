@@ -1,6 +1,6 @@
-# Manual Técnico — Agentify
+# Manual Técnico — State Guard
 
-Este manual cubre la arquitectura técnica, configuración y flujos avanzados del sistema Agentify.
+Este manual cubre la arquitectura técnica, configuración y flujos avanzados del sistema State Guard.
 
 ---
 
@@ -16,16 +16,16 @@ Memory Guard (memory-guard.md)
     ├── Carga transaction-protocol.md → Protocolo BEGIN/COMMIT/ROLLBACK
     ├── Carga capabilities.md         → Detecta capacidades del host
     ├── Carga persistence-contract.md → Resuelve el modo de persistencia
-    ├── Carga openspec-convention.md  → Prepara rutas y schema
+    ├── Carga convention.md  → Prepara rutas y schema
     │
-    ├── Ejecuta inline → agentify-explore   (carga SKILL.md como instrucciones)
-    ├── Ejecuta inline → agentify-propose
-    ├── Ejecuta inline → agentify-spec
-    ├── Ejecuta inline → agentify-design
-    ├── Ejecuta inline → agentify-tasks
-    ├── Ejecuta inline → agentify-apply     (delega si > 10 tareas y host soporta)
-    ├── Ejecuta inline → agentify-verify
-    └── Ejecuta inline → agentify-archive
+    ├── Ejecuta inline → explore   (carga SKILL.md como instrucciones)
+    ├── Ejecuta inline → propose
+    ├── Ejecuta inline → spec
+    ├── Ejecuta inline → design
+    ├── Ejecuta inline → tasks
+    ├── Ejecuta inline → apply     (delega si > 10 tareas y host soporta)
+    ├── Ejecuta inline → verify
+    └── Ejecuta inline → archive
 ```
 
 ### Módulos del Memory Guard
@@ -39,8 +39,8 @@ Los contratos compartidos residen en `skills/_shared/`:
 | `capabilities.md` | Detección de capacidades del agente host y regla de delegación inteligente |
 | `context-injection.md` | Dependencias de contexto por fase y secuencia de ejecución |
 | `persistence-contract.md` | Contrato de persistencia: inline vs delegada, protocolo de comunicación |
-| `openspec-convention.md` | Convención de filesystem, schema state.ini v2, tabla de transiciones de lock_phase |
-| `agentify-phase-common.md` | Protocolo de transacción común a todas las skills de fase |
+| `convention.md` | Convención de filesystem, schema state.ini v2, tabla de transiciones de lock_phase |
+| `phase-common.md` | Protocolo de transacción común a todas las skills de fase |
 | `test-runner-detection.md` | Pseudocódigo para la detección automática del test runner del proyecto |
 
 ### Autodetección y Delegación Inteligente
@@ -49,7 +49,7 @@ El agente determina su comportamiento en tiempo de ejecución analizando las reg
 
 El Memory Guard ejecuta fases **inline por defecto**: carga el `SKILL.md` correspondiente y sigue sus instrucciones como propias. Sin embargo, para aislar el contexto y preservar la memoria de la sesión principal, delega el trabajo pesado a un sub-agente real bajo estas estrictas condiciones:
 
-1. La fase es `agentify-apply` con más de 10 tareas pendientes, **Y**
+1. La fase es `apply` con más de 10 tareas pendientes, **Y**
 2. El agente host detectado soporta sub-agentes reales (Claude Code, OpenCode, Antigravity CLI).
 
 En la ejecución delegada, el sub-agente ejecuta las tareas e interactúa con el disco, pero **nunca** escribe en `state.ini`. El Memory Guard asume exclusivamente la responsabilidad del COMMIT transaccional al finalizar la delegación.
@@ -58,8 +58,8 @@ En la ejecución delegada, el sub-agente ejecuta las tareas e interactúa con el
 
 El sistema incluye un **registry dinámico de skills** que permite el descubrimiento automático de herramientas:
 
-- Script bash POSIX en `skills/agentify-skill-registry/scan.sh`
-- Índice generado en `.agentify/skill-registry.md`
+- Script bash POSIX en `skills/skill-registry/scan.sh`
+- Índice generado en `.state-guard/skill-registry.md`
 - El Memory Guard lee este índice al iniciar para conocer las herramientas disponibles
 
 El registry escanea los directorios global (`$HOME/.skills-custom`) y local (`./skills-custom`), extrayendo nombre, descripción, trigger y ubicación de cada SKILL.md.
@@ -68,12 +68,9 @@ El registry escanea los directorios global (`$HOME/.skills-custom`) y local (`./
 
 ## Compilación Condicional vs Runtime
 
-El sistema emplea el script empaquetador `scripts/packager.py` para adaptar la arquitectura al nivel de inteligencia del motor destino, garantizando la inmutabilidad de la carpeta raíz de habilidades (`skills/`):
-
 ### Compilación Estática (Target OpenCode)
 Los modelos de entrada tienden a sufrir de "pereza de herramientas" y les cuesta inferir que deben leer el contexto dinámicamente si no se les inyecta explícitamente en el *system prompt*.
-Para `--target opencode`, el empaquetador realiza un **inlining masivo**: lee todo el contenido de `memory-guard.md`, `transaction-protocol.md`, `capabilities.md` y `openspec-convention.md`, inyectándolo como un único bloque gigante dentro de la clave `prompt` del archivo `opencode.json`. 
-Además, el empaquetador reescribe dinámicamente las directivas de los *slash commands* (como `agentify-apply.md`) para usar lenguaje imperativo (ej. `INSTRUCCIÓN CRÍTICA: DEBES usar tu herramienta read_file INMEDIATAMENTE en la ruta...`), forzando al modelo a realizar el *tool-calling* esperado.
+Además, el empaquetador reescribe dinámicamente las directivas de los *slash commands* (como `apply.md`) para usar lenguaje imperativo (ej. `INSTRUCCIÓN CRÍTICA: DEBES usar tu herramienta read_file INMEDIATAMENTE en la ruta...`), forzando al modelo a realizar el *tool-calling* esperado.
 
 ### Context Streaming (Targets Avanzados)
 Para modelos de frontera como Antigravity CLI o Claude Code (`--target antigravity-cli`, `--target claude-code`), el empaquetador evita el inlining pesado. Despliega un *system prompt* minimalista conservando la filosofía de **Lazy Loading** (Context Streaming). El agente carga dinámicamente las habilidades compartidas y específicas bajo demanda, respetando las referencias modulares limpias para mantener la ventana de contexto sumamente ligera.
@@ -87,7 +84,7 @@ Para modelos de frontera como Antigravity CLI o Claude Code (`--target antigravi
 El archivo `state.ini` es el núcleo del sistema de estados. Se encuentra en:
 
 ```text
-.agentify/changes/{nombre-del-cambio}/state.ini
+.state-guard/changes/{nombre-del-cambio}/state.ini
 ```
 
 **Schema (formato INI, manejado por `state_manager.py`):**
@@ -108,7 +105,7 @@ completed_phases = explore, propose
 pending_phases = spec, design, tasks, apply, verify, archive
 
 [Session]
-session_summary = ...      ; opcional — bloque generado por agentify-checkpoint, ≤500 tokens (enforced en código: máx 2000 chars)
+session_summary = ...      ; opcional — bloque generado por checkpoint, ≤500 tokens (enforced en código: máx 2000 chars)
 ```
 
 ### Protocolo de Transacciones (transaction-protocol.md)
@@ -119,7 +116,7 @@ Cada fase del agente se ejecuta como una transacción ACID atómica gobernada es
 IDLE → BEGIN → EXECUTE → COMMIT (éxito) o ROLLBACK (fallo) → IDLE
 ```
 
-El ciclo de vida de la transacción exige la actualización de los nuevos campos transaccionales obligatorios (`schema_version: 2`):
+El ciclo de vida de la transacción exige la actualización de los nuevos campos transaccionales obligatorios en `state.ini`:
 
 | Paso | Qué ocurre |
 |------|-----------|
@@ -173,7 +170,7 @@ El Memory Guard detecta cambios concurrentes mediante:
 ### Ubicación
 
 ```text
-.agentify/config.yaml
+.state-guard/config.yaml
 ```
 
 ### Glosario de Configuraciones
@@ -218,9 +215,9 @@ Si no se define, la verificación reportará que los tests no pudieron ejecutars
 
 ## Flujos Avanzados
 
-### /agentify-split — División de Proposals
+### /split — División de Proposals
 
-El comando `/agentify-split` analiza una proposal monolítica y la divide en sub-cambios manejables.
+El comando `/split` analiza una proposal monolítica y la divide en sub-cambios manejables.
 
 **Cuándo usarlo:**
 
@@ -238,30 +235,30 @@ El comando `/agentify-split` analiza una proposal monolítica y la divide en sub
 **Ejemplo de uso:**
 
 ```text
-/agentify-split mi-cambio-grande
+/split mi-cambio-grande
 ```
 
-### /agentify-ff — Avance Rápido (Fast-Forward)
+### /ff — Avance Rápido (Fast-Forward)
 
-El comando `/agentify-ff` permite ejecutar secuencialmente las fases de planificación (`propose`, `spec`, `design`, `tasks`).
+El comando `/ff` permite ejecutar secuencialmente las fases de planificación (`propose`, `spec`, `design`, `tasks`).
 
 **Cuándo usarlo:**
 
 - Al iniciar un cambio nuevo bien definido donde no necesitas revisar manualmente cada artefacto intermedio.
 
 **Anti-Batching Transaccional:**
-A diferencia de pedirle al LLM que "haga todas las fases de una vez" en un solo prompt (lo que corrompe el DAG), `/agentify-ff` ejecuta 4 transacciones secuenciales independientes. Cada fase tiene su propio ciclo BEGIN → COMMIT, y si el agente crashea entre la transacción 2 y la 3, el Recovery Protocol continúa automáticamente desde donde quedó.
+A diferencia de pedirle al LLM que "haga todas las fases de una vez" en un solo prompt (lo que corrompe el DAG), `/ff` ejecuta 4 transacciones secuenciales independientes. Cada fase tiene su propio ciclo BEGIN → COMMIT, y si el agente crashea entre la transacción 2 y la 3, el Recovery Protocol continúa automáticamente desde donde quedó.
 
-### /agentify-checkpoint — Guardado de Estado
+### /checkpoint — Guardado de Estado
 
-El comando `/agentify-checkpoint` genera un **bloque YAML estructurado** analizando proactivamente
+El comando `/checkpoint` genera un **bloque YAML estructurado** analizando proactivamente
 `tasks.md` y `design.md` del cambio activo. El resultado se guarda en el campo `session_summary`
 de `state.ini`, posibilitando una recuperación de contexto eficiente (**Warm-Boot**).
 
 **Dos modos de operación:**
 
 1. **Automático** (post-COMMIT): El protocolo de transacción genera un `session_summary` compacto después de cada fase. Esto es suficiente para la mayoría de los casos.
-2. **Manual** (`/agentify-checkpoint`): Genera un checkpoint de alta fidelidad con análisis proactivo de todos los artefactos. Útil antes de operaciones riesgosas o para refrescar el contexto.
+2. **Manual** (`/checkpoint`): Genera un checkpoint de alta fidelidad con análisis proactivo de todos los artefactos. Útil antes de operaciones riesgosas o para refrescar el contexto.
 
 El checkpoint es **agnóstico al DAG**: puede ejecutarse en cualquier momento sin modificar
 `lock_phase`, `current_phase` ni el flujo de fases activo.
@@ -269,30 +266,30 @@ El checkpoint es **agnóstico al DAG**: puede ejecutarse en cualquier momento si
 **Cuándo usarlo manualmente:**
 
 - Antes de realizar operaciones riesgosas
-- Al interrumpir un lote de `agentify-apply` para preservar el estado
+- Al interrumpir un lote de `apply` para preservar el estado
 - Al restablecer el contexto de trabajo forzando al LLM a recargar el panorama
 
 **Ejemplo de uso:**
 
 ```text
-/agentify-checkpoint
+/checkpoint
 ```
 
-### /agentify-archive — Cierre de Cambios
+### /archive — Cierre de Cambios
 
-El comando `/agentify-archive` cierra un cambio: fusiona las specs delta en las specs principales y mueve el cambio al archivo.
+El comando `/archive` cierra un cambio: fusiona las specs delta en las specs principales y mueve el cambio al archivo.
 
 **Flujo Obligatorio:**
 
-1. Ejecutar `/agentify-verify` y asegurar que todo es correcto.
+1. Ejecutar `/verify` y asegurar que todo es correcto.
 2. Realizar un `git commit` de todos los cambios de código y especificaciones.
-3. Ejecutar `/agentify-archive`.
+3. Ejecutar `/archive`.
 
 El comando realizará el **Paso 0** inhibitorio evaluando reportes previos, abortando en seco la operación si detecta resoluciones `CRITICAL`. Verificará el árbol de trabajo git e interrumpirá si detecta diferencias con cambios sin commitear.
 
-### /agentify-review — Auditoría Estática
+### /review — Auditoría Estática
 
-El comando `/agentify-review` compara el código implementado contra las especificaciones sin ejecutar tests.
+El comando `/review` compara el código implementado contra las especificaciones sin ejecutar tests.
 
 **Cuándo usarlo:**
 
@@ -309,12 +306,12 @@ El comando `/agentify-review` compara el código implementado contra las especif
 **Ejemplo de uso:**
 
 ```text
-/agentify-review mi-cambio
+/review mi-cambio
 ```
 
-### /agentify-rollback — Revertir un Cambio
+### /rollback — Revertir un Cambio
 
-El comando `/agentify-rollback` purga la carpeta del cambio y restaura los archivos modificados desde git.
+El comando `/rollback` purga la carpeta del cambio y restaura los archivos modificados desde git.
 
 **⚠️ ADVERTENCIA: Pérdida de Trabajo**
 
@@ -327,7 +324,7 @@ Este comando **elimina permanentemente** todo el trabajo no commiteado en el dir
 **Ejemplo de uso:**
 
 ```text
-/agentify-rollback mi-cambio
+/rollback mi-cambio
 ```
 
 ---
@@ -335,7 +332,7 @@ Este comando **elimina permanentemente** todo el trabajo no commiteado en el dir
 ## Estructura de Archivos
 
 ```text
-.agentify/
+.state-guard/
 ├── config.yaml                    ← Configuración del proyecto
 ├── skill-registry.md              ← Índice dinámico de skills
 ├── specs/                         ← Specs actuales (fuente de verdad)
@@ -395,7 +392,7 @@ Las specs usan el formato **GIVEN/WHEN/THEN**:
 
 ## Integración con Herramientas
 
-Agentify soporta múltiples agentes de IA. El Memory Guard se adapta automáticamente a las capacidades de cada host:
+State Guard soporta múltiples agentes de IA. El Memory Guard se adapta automáticamente a las capacidades de cada host:
 
 | Herramienta | Ejecución Inline | Sub-agentes | Delegación Inteligente |
 |------------|:----------------:|:-----------:|:---------------------:|
@@ -409,7 +406,7 @@ La instalación varía según la herramienta. Ejecuta `scripts/install.sh` y sel
 
 ## Guía de Integración: Custom Skills
 
-El framework de Agentify es extensible mediante "Custom Skills", permitiendo integrar herramientas especializadas que no son parte nativa del framework (por ejemplo, herramientas de desarrollo frontend, diseño o base de datos).
+El framework de State Guard es extensible mediante "Custom Skills", permitiendo integrar herramientas especializadas que no son parte nativa del framework (por ejemplo, herramientas de desarrollo frontend, diseño o base de datos).
 
 ### 1. Ubicación Física
 
@@ -428,14 +425,14 @@ Toda skill **DEBE** contener un archivo `SKILL.md` en su raíz. Este archivo act
 Una vez añadida la skill, el desarrollador (o el sistema) debe registrarla para que pueda ser descubierta. Para esto, ejecuta el comando:
 
 ```text
-/agentify-skill-registry
+/skill-registry
 ```
 
-Esto escaneará las rutas global y local, y actualizará el archivo de repositorio local en `.agentify/skill-registry.md`.
+Esto escaneará las rutas global y local, y actualizará el archivo de repositorio local en `.state-guard/skill-registry.md`.
 
 ### 4. Uso por el Memory Guard
 
-El Memory Guard lee `.agentify/skill-registry.md` al inicializar contexto y mapea cada entrada como una herramienta ejecutable. Al analizar la necesidad de un usuario, se basará en atributos declarados como `name` y `description` para cargar proactivamente la skill relevante.
+El Memory Guard lee `.state-guard/skill-registry.md` al inicializar contexto y mapea cada entrada como una herramienta ejecutable. Al analizar la necesidad de un usuario, se basará en atributos declarados como `name` y `description` para cargar proactivamente la skill relevante.
 
 ### Ejemplo Boilerplate (`frontend-design/SKILL.md`)
 
@@ -460,27 +457,27 @@ Actúas como un desarrollador y diseñador de componentes Vue/React/HTML...
 
 ### El estado no avanza
 
-1. Verificar que `state.ini` existe en `.agentify/changes/{change-name}/`
+1. Verificar que `state.ini` existe en `.state-guard/changes/{change-name}/`
 2. Verificar `txn_status` vía `state_manager.py status`: si es `in_progress`, hay una transacción incompleta.
-3. Ejecutar `/agentify-continue` para que el Recovery Protocol intente resolver automáticamente.
+3. Ejecutar `/continue` para que el Recovery Protocol intente resolver automáticamente.
 
 ### Los artefactos no persisten
 
-1. Verificar que el directorio `.agentify/` existe
+1. Verificar que el directorio `.state-guard/` existe
 2. Revisar permisos de escritura
 3. Confirmar que el cambio tiene un `state.ini` válido
 
 ### Transacción incompleta detectada
 
-1. El Recovery Protocol intenta resolver automáticamente al ejecutar `/agentify-continue`
+1. El Recovery Protocol intenta resolver automáticamente al ejecutar `/continue`
 2. Como último recurso, editar manualmente `state.ini`: setear `txn_status = idle`, `txn_phase = None`
 
 ### Conflictos entre cambios
 
-1. Usar `/agentify-status` para ver todos los cambios activos (incluye columna de estado transaccional)
+1. Usar `/status` para ver todos los cambios activos (incluye columna de estado transaccional)
 2. Archivar cambios completados antes de iniciar nuevos
 3. No trabajar en el mismo cambio desde múltiples sesiones
 
 ---
 
-*Manual técnico — Agentify v2.0 — Arquitectura Memory Guard*
+*Manual técnico — State Guard v2.0 — Arquitectura Memory Guard*

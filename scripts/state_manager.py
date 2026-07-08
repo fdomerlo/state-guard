@@ -15,10 +15,10 @@ from _lock_utils import (
     with_write_lock,
 )
 
-STATE_FILE = ".agentify/changes/{change}/state.ini"
-LOCK_FILE = ".agentify/changes/{change}/.lock"
-WRITE_LOCK_FILE = ".agentify/changes/{change}/.write-lock"
-TASKS_FILE = ".agentify/changes/{change}/tasks.md"
+STATE_FILE = ".state-guard/changes/{change}/state.ini"
+LOCK_FILE = ".state-guard/changes/{change}/.lock"
+WRITE_LOCK_FILE = ".state-guard/changes/{change}/.write-lock"
+TASKS_FILE = ".state-guard/changes/{change}/tasks.md"
 DEFAULT_TTL = 1800
 MAX_SUMMARY_CHARS = 2000  # ~500 tokens ≈ 2000 chars
 
@@ -136,7 +136,7 @@ def cmd_commit(args):
         # Auto-checkpoint determinístico: genera un session_summary mínimo
         # con el estado real del DAG post-commit. Esto garantiza que siempre
         # exista un checkpoint para warm-boot, sin depender de que el modelo
-        # ejecute /agentify-checkpoint manualmente.
+        # ejecute /checkpoint manualmente.
         auto_summary = (
             f"fase_completada={phase}\n"
             f"siguiente_fase={args.next_phase}\n"
@@ -191,7 +191,7 @@ def cmd_checkpoint(args):
 
 def cmd_check_completion(args):
     """Parser determinista de tasks.md — reemplaza el conteo manual que antes
-    le pedíamos al LLM (Paso 3a de agentify-checkpoint). Un modelo débil cuenta mal
+    le pedíamos al LLM (Paso 3a de checkpoint). Un modelo débil cuenta mal
     checkboxes en markdown; una regex no."""
     path = TASKS_FILE.format(change=args.change)
     if not os.path.exists(path):

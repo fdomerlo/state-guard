@@ -1,19 +1,19 @@
 # Protocolo de Contexto para Fases
 
-Cada fase del agente tiene reglas de lectura y escritura. Cuando ejecutás una fase inline, leés los artefactos directamente del filesystem (`.agentify/`). Cuando delegás a un sub-agente, le pasás las **rutas** (no el contenido).
+Cada fase del agente tiene reglas de lectura y escritura. Cuando ejecutás una fase inline, leés los artefactos directamente del filesystem (`.state-guard/`). Cuando delegás a un sub-agente, le pasás las **rutas** (no el contenido).
 
 ## Dependencias de Contexto por Fase
 
 | Fase | Lee dependencias de (OpenSpec) | Escribe artefacto |
 | --- | --- | --- |
-| `agentify-explore` | Nada | Opcional (`exploration.md`) |
-| `agentify-propose` | Exploración (si existe) | Sí (`proposal.md`) |
-| `agentify-spec` | Propuesta (requerido) | Sí (`specs/`) |
-| `agentify-design` | Propuesta (requerido) | Sí (`design.md`) |
-| `agentify-tasks` | Spec + Design (requeridos) | Sí (`tasks.md`) |
-| `agentify-apply` | Tasks + Spec + Design | Actualiza `tasks.md` |
-| `agentify-verify` | Spec + Tasks | Sí (`verify-report.md`) |
-| `agentify-archive` | Todos los artefactos | Archiva la carpeta |
+| `explore` | Nada | Opcional (`exploration.md`) |
+| `propose` | Exploración (si existe) | Sí (`proposal.md`) |
+| `spec` | Propuesta (requerido) | Sí (`specs/`) |
+| `design` | Propuesta (requerido) | Sí (`design.md`) |
+| `tasks` | Spec + Design (requeridos) | Sí (`tasks.md`) |
+| `apply` | Tasks + Spec + Design | Actualiza `tasks.md` |
+| `verify` | Spec + Tasks | Sí (`verify-report.md`) |
+| `archive` | Todos los artefactos | Archiva la carpeta |
 
 ## Secuencia de Ejecución por Fase
 

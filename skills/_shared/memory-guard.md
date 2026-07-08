@@ -56,7 +56,7 @@ Cuando delegás a sub-agente:
 
 ### Lo que delegás (solo si el host lo soporta)
 
-- Fases pesadas de `agentify-apply` (> 10 tareas)
+- Fases pesadas de `apply` (> 10 tareas)
 - Tareas que el usuario solicite explícitamente en sub-agente
 
 ### Autoevaluación
@@ -67,7 +67,7 @@ Antes de delegar, preguntate: "¿Puedo ejecutar esto inline sin exceder mi venta
 
 El middleware implementa dos mecanismos automáticos al ejecutar COMMIT:
 
-1. **Auto-Checkpoint Determinístico:** `cmd_commit` genera y persiste un `session_summary` mínimo con el estado real del DAG (fase completada, siguiente, completadas, pendientes). Esto garantiza warm-boot sin depender de que vos ejecutes `/agentify-checkpoint`.
+1. **Auto-Checkpoint Determinístico:** `cmd_commit` genera y persiste un `session_summary` mínimo con el estado real del DAG (fase completada, siguiente, completadas, pendientes). Esto garantiza warm-boot sin depender de que vos ejecutes `/checkpoint`.
 
 2. **Boundary Marker:** El output del COMMIT incluye `⚠️ FASE {X} COMPLETADA — sus instrucciones ya no aplican`, señalando explícitamente que las instrucciones de la fase anterior son obsoletas.
 
@@ -102,7 +102,7 @@ lock_state == FREE    y txn_status == idle        → no hay nada que recuperar,
 
 Solo si caíste en el caso `STALE` (segunda fila) seguí con los pasos clásicos:
 
-1. Leé `.agentify/changes/{change-name}/state.ini` (vía `status`, ya lo hiciste en el Paso 0).
+1. Leé `.state-guard/changes/{change-name}/state.ini` (vía `status`, ya lo hiciste en el Paso 0).
 2. Verificá si el artefacto de la fase (`txn_phase`) se persistió en disco.
    - Si SÍ → ejecutá COMMIT (la fase se completó pero no se persistió el estado).
    - Si NO → ejecutá ROLLBACK (restaurar `txn_status: idle` sin modificar phases; el middleware libera el lock stale automáticamente al recibir un nuevo `begin`, pero ROLLBACK lo hace explícito y limpio).
@@ -114,5 +114,5 @@ Solo si caíste en el caso `STALE` (segunda fila) seguí con los pasos clásicos
 ## Convenciones
 
 - `persistence-contract.md` — comportamiento de la persistencia.
-- `agentify-convention.md` — carpetas y rutas exactas.
-- `agentify-skill-registry` — escanea skills personalizadas (globales y locales).
+- `convention.md` — carpetas y rutas exactas.
+- `skill-registry` — escanea skills personalizadas (globales y locales).

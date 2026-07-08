@@ -17,9 +17,9 @@ Este módulo permite al Memory Guard adaptar su comportamiento según las capaci
 El agente detecta su host por la presencia de archivos de configuración específicos:
 
 ```text
-¿Existe ~/.claude/CLAUDE.md?           → Claude Code
+¿Existe ~/.claude/CLAUDE.md? → Claude Code
 ¿Existe ~/.config/opencode/opencode.json? → OpenCode
-¿Existe ~/.gemini/GEMINI.md?           → Antigravity CLI
+¿Existe ~/.gemini/GEMINI.md? → Antigravity CLI
 ```
 
 Si no se puede detectar automáticamente, asumir capacidades máximas (ejecución inline + sub-agentes disponibles).
@@ -52,7 +52,7 @@ Modo híbrido: inline por defecto, delegación para fases pesadas. Al delegar:
 Cada host necesita un system prompt mínimo que cargue el Memory Guard. El contenido es idéntico para todos:
 
 ```markdown
-# Agentify Memory Guard
+# Memory Guard
 
 Actúas como agente de desarrollo con memoria transaccional usando la metodología
 Entorno de Ejecución con Memoria Transaccional.
@@ -70,7 +70,7 @@ Cargá y seguí `{ruta-skills}/_shared/memory-guard.md` para todas las reglas de
 
 Cargá también al inicio:
 - `{ruta-skills}/_shared/persistence-contract.md`
-- `{ruta-skills}/_shared/agentify-convention.md`
+- `{ruta-skills}/_shared/convention.md`
 ```
 
 La única variación es `{ruta-skills}`:

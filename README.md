@@ -1,14 +1,12 @@
-# Agentify — Entorno de Desarrollo con Memoria Transaccional
+# State Guard — Un Framework de Memoria Transaccional para Agentes LLM
 
-Agentify es un framework de desarrollo de software para agentes de IA que estructura el trabajo en fases formales: explorar, proponer, especificar, diseñar, planificar, implementar, verificar y archivar. Su arquitectura de **Memory Guard** garantiza persistencia transaccional del estado entre sesiones, ejecución inline de fases con delegación inteligente, y optimización de tokens mediante inyección dinámica de contexto.
+State Guard es un framework de desarrollo de software para agentes de IA que estructura el trabajo en fases formales: explorar, proponer, especificar, diseñar, planificar, implementar, verificar y archivar. Su arquitectura de **Memory Guard** garantiza persistencia transaccional del estado entre sesiones, ejecución inline de fases con delegación inteligente, y optimización de tokens mediante inyección dinámica de contexto.
 
 Para equipos que exigen rigor construyendo sobre lineamientos auditables.
 
 ---
 
 ## Instalación
-
-Los scripts de instalación compilan y empaquetan la configuración dinámicamente. El repositorio sigue un principio estricto de **Aislamiento de Código Fuente**: las skills base en `skills/` permanecen limpias e inmutables. El empaquetador (`packager.py`) genera en memoria y copia los artefactos específicos al directorio destino según el motor de IA.
 
 ### Unix / Linux / macOS
 
@@ -22,38 +20,31 @@ bash scripts/install.sh --target antigravity
 
 Opciones para `--target`: `opencode` (por defecto), `antigravity`, `claude-code`.
 
-### Windows
-
-```powershell
-# Usando el flag equivalente -Target
-powershell .\scripts\install.ps1 -Target opencode
-```
-
 ---
 
 ## Comandos
 
 | Comando | Descripción | Tipo |
 |---------|-------------|------|
-| `/agentify-init` | Inicializa el contexto del agente en el proyecto. Detecta el stack y crea la estructura `.agentify/`. | Skill Directa |
-| `/agentify-new <nombre>` | Inicia un nuevo cambio. Ejecuta exploración y propuesta como transacciones secuenciales inline. | Meta-Skill |
-| `/agentify-continue` | Ejecuta la siguiente fase pendiente según `lock_phase` en `state.ini`. | Meta-Skill |
-| `/agentify-ff` | Fast-forward de planificación: ejecuta propuesta → specs → diseño → tareas, cada fase como transacción independiente. | Meta-Skill |
-| `/agentify-status` | Muestra el estado de todos los cambios activos, incluyendo estado transaccional. | Skill Directa |
-| `/agentify-changelog` | Genera un changelog automático a partir de los cambios archivados. | Skill Directa |
-| `/agentify-explore <tema>` | Investiga una idea antes de comprometerse. Lee el código base, compara enfoques e identifica riesgos. | Fase (Explore) |
-| `/agentify-propose <nombre>` | Crea o itera sobre una propuesta de cambio de manera independiente. | Fase (Propose) |
-| `/agentify-spec` | Escribe especificaciones delta para un cambio transaccional. | Fase (Spec) |
-| `/agentify-design` | Crea el documento de diseño técnico para un cambio. | Fase (Design) |
-| `/agentify-tasks` | Desglosa un cambio en tareas de implementación. | Fase (Tasks) |
-| `/agentify-apply` | Implementa las tareas de un cambio. Escribe código siguiendo specs y diseño, marca tareas completadas. | Fase (Apply) |
-| `/agentify-verify` | Valida la implementación contra las especificaciones. Ejecuta tests y genera reporte de cumplimiento. | Fase (Verify) |
-| `/agentify-archive` | Cierra un cambio: fusiona las specs delta en las specs principales y mueve el cambio al archivo. | Fase (Archive) |
-| `/agentify-split` | Divide proposals monolíticas en sub-cambios manejables. Útil para cambios demasiado grandes. | Skill Directa |
-| `/agentify-review` | Realiza auditoría estática de código comparando contra las especificaciones. | Skill Directa |
-| `/agentify-checkpoint` | Genera un resumen del estado actual de la sesión y lo guarda en `state.ini`. También se ejecuta automáticamente después de cada fase completada. | Skill Directa |
-| `/agentify-rollback` | Purga la carpeta del cambio y restaura los archivos modificados desde git. | Skill Directa |
-| `/agentify-skill-registry` | Escanea los directorios global (`$HOME/.skills-custom`) y local (`./skills-custom`) de skills y actualiza el repositorio local. | Skill Directa |
+| `/init` | Inicializa el contexto del agente en el proyecto. Detecta el stack y crea la estructura `.state-guard/`. | Skill Directa |
+| `/new <nombre>` | Inicia un nuevo cambio. Ejecuta exploración y propuesta como transacciones secuenciales inline. | Meta-Skill |
+| `/continue` | Ejecuta la siguiente fase pendiente según `lock_phase` en `state.ini`. | Meta-Skill |
+| `/ff` | Fast-forward de planificación: ejecuta propuesta → specs → diseño → tareas, cada fase como transacción independiente. | Meta-Skill |
+| `/status` | Muestra el estado de todos los cambios activos, incluyendo estado transaccional. | Skill Directa |
+| `/changelog` | Genera un changelog automático a partir de los cambios archivados. | Skill Directa |
+| `/explore <tema>` | Investiga una idea antes de comprometerse. Lee el código base, compara enfoques e identifica riesgos. | Fase (Explore) |
+| `/propose <nombre>` | Crea o itera sobre una propuesta de cambio de manera independiente. | Fase (Propose) |
+| `/spec` | Escribe especificaciones delta para un cambio transaccional. | Fase (Spec) |
+| `/design` | Crea el documento de diseño técnico para un cambio. | Fase (Design) |
+| `/tasks` | Desglosa un cambio en tareas de implementación. | Fase (Tasks) |
+| `/apply` | Implementa las tareas de un cambio. Escribe código siguiendo specs y diseño, marca tareas completadas. | Fase (Apply) |
+| `/verify` | Valida la implementación contra las especificaciones. Ejecuta tests y genera reporte de cumplimiento. | Fase (Verify) |
+| `/archive` | Cierra un cambio: fusiona las specs delta en las specs principales y mueve el cambio al archivo. | Fase (Archive) |
+| `/split` | Divide proposals monolíticas en sub-cambios manejables. Útil para cambios demasiado grandes. | Skill Directa |
+| `/review` | Realiza auditoría estática de código comparando contra las especificaciones. | Skill Directa |
+| `/checkpoint` | Genera un resumen del estado actual de la sesión y lo guarda en `state.ini`. También se ejecuta automáticamente después de cada fase completada. | Skill Directa |
+| `/rollback` | Purga la carpeta del cambio y restaura los archivos modificados desde git. | Skill Directa |
+| `/skill-registry` | Escanea los directorios global (`$HOME/.skills-custom`) y local (`./skills-custom`) de skills y actualiza el repositorio local. | Skill Directa |
 
 ---
 
@@ -62,19 +53,19 @@ powershell .\scripts\install.ps1 -Target opencode
 ### 1. Inicializar el proyecto
 
 ```bash
-/agentify-init
+/init
 ```
 
 ### 2. Crear un nuevo cambio
 
 ```bash
-/agentify-new mi-nueva-funcionalidad
+/new mi-nueva-funcionalidad
 ```
 
 ### 3. Continuar con las siguientes fases
 
 ```bash
-/agentify-continue
+/continue
 ```
 
 El Memory Guard ejecutará la siguiente fase según `lock_phase`, persistiendo el estado transaccionalmente después de cada fase.
@@ -82,18 +73,18 @@ El Memory Guard ejecutará la siguiente fase según `lock_phase`, persistiendo e
 ### 4. Implementar
 
 ```bash
-/agentify-apply
+/apply
 ```
 
 ### 5. Verificar
 
 ```bash
-/agentify-verify
+/verify
 ```
 
 ### 6. Git Commit (PASO OBLIGATORIO)
 
-Antes de proceder al archivado, es **estrictamente obligatorio** guardar los cambios en el control de versiones. El comando `/agentify-archive` fallará si detecta cambios sin commitear.
+Antes de proceder al archivado, es **estrictamente obligatorio** guardar los cambios en el control de versiones. El comando `/archive` fallará si detecta cambios sin commitear.
 
 ```bash
 git add .
@@ -105,7 +96,7 @@ git commit -m "feat: implementar mi-nueva-funcionalidad"
 Cierra el ciclo del cambio, fusionando especificaciones y moviendo los artefactos al histórico.
 
 ```bash
-/agentify-archive
+/archive
 ```
 
 ---
@@ -149,7 +140,7 @@ El **Memory Guard** es el contrato central que el agente carga al iniciar. Defin
 
 ## Herramientas CLI Compatibles
 
-Agentify es un framework **Agent-First**. El Memory Guard se adapta automáticamente a las capacidades de cada agente host:
+State Guard es un framework **Agent-First**. El Memory Guard se adapta automáticamente a las capacidades de cada agente host:
 
 | Herramienta | Ejecución Inline | Sub-agentes | Delegación Inteligente |
 |-------------|:----------------:|:-----------:|:---------------------:|
@@ -175,7 +166,7 @@ Este protocolo garantiza que el estado sobreviva a cualquier pérdida de context
 
 ### Specs Delta
 
-Los cambios describen qué es diferente del estado actual, no reescriben todo. Al archivar, estos deltas se fusionan automáticamente en `.agentify/specs/`.
+Los cambios describen qué es diferente del estado actual, no reescriben todo. Al archivar, estos deltas se fusionan automáticamente en `.state-guard/specs/`.
 
 ### State Machine Transaccional
 
@@ -199,7 +190,7 @@ El sistema utiliza **OpenSpec** como estándar de persistencia nativa:
 
 - Los artefactos se almacenan como archivos Markdown en el repositorio
 - Permite versionado y revisión en Pull Requests
-- Carpeta de archivo: `.agentify/changes/archive/YYYY-MM-DD-{change-name}/`
+- Carpeta de archivo: `.state-guard/changes/archive/YYYY-MM-DD-{change-name}/`
 
 ---
 

@@ -2,7 +2,7 @@
 set -euo pipefail
 
 # ============================================================================
-# Agentify: Memory Guard — Install Script Tests
+# State Guard: Memory Guard — Install Script Tests
 # Run: bash scripts/install_test.sh
 # ============================================================================
 
@@ -29,26 +29,26 @@ NC='\033[0m'
 
 # All 20 expected skills
 EXPECTED_SKILLS=(
-    agentify-apply
-    agentify-archive
-    agentify-changelog
-    agentify-checkpoint
-    agentify-continue
-    agentify-design
-    agentify-explore
-    agentify-ff
-    agentify-hotfix
-    agentify-init
-    agentify-new
-    agentify-propose
-    agentify-review
-    agentify-rollback
-    agentify-spec
-    agentify-split
-    agentify-status
-    agentify-tasks
-    agentify-verify
-    agentify-skill-registry
+    apply
+    archive
+    changelog
+    checkpoint
+    continue
+    design
+    explore
+    ff
+    hotfix
+    init
+    new
+    propose
+    review
+    rollback
+    spec
+    split
+    status
+    tasks
+    verify
+    skill-registry
 )
 
 # ============================================================================
@@ -228,16 +228,16 @@ test_opencode_commands_folder() {
 
 test_opencode_commands_path_substituted() {
     bash "$INSTALL_SCRIPT" --agent opencode > /dev/null 2>&1
-    local cmd_file="$HOME/.config/opencode/commands/agentify-apply.md"
+    local cmd_file="$HOME/.config/opencode/commands/apply.md"
     assert_file_exists "$cmd_file" || return 1
     # The placeholder {{SKILLS_PATH}} must be replaced with the actual path
     if grep -q '{{SKILLS_PATH}}' "$cmd_file"; then
-        echo "Placeholder {{SKILLS_PATH}} was NOT substituted in agentify-apply.md"
+        echo "Placeholder {{SKILLS_PATH}} was NOT substituted in apply.md"
         return 1
     fi
     # Must contain the actual skills path
     grep -q '.config/opencode/skills' "$cmd_file" || {
-        echo "Expected .config/opencode/skills path in agentify-apply.md"
+        echo "Expected .config/opencode/skills path in apply.md"
         return 1
     }
 }
@@ -475,17 +475,17 @@ test_pre_existing_dir_not_clobbered() {
 
 test_overwrite_stale_skill() {
     # Pre-create a stale SKILL.md
-    mkdir -p "$HOME/.claude/skills/agentify-apply"
-    echo "stale" > "$HOME/.claude/skills/agentify-apply/SKILL.md"
+    mkdir -p "$HOME/.claude/skills/apply"
+    echo "stale" > "$HOME/.claude/skills/apply/SKILL.md"
     bash "$INSTALL_SCRIPT" --agent claude-code > /dev/null 2>&1
     # Should be replaced with actual content (not "stale")
     local content
-    content=$(head -c 5 "$HOME/.claude/skills/agentify-apply/SKILL.md")
+    content=$(head -c 5 "$HOME/.claude/skills/apply/SKILL.md")
     if [[ "$content" == "stale" ]]; then
         echo "SKILL.md was NOT overwritten — still contains stale data"
         return 1
     fi
-    assert_file_not_empty "$HOME/.claude/skills/agentify-apply/SKILL.md"
+    assert_file_not_empty "$HOME/.claude/skills/apply/SKILL.md"
 }
 
 test_nested_custom_path() {
@@ -500,7 +500,7 @@ test_nested_custom_path() {
 
 echo ""
 echo -e "${CYAN}${BOLD}╔════════════════════════════════════════════════════════════╗${NC}"
-echo -e "${CYAN}${BOLD}║    Agentify: Memory Guard — Install Script Tests           ║${NC}"
+echo -e "${CYAN}${BOLD}║    State Guard: Memory Guard — Install Script Tests           ║${NC}"
 echo -e "${CYAN}${BOLD}╚════════════════════════════════════════════════════════════╝${NC}"
 echo ""
 

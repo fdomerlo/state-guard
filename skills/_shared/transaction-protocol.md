@@ -32,7 +32,7 @@ Cuando hayas terminado todos los entregables de la fase, avanza el grafo metodol
 
 **Comando:** `state_manager.py commit --change {nombre-del-cambio} --next-phase {siguiente-fase-segun-orden-logico}`
 
-El middleware valida la transición contra la tabla del DAG (ver `agentify-convention.md`). Si `--next-phase` no es la fase permitida desde `txn_phase`, el comando falla con `ERROR: Transición inválida` — **este es un rechazo del código, no una convención que dependa de que vos calcules bien la siguiente fase.** Si falla, no reintentes con otro valor arbitrario: leé el mensaje, que indica cuál es la única fase válida.
+El middleware valida la transición contra la tabla del DAG (ver `convention.md`). Si `--next-phase` no es la fase permitida desde `txn_phase`, el comando falla con `ERROR: Transición inválida` — **este es un rechazo del código, no una convención que dependa de que vos calcules bien la siguiente fase.** Si falla, no reintentes con otro valor arbitrario: leé el mensaje, que indica cuál es la única fase válida.
 
 ### 4. ROLLBACK (Cancelación de Transacción)
 
@@ -54,7 +54,7 @@ Puede ejecutarse en cualquier momento, incluso con una transacción de fase en p
 
 ### STATUS (Lectura de Diagnóstico)
 
-Lectura machine-readable del estado actual, usada por `agentify-continue` y por el Recovery Protocol:
+Lectura machine-readable del estado actual, usada por `continue` y por el Recovery Protocol:
 
 **Comando:** `state_manager.py status --change {nombre-del-cambio} [--ttl {segundos}]`
 

@@ -1,9 +1,9 @@
-# Agentify
+# State Guard
 .agent/
-.agentify/
+.state-guard/
 # Ignorar solo cambios locales activos (evita subir borradores)
-openspec/changes/*
+state-guard/changes/*
 # Permitir persistir el archivo histórico (archive)
-!openspec/changes/archive/
+!state-guard/changes/archive/
 .claude/
 __pycache__/
