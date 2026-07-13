@@ -1,9 +1,0 @@
-# State Guard
-.agent/
-.state-guard/
-# Ignorar solo cambios locales activos (evita subir borradores)
-state-guard/changes/*
-# Permitir persistir el archivo histórico (archive)
-!state-guard/changes/archive/
-.claude/
-__pycache__/

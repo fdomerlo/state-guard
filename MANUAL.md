@@ -45,12 +45,12 @@ Los contratos compartidos residen en `skills/_shared/`:
 
 ### Autodetección y Delegación Inteligente
 
-El agente determina su comportamiento en tiempo de ejecución analizando las reglas de `capabilities.md`. A través del sistema de archivos, el agente detecta dinámicamente el host en runtime (por ejemplo, verificando la presencia de `.claude`, `.gemini` o `.config/opencode/`) y activa o desactiva capacidades según la plataforma.
+El agente determina su comportamiento en tiempo de ejecución analizando las reglas de `capabilities.md`. A través del sistema de archivos, el agente detecta dinámicamente el host en runtime (por ejemplo, verificando la presencia de `.gemini` o `.config/opencode/`) y activa o desactiva capacidades según la plataforma.
 
 El Memory Guard ejecuta fases **inline por defecto**: carga el `SKILL.md` correspondiente y sigue sus instrucciones como propias. Sin embargo, para aislar el contexto y preservar la memoria de la sesión principal, delega el trabajo pesado a un sub-agente real bajo estas estrictas condiciones:
 
 1. La fase es `apply` con más de 10 tareas pendientes, **Y**
-2. El agente host detectado soporta sub-agentes reales (Claude Code, OpenCode, Antigravity CLI).
+2. El agente host detectado soporta sub-agentes reales (OpenCode o Antigravity CLI).
 
 En la ejecución delegada, el sub-agente ejecuta las tareas e interactúa con el disco, pero **nunca** escribe en `state.ini`. El Memory Guard asume exclusivamente la responsabilidad del COMMIT transaccional al finalizar la delegación.
 
@@ -73,7 +73,7 @@ Los modelos de entrada tienden a sufrir de "pereza de herramientas" y les cuesta
 Además, el empaquetador reescribe dinámicamente las directivas de los *slash commands* (como `apply.md`) para usar lenguaje imperativo (ej. `INSTRUCCIÓN CRÍTICA: DEBES usar tu herramienta read_file INMEDIATAMENTE en la ruta...`), forzando al modelo a realizar el *tool-calling* esperado.
 
 ### Context Streaming (Targets Avanzados)
-Para modelos de frontera como Antigravity CLI o Claude Code (`--target antigravity-cli`, `--target claude-code`), el empaquetador evita el inlining pesado. Despliega un *system prompt* minimalista conservando la filosofía de **Lazy Loading** (Context Streaming). El agente carga dinámicamente las habilidades compartidas y específicas bajo demanda, respetando las referencias modulares limpias para mantener la ventana de contexto sumamente ligera.
+Para modelos de frontera como Antigravity CLI y OpenCode, el empaquetador evita el inlining pesado. Despliega un *system prompt* minimalista conservando la filosofía de **Lazy Loading** (Context Streaming). El agente carga dinámicamente las habilidades compartidas y específicas bajo demanda, respetando las referencias modulares limpias para mantener la ventana de contexto sumamente ligera.
 
 ---
 
@@ -396,7 +396,6 @@ State Guard soporta múltiples agentes de IA. El Memory Guard se adapta automát
 
 | Herramienta | Ejecución Inline | Sub-agentes | Delegación Inteligente |
 |------------|:----------------:|:-----------:|:---------------------:|
-| Claude Code | ✅ | ✅ | Apply pesados |
 | OpenCode | ✅ | ✅ | Apply pesados |
 | Antigravity CLI | ✅ | ✅ | Apply pesados |
 

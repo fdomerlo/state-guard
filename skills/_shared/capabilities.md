@@ -6,18 +6,17 @@ Este módulo permite al Memory Guard adaptar su comportamiento según las capaci
 
 ## Tabla de Capacidades
 
-| Capacidad                  | Claude Code | OpenCode | Antigravity CLI |
-| -------------------------- | :---------: | :------: | :-------------: |
-| Sub-agentes reales (Task)  |      ✅      |    ✅     |        ✅        |
-| Ejecución inline de skills |      ✅      |    ✅     |        ✅        |
-| Ventana de contexto 200K+  |      ✅      |    ✅     |        ✅        |
+| Capacidad                  | OpenCode | Antigravity CLI |
+| -------------------------- | :------: | :-------------: |
+| Sub-agentes reales (Task)  |    ✅     |        ✅        |
+| Ejecución inline de skills |    ✅     |        ✅        |
+| Ventana de contexto 200K+  |    ✅     |        ✅        |
 
 ## Auto-Detección del Host
 
 El agente detecta su host por la presencia de archivos de configuración específicos:
 
 ```text
-¿Existe ~/.claude/CLAUDE.md? → Claude Code
 ¿Existe ~/.config/opencode/opencode.json? → OpenCode
 ¿Existe ~/.gemini/GEMINI.md? → Antigravity CLI
 ```
@@ -38,7 +37,7 @@ SINO:
 
 ## Adaptaciones por Host
 
-### Claude Code / OpenCode / Antigravity CLI (con sub-agentes)
+### OpenCode / Antigravity CLI (con sub-agentes)
 
 Modo híbrido: inline por defecto, delegación para fases pesadas. Al delegar:
 
@@ -77,6 +76,5 @@ La única variación es `{ruta-skills}`:
 
 | Host            | `{ruta-skills}`             |
 | --------------- | --------------------------- |
-| Claude Code     | `~/.claude/skills`          |
 | OpenCode        | `~/.config/opencode/skills` |
 | Antigravity CLI | `~/.gemini/skills`          |

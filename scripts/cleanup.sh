@@ -15,11 +15,9 @@ else
     echo "- El directorio $STATE_GUARD_DIR no existe."
 fi
 
-# 2. Limpiar los archivos de configuración de los orquestadores (ejemplo para OpenCode/Claude si los inyectas globalmente)
-# Nota: Ajusta estas rutas a los archivos reales donde install.sh hace la inyección.
+# 2. Limpiar los archivos de configuración de los orquestadores donde install.sh hizo la inyección.
 CONFIG_FILES=(
     "$HOME/.config/opencode/AGENTS.md"
-    "$HOME/.claude/AGENTS.md"
 )
 
 for file in "${CONFIG_FILES[@]}"; do
