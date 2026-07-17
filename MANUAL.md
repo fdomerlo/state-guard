@@ -18,7 +18,7 @@ Memory Guard (memory-guard.md)
     ├── Carga persistence-contract.md → Resuelve el modo de persistencia
     ├── Carga convention.md  → Prepara rutas y schema
     │
-    ├── Ejecuta inline → explore   (carga SKILL.md como instrucciones)
+    ├── Ejecuta inline → explore   (carga el archivo de fase como instrucciones)
     ├── Ejecuta inline → propose
     ├── Ejecuta inline → spec
     ├── Ejecuta inline → design
@@ -47,7 +47,7 @@ Los contratos compartidos residen en `skills/_shared/`:
 
 El agente determina su comportamiento en tiempo de ejecución analizando las reglas de `capabilities.md`. A través del sistema de archivos, el agente detecta dinámicamente el host en runtime (por ejemplo, verificando la presencia de `.gemini` o `.config/opencode/`) y activa o desactiva capacidades según la plataforma.
 
-El Memory Guard ejecuta fases **inline por defecto**: carga el `SKILL.md` correspondiente y sigue sus instrucciones como propias. Sin embargo, para aislar el contexto y preservar la memoria de la sesión principal, delega el trabajo pesado a un sub-agente real bajo estas estrictas condiciones:
+El Memory Guard ejecuta fases **inline por defecto**: carga el archivo `.md` correspondiente a la fase (ej. `skills/apply/apply.md`) y sigue sus instrucciones como propias. Sin embargo, para aislar el contexto y preservar la memoria de la sesión principal, delega el trabajo pesado a un sub-agente real bajo estas estrictas condiciones:
 
 1. La fase es `apply` con más de 10 tareas pendientes, **Y**
 2. El agente host detectado soporta sub-agentes reales (OpenCode o Antigravity CLI).

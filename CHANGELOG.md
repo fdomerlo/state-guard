@@ -1,5 +1,15 @@
 # Changelog
 
+## [2.3.0] - 2026-07-17
+
+### Changed
+- **Fases core a Markdown plano**: Las 8 fases core (`explore`, `propose`, `spec`, `design`, `tasks`, `apply`, `verify`, `archive`) dejan de usar `SKILL.md` con frontmatter YAML y pasan a archivos `<fase>.md` en Markdown plano (ej. `skills/explore/explore.md`). El frontmatter YAML (`name`, `description`, `license`, `metadata`) se elimina; el contenido instructivo se conserva intacto.
+- **Scripts de instalación actualizados**: `scripts/install.sh` y `tests/install_test.sh` ahora detectan ambos formatos (`<fase>.md` para fases core, `SKILL.md` para skills descubiertas por el agente).
+- **Referencias actualizadas**: Se actualizaron todas las referencias en `_shared/memory-guard.md`, `_shared/phase-common.md`, `_shared/context-injection.md`, `skills/new/SKILL.md`, `skills/ff/SKILL.md` y `MANUAL.md`.
+
+### Note
+- `skills/skill-registry/` y las custom skills del usuario **mantienen** el formato `SKILL.md` con frontmatter, ya que son descubiertas dinámicamente por el agente (no invocadas determinísticamente).
+
 ## [2.2.0] - 2026-07-08
 
 ### Added

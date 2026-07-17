@@ -1,13 +1,3 @@
----
-name: archive
-description: >
-  Sincroniza especificaciones delta con las especificaciones principales y archiva un cambio completado.
-  Disparador: Cuando el usuario ejecuta /archive para archivar un cambio después de la implementación y verificación.
-license: MIT
-metadata:
-  author: fdomerlo@gmail.com (136bits)
-  version: "3.0"
----
 
 # Archive Skill
 

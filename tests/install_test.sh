@@ -29,18 +29,24 @@ echo "Iniciando instalación de State Guard..."
 mkdir -p "$TARGET_DIR"
 
 count=0
-# Iteramos solo sobre los directorios que contienen un SKILL.md
+# Iteramos sobre los directorios que contienen un archivo de instrucciones
 for skill_dir in "$SOURCE_SKILLS_DIR"/*/; do
-    if [[ -f "${skill_dir}SKILL.md" ]]; then
-        skill_name=$(basename "$skill_dir")
-        
-        # Sobrescribimos el SKILL.md manteniendo cualquier otra custom skill intacta
-        mkdir -p "$TARGET_DIR/$skill_name"
-        cp "$skill_dir/SKILL.md" "$TARGET_DIR/$skill_name/SKILL.md"
-        
-        echo "  - $skill_name"
-        count=$((count + 1))
+    skill_name=$(basename "$skill_dir")
+    # Core phases use <phase>.md; other skills use SKILL.md
+    if [[ -f "${skill_dir}${skill_name}.md" ]]; then
+        skill_file="${skill_name}.md"
+    elif [[ -f "${skill_dir}SKILL.md" ]]; then
+        skill_file="SKILL.md"
+    else
+        continue
     fi
+    
+    # Sobrescribimos el archivo de instrucciones manteniendo cualquier otra custom skill intacta
+    mkdir -p "$TARGET_DIR/$skill_name"
+    cp "$skill_dir/${skill_file}" "$TARGET_DIR/$skill_name/${skill_file}"
+    
+    echo "  - $skill_name"
+    count=$((count + 1))
 done
 
 echo "✓ $count skills instaladas en $TARGET_DIR"

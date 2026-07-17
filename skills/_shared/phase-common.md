@@ -20,7 +20,7 @@ txn_started_at: "{timestamp ISO 8601}"
 
 ### 2. EXECUTE — Trabajo de la fase
 
-Ejecutar las instrucciones del SKILL.md. Persistir el artefacto resultante en disco **antes** de actualizar `state.ini`.
+Ejecutar las instrucciones del archivo de fase (ej. `skills/spec/spec.md`). Persistir el artefacto resultante en disco **antes** de actualizar `state.ini`.
 
 ### 3. COMMIT — Al completar exitosamente
 

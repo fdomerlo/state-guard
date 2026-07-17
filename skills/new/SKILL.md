@@ -20,13 +20,13 @@ Meta-skill responsable de inicializar un nuevo cambio transaccional. Ejecuta sec
 
 ### Paso 2: Ejecutar explore (Transacción 1)
 
-Cargá `skills/explore/SKILL.md` y ejecutá inline:
+Cargá `skills/explore/explore.md` y ejecutá inline:
 
 1. Ejecutar la exploración
 
 ### Paso 3: Ejecutar propose (Transacción 2)
 
-Cargá `skills/propose/SKILL.md` y ejecutá inline:
+Cargá `skills/propose/propose.md` y ejecutá inline:
 
 1. Ejecutar la propuesta
 

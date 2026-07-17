@@ -1,13 +1,3 @@
----
-name: propose
-description: >
-  Crea una propuesta de cambio con intención, alcance y enfoque.
-  Disparador: Cuando el usuario ejecuta /propose para crear o actualizar una propuesta de cambio.
-license: MIT
-metadata:
-  author: fdomerlo@gmail.com (136bits)
-  version: "3.0"
----
 
 # Propose Skill
 
