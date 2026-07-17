@@ -2,7 +2,7 @@
 
 ## Persistencia Directa (File System)
 
-El framework utiliza el File System como único mecanismo de persistencia nativo. Todas las operaciones de lectura y escritura de artefactos se realizan bajo el directorio `.state-guard/` siguiendo la convención [convention.md](./convention.md).
+El framework utiliza el File System como único mecanismo de persistencia nativo. Todas las operaciones de lectura y escritura de artefactos se realizan bajo el directorio `.state-guard/` siguiendo la convención [convention.md](../../skills/_shared/convention.md).
 
 ## Persistencia Transaccional del Estado
 

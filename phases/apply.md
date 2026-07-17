@@ -71,7 +71,7 @@ PARA CADA TAREA:
 └── 6. Anotar cualquier problema o desviación
 ```
 
-Detecta el test runner consultando `skills/_shared/test-runner-detection.md` con parámetro `{fase}=apply`.
+Detecta el test runner consultando `phases/_shared/test-runner-detection.md` con parámetro `{fase}=apply`.
 
 ### Paso 2b: Implementar Tareas (Flujo Estándar)
 

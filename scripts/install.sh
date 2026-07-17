@@ -17,6 +17,7 @@ fi
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_DIR="$(dirname "$SCRIPT_DIR")"
 SOURCE_SKILLS_DIR="$REPO_DIR/skills"
+SOURCE_PHASES_DIR="$REPO_DIR/phases"
 TARGET_DIR="$HOME/.agents/skills/state-guard"
 
 MARKER_START="<!-- state-guard:begin -->"
@@ -24,27 +25,34 @@ MARKER_END="<!-- state-guard:end -->"
 
 echo "Iniciando instalación universal de State Guard..."
 
-# 1. Directorios unificados y copia de skills/binarios
-mkdir -p "$TARGET_DIR/bin" "$TARGET_DIR/_shared"
+# 1. Directorios unificados y copia de skills/phases/binarios
+mkdir -p "$TARGET_DIR/bin" "$TARGET_DIR/_shared" "$TARGET_DIR/phases/_shared"
 
 echo "→ Copiando contratos y skills..."
 cp -r "$SOURCE_SKILLS_DIR/_shared/"* "$TARGET_DIR/_shared/"
 
+# Copiar contratos compartidos de fases
+cp -r "$SOURCE_PHASES_DIR/_shared/"* "$TARGET_DIR/phases/_shared/"
+
+# Copiar las 8 fases (archivos planos)
+phase_count=0
+for phase_file in "$SOURCE_PHASES_DIR"/*.md; do
+    [ -f "$phase_file" ] || continue
+    cp "$phase_file" "$TARGET_DIR/phases/"
+    phase_count=$((phase_count + 1))
+done
+echo "  ✓ $phase_count fases instaladas en $TARGET_DIR/phases/"
+
+# Copiar skills discoverable (SKILL.md con frontmatter)
 count=0
 for skill_dir in "$SOURCE_SKILLS_DIR"/*/; do
     skill_name=$(basename "$skill_dir")
     if [[ "$skill_name" == "_shared" ]]; then continue; fi
-    # Core phases use <phase>.md; other skills use SKILL.md
-    if [[ -f "${skill_dir}${skill_name}.md" ]]; then
-        skill_file="${skill_name}.md"
-    elif [[ -f "${skill_dir}SKILL.md" ]]; then
-        skill_file="SKILL.md"
-    else
-        continue
+    if [[ -f "${skill_dir}SKILL.md" ]]; then
+        mkdir -p "$TARGET_DIR/$skill_name"
+        cp "${skill_dir}SKILL.md" "$TARGET_DIR/$skill_name/SKILL.md"
+        count=$((count + 1))
     fi
-    mkdir -p "$TARGET_DIR/$skill_name"
-    cp "${skill_dir}${skill_file}" "$TARGET_DIR/$skill_name/${skill_file}"
-    count=$((count + 1))
 done
 
 cp "$SCRIPT_DIR/state_manager.py" "$SCRIPT_DIR/_lock_utils.py" "$TARGET_DIR/bin/"
@@ -124,25 +132,37 @@ rm -f "$CMD_DIR"/*.md 2>/dev/null || true
 
 echo "→ Generando Slash Commands dinámicos..."
 cmd_count=0
+
+# Generar slash commands para fases (phases/*.md)
+for phase_file in "$TARGET_DIR/phases"/*.md; do
+    [ -f "$phase_file" ] || continue
+    phase_name=$(basename "$phase_file" .md)
+    # Extraer descripción del primer heading
+    desc=$(head -5 "$phase_file" | grep '^# ' | head -1 | sed 's/^# //')
+    [ -z "$desc" ] && desc="Fase $phase_name"
+
+    cat > "$CMD_DIR/${phase_name}.md" <<EOF
+---
+description: "$desc"
+agent: state-guard
+---
+Lee el archivo $TARGET_DIR/phases/${phase_name}.md y ejecuta sus instrucciones al pie de la letra.
+EOF
+    cmd_count=$((cmd_count + 1))
+done
+
+# Generar slash commands para skills discoverable (SKILL.md)
 for skill_dir in "$TARGET_DIR"/*/; do
     skill_name=$(basename "$skill_dir")
-    if [[ "$skill_name" == "_shared" || "$skill_name" == "bin" ]]; then continue; fi
-    # Core phases use <phase>.md; other skills use SKILL.md
-    if [[ -f "${skill_dir}${skill_name}.md" ]]; then
-        skill_file="${skill_name}.md"
-    elif [[ -f "${skill_dir}SKILL.md" ]]; then
-        skill_file="SKILL.md"
-    else
-        continue
-    fi
-    desc=$(python3 - <<'PY' "${skill_dir}${skill_file}"
+    if [[ "$skill_name" == "_shared" || "$skill_name" == "bin" || "$skill_name" == "phases" ]]; then continue; fi
+    if [[ ! -f "${skill_dir}SKILL.md" ]]; then continue; fi
+    desc=$(python3 - <<'PY' "${skill_dir}SKILL.md"
 import pathlib
 import sys
 
 path = pathlib.Path(sys.argv[1])
 text = path.read_text(encoding='utf-8')
 lines = text.splitlines()
-# Try YAML frontmatter first (SKILL.md files)
 for idx, line in enumerate(lines):
     if line.startswith('description:'):
         value = line.split(':', 1)[1].strip()
@@ -155,26 +175,18 @@ for idx, line in enumerate(lines):
             print(value.strip('"').strip("'"))
         break
 else:
-    # Fallback: extract from first heading or purpose section
-    for line in lines:
-        if line.startswith('## Prop') or line.startswith('## Purpose'):
-            continue
-        if line.startswith('# '):
-            print(line.lstrip('# ').strip())
-            break
-    else:
-        print('')
+    print('')
 PY
 )
 
-        cat > "$CMD_DIR/${skill_name}.md" <<EOF
+    cat > "$CMD_DIR/${skill_name}.md" <<EOF
 ---
 description: "$desc"
 agent: state-guard
 ---
-Lee el archivo $TARGET_DIR/$skill_name/${skill_file} y ejecuta sus instrucciones al pie de la letra.
+Lee el archivo $TARGET_DIR/$skill_name/SKILL.md y ejecuta sus instrucciones al pie de la letra.
 EOF
-        cmd_count=$((cmd_count + 1))
+    cmd_count=$((cmd_count + 1))
 done
 echo "  ✓ $cmd_count slash commands generados al vuelo."
 

@@ -18,6 +18,7 @@ fi
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_DIR="$(dirname "$SCRIPT_DIR")"
 SOURCE_SKILLS_DIR="$REPO_DIR/skills"
+SOURCE_PHASES_DIR="$REPO_DIR/phases"
 TARGET_DIR="$HOME/.agents/skills/state-guard"
 
 MARKER_START="<!-- state-guard:begin -->"
@@ -25,28 +26,34 @@ MARKER_END="<!-- state-guard:end -->"
 
 echo "Iniciando instalación de State Guard..."
 
-# 2. Creación de directorio unificado e instalación de skills
-mkdir -p "$TARGET_DIR"
+# 2. Creación de directorio unificado e instalación de skills y fases
+mkdir -p "$TARGET_DIR/phases/_shared"
 
+# Copiar fases (archivos planos)
+phase_count=0
+for phase_file in "$SOURCE_PHASES_DIR"/*.md; do
+    [ -f "$phase_file" ] || continue
+    cp "$phase_file" "$TARGET_DIR/phases/"
+    echo "  - fase: $(basename "$phase_file" .md)"
+    phase_count=$((phase_count + 1))
+done
+
+# Copiar contratos compartidos de fases
+cp -r "$SOURCE_PHASES_DIR/_shared/"* "$TARGET_DIR/phases/_shared/"
+
+echo "✓ $phase_count fases instaladas en $TARGET_DIR/phases/"
+
+# Copiar skills discoverable (SKILL.md con frontmatter)
 count=0
-# Iteramos sobre los directorios que contienen un archivo de instrucciones
 for skill_dir in "$SOURCE_SKILLS_DIR"/*/; do
     skill_name=$(basename "$skill_dir")
-    # Core phases use <phase>.md; other skills use SKILL.md
-    if [[ -f "${skill_dir}${skill_name}.md" ]]; then
-        skill_file="${skill_name}.md"
-    elif [[ -f "${skill_dir}SKILL.md" ]]; then
-        skill_file="SKILL.md"
-    else
-        continue
+    if [[ "$skill_name" == "_shared" ]]; then continue; fi
+    if [[ -f "${skill_dir}SKILL.md" ]]; then
+        mkdir -p "$TARGET_DIR/$skill_name"
+        cp "${skill_dir}SKILL.md" "$TARGET_DIR/$skill_name/SKILL.md"
+        echo "  - $skill_name"
+        count=$((count + 1))
     fi
-    
-    # Sobrescribimos el archivo de instrucciones manteniendo cualquier otra custom skill intacta
-    mkdir -p "$TARGET_DIR/$skill_name"
-    cp "$skill_dir/${skill_file}" "$TARGET_DIR/$skill_name/${skill_file}"
-    
-    echo "  - $skill_name"
-    count=$((count + 1))
 done
 
 echo "✓ $count skills instaladas en $TARGET_DIR"

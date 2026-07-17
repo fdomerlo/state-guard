@@ -45,7 +45,7 @@ PARA CADA fase en la secuencia (propose → spec → design → tasks):
 
 Para cada fase que pase el guard semántico exitosamente:
 
-1. **Cargar:** Leé el archivo `.md` correspondiente a la fase (ej. `skills/spec/spec.md`).
+1. **Cargar:** Leé el archivo `.md` correspondiente a la fase (ej. `phases/spec.md`).
 2. **Transaccionar:** Ejecutá inline respetando ESTRICTAMENTE el ciclo del Framework de Memoria Transaccional:
 * **BEGIN**: Reclamar y setear el estado en `state.ini` como `in_progress`.
 * **TRABAJO**: Generar los artefactos Markdown.

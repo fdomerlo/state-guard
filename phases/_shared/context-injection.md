@@ -18,7 +18,7 @@ Cada fase del agente tiene reglas de lectura y escritura. Cuando ejecutás una f
 ## Secuencia de Ejecución por Fase
 
 ```text
-Inline:   Cargá el archivo de fase (ej. `explore.md`) → Leé dependencias del disco → Ejecutá → Persistí artefacto → COMMIT vía `state_manager.py` → Reportá al usuario
+Inline:   Cargá el archivo de fase (ej. `phases/explore.md`) → Leé dependencias del disco → Ejecutá → Persistí artefacto → COMMIT vía `state_manager.py` → Reportá al usuario
 Delegada: Pasá rutas → Sub-agente ejecuta y persiste artefacto → Recibís resumen → COMMIT vía `state_manager.py` → Reportá al usuario
 ```
 

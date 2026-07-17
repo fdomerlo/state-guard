@@ -1,5 +1,15 @@
 # Changelog
 
+## [2.4.0] - 2026-07-17
+
+### Changed
+- **Separación `phases/` vs `skills/`**: Las 8 fases core (invocación determinística por CLI) se mueven de `skills/<fase>/<fase>.md` a `phases/<fase>.md` como archivos planos. Las skills discoverable (invocación por agente vía frontmatter YAML) permanecen en `skills/<skill>/SKILL.md`.
+- **Contratos compartidos divididos**: Los contratos específicos de fases (`transaction-protocol.md`, `persistence-contract.md`, `phase-common.md`, `context-injection.md`, `test-runner-detection.md`) se mueven a `phases/_shared/`. Los contratos globales del agente (`memory-guard.md`, `capabilities.md`, `convention.md`) permanecen en `skills/_shared/`.
+- **`context-injection.md` → `phases/_shared/`**: Se determinó que su contenido es exclusivamente sobre fases (tabla de dependencias de las 8 fases, secuencia de ejecución inline/delegada). No aplica a skills discoverable.
+- **`convention.md` → permanece en `skills/_shared/`**: Es un contrato global (incluye rutas de skills no-fase como hotfix, init, checkpoint; schema de state.ini).
+- **`boot/boot.md` → `boot/SKILL.md`**: Corrige inconsistencia previa; boot es un meta-skill que debe seguir la convención SKILL.md con frontmatter.
+- **Scripts de instalación actualizados**: `scripts/install.sh` y `tests/install_test.sh` ahora copian `phases/` y `skills/` por separado.
+
 ## [2.3.0] - 2026-07-17
 
 ### Changed

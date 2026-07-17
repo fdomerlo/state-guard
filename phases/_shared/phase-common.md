@@ -20,7 +20,7 @@ txn_started_at: "{timestamp ISO 8601}"
 
 ### 2. EXECUTE — Trabajo de la fase
 
-Ejecutar las instrucciones del archivo de fase (ej. `skills/spec/spec.md`). Persistir el artefacto resultante en disco **antes** de actualizar `state.ini`.
+Ejecutar las instrucciones del archivo de fase (ej. `phases/spec.md`). Persistir el artefacto resultante en disco **antes** de actualizar `state.ini`.
 
 ### 3. COMMIT — Al completar exitosamente
 
@@ -68,4 +68,4 @@ Si existe `.state-guard/config.yaml` con sección `glossary`, cargar los términ
 
 Cada skill de fase incluye en su sección de transacción:
 
-> Seguí el protocolo de transacción definido en `skills/_shared/phase-common.md`
+> Seguí el protocolo de transacción definido en `phases/_shared/phase-common.md`
