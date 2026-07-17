@@ -68,7 +68,7 @@ Buscar archivos de test relacionados con el cambio
 
 CRÍTICO: Debes ejecutar usando una herramienta de terminal real. ESTÁ PROHIBIDO simular o inferir el resultado.
 
-Detectar el test runner consultando `skills/_shared/test-runner-detection.md` con parámetro `{fase}=verify`.
+Detectar el test runner consultando `phases/_shared/test-runner-detection.md` con parámetro `{fase}=verify`.
 
 ### Paso 4c: Build y Verificación de Tipos (Ejecución Real)
 

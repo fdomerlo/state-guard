@@ -30,24 +30,31 @@ Memory Guard (memory-guard.md)
 
 ### Módulos del Memory Guard
 
-Los contratos compartidos residen en `skills/_shared/`:
+Los contratos compartidos se distribuyen en dos directorios:
+
+**`skills/_shared/`** — Contratos globales del agente:
 
 | Archivo | Propósito |
 |---------|-----------|
 | `memory-guard.md` | Contrato unificado: identidad del agente, ejecución de fases, delegación inteligente, recovery |
-| `transaction-protocol.md` | Protocolo de transacciones: ciclo BEGIN/COMMIT/ROLLBACK, campos txn_* en state.ini, auto-checkpoint |
 | `capabilities.md` | Detección de capacidades del agente host y regla de delegación inteligente |
-| `context-injection.md` | Dependencias de contexto por fase y secuencia de ejecución |
-| `persistence-contract.md` | Contrato de persistencia: inline vs delegada, protocolo de comunicación |
 | `convention.md` | Convención de filesystem, schema state.ini v2, tabla de transiciones de lock_phase |
-| `phase-common.md` | Protocolo de transacción común a todas las skills de fase |
+
+**`phases/_shared/`** — Contratos específicos de fases:
+
+| Archivo | Propósito |
+|---------|-----------|
+| `transaction-protocol.md` | Protocolo de transacciones: ciclo BEGIN/COMMIT/ROLLBACK, campos txn_* en state.ini, auto-checkpoint |
+| `phase-common.md` | Protocolo de transacción común a todas las fases |
+| `persistence-contract.md` | Contrato de persistencia: inline vs delegada, protocolo de comunicación |
+| `context-injection.md` | Dependencias de contexto por fase y secuencia de ejecución |
 | `test-runner-detection.md` | Pseudocódigo para la detección automática del test runner del proyecto |
 
 ### Autodetección y Delegación Inteligente
 
 El agente determina su comportamiento en tiempo de ejecución analizando las reglas de `capabilities.md`. A través del sistema de archivos, el agente detecta dinámicamente el host en runtime (por ejemplo, verificando la presencia de `.gemini` o `.config/opencode/`) y activa o desactiva capacidades según la plataforma.
 
-El Memory Guard ejecuta fases **inline por defecto**: carga el archivo `.md` correspondiente a la fase (ej. `skills/apply/apply.md`) y sigue sus instrucciones como propias. Sin embargo, para aislar el contexto y preservar la memoria de la sesión principal, delega el trabajo pesado a un sub-agente real bajo estas estrictas condiciones:
+El Memory Guard ejecuta fases **inline por defecto**: carga el archivo `.md` correspondiente a la fase (ej. `phases/apply.md`) y sigue sus instrucciones como propias. Sin embargo, para aislar el contexto y preservar la memoria de la sesión principal, delega el trabajo pesado a un sub-agente real bajo estas estrictas condiciones:
 
 1. La fase es `apply` con más de 10 tareas pendientes, **Y**
 2. El agente host detectado soporta sub-agentes reales (OpenCode o Antigravity CLI).
