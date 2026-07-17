@@ -1,13 +1,3 @@
----
-name: tasks
-description: >
-  Desglosa un cambio en tareas de implementación con numeración jerárquica.
-  Disparador: Cuando el usuario ejecuta /tasks para crear el checklist de tareas.
-license: MIT
-metadata:
-  author: fdomerlo@gmail.com (136bits)
-  version: "3.0"
----
 
 # Tasks Skill
 

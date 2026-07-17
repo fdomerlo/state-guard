@@ -1,13 +1,3 @@
----
-name: explore
-description: >
-  Explora e investiga ideas antes de comprometerse con un cambio.
-  Disparador: Cuando el usuario ejecuta /explore para reflexionar sobre una funcionalidad, investigar el código base o aclarar requisitos.
-license: MIT
-metadata:
-  author: fdomerlo@gmail.com (136bits)
-  version: "3.0"
----
 
 # Explore Skill
 

@@ -1,6 +1,28 @@
 # Changelog
 
+## [2.3.0] - 2026-07-17
+
+### Changed
+- **Fases core a Markdown plano**: Las 8 fases core (`explore`, `propose`, `spec`, `design`, `tasks`, `apply`, `verify`, `archive`) dejan de usar `SKILL.md` con frontmatter YAML y pasan a archivos `<fase>.md` en Markdown plano (ej. `skills/explore/explore.md`). El frontmatter YAML (`name`, `description`, `license`, `metadata`) se elimina; el contenido instructivo se conserva intacto.
+- **Scripts de instalación actualizados**: `scripts/install.sh` y `tests/install_test.sh` ahora detectan ambos formatos (`<fase>.md` para fases core, `SKILL.md` para skills descubiertas por el agente).
+- **Referencias actualizadas**: Se actualizaron todas las referencias en `_shared/memory-guard.md`, `_shared/phase-common.md`, `_shared/context-injection.md`, `skills/new/SKILL.md`, `skills/ff/SKILL.md` y `MANUAL.md`.
+
+### Note
+- `skills/skill-registry/` y las custom skills del usuario **mantienen** el formato `SKILL.md` con frontmatter, ya que son descubiertas dinámicamente por el agente (no invocadas determinísticamente).
+
+## [2.2.0] - 2026-07-08
+
+### Added
+- **Auto-descubrimiento de Skills (Zero-Config)**: El script de instalación ahora lee dinámicamente el *frontmatter* YAML de cada `SKILL.md` para generar los *slash commands* al vuelo para OpenCode.
+
+### Changed
+- **Bootstrap Universal**: Se simplificó radicalmente la inyección de contexto. El contrato `memory-guard` ahora se inyecta directamente como prompt nativo en `opencode.jsonc` y `GEMINI.md`, eliminando la necesidad de archivos intermediarios.
+
+### Removed
+- Se eliminó por completo el directorio `integrations/` y todos sus archivos estáticos (`AGENTS.md`, JSONs y comandos Markdown heredados), reduciendo drásticamente la duplicación de código.
+- 
 ## [2.1.1] - 2026-07-08
+
 ### Changed
 - **Refactor de Naming**: Se eliminaron los prefijos de todos los directorios de skills, archivos de comandos e integraciones.
 - **Actualización de Rutes**: Se actualizaron todas las referencias internas, scripts y prompts para reflejar los nuevos nombres de comandos (ej. `/split` en lugar de `/agentify-split`).
@@ -10,6 +32,7 @@
 - Se corrigieron rutas rotas causadas por el renombrado masivo en `scripts/install.sh`, `scripts/cleanup.sh` y comandos internos.
 
 ## [2.1.0] - 2026-07-08
+
 ### Changed
 - **Migración de Estado**: Se reemplazó `state.yaml` por `state.ini` para mejorar la compatibilidad nativa con bash.
 - **Gestión de Locks**: Se introdujo `_lock_utils.py` aislando la lógica de locks del negocio, resolviendo conflictos de concurrencia.
@@ -35,10 +58,9 @@
 - **checkpoint**: Ahora opera en modo dual (automático post-COMMIT + manual bajo demanda).
 - **fix**: Añadida migración v1→v2 y resolución de transacciones incompletas.
 - **status**: Muestra `txn_status` en la tabla de estado.
-- **Integraciones**: Claude Code, Antigravity CLI y OpenCode reducidas a stubs mínimos que cargan `memory-guard.md`. Se eliminó por completo la integración obsoleta de `gemini-cli` y se renombró `antigravity` a `antigravity-cli` en todos los instaladores, scripts y documentación.
+- **Integraciones**: OpenCode y Antigravity CLI reducidas a stubs mínimos que cargan `memory-guard.md`. Se eliminó por completo la integración obsoleta de `gemini-cli` y se renombró `antigravity` a `antigravity-cli` en todos los instaladores, scripts y documentación.
 - **install.sh / cleanup.sh**: Actualizados para soportar exclusivamente `antigravity-cli` y retirar la opción de `gemini-cli`.
 - **Estructura del agente**: Inicialización de la estructura del agente en el proyecto (`/init`) creando `openspec/config.yaml` y generando el índice de habilidades `.state-guard/skill-registry.md`.
-
 
 ### Removed
 

@@ -12,14 +12,14 @@ Para equipos que exigen rigor construyendo sobre lineamientos auditables.
 ### Unix / Linux / macOS
 
 ```bash
-# Para modelos de entrada (OpenCode): realiza inlining para evitar pereza de herramientas
-bash scripts/install.sh --target opencode
+# Instala el bootstrap universal para OpenCode y genera slash commands dinámicos
+bash scripts/install.sh
 
-# Para modelos de frontera (Antigravity CLI): usa Context Streaming (lazy loading)
-bash scripts/install.sh --target antigravity
+# El mismo script aplica el bootstrap universal a Antigravity CLI cuando existe GEMINI.md
+bash scripts/install.sh
 ```
 
-Opciones para `--target`: `opencode` (por defecto), `antigravity`, `claude-code`.
+El instalador universal inyecta el bootstrap de State Guard en OpenCode y Antigravity CLI sin depender de targets heredados.
 
 ---
 
@@ -145,7 +145,6 @@ State Guard es un framework **Agent-First**. El Memory Guard se adapta automáti
 
 | Herramienta | Ejecución Inline | Sub-agentes | Delegación Inteligente |
 |-------------|:----------------:|:-----------:|:---------------------:|
-| **Claude Code** | ✅ | ✅ | Delega apply pesados (> 10 tareas) |
 | **OpenCode** | ✅ | ✅ | Delega apply pesados (> 10 tareas) |
 | **Antigravity CLI** | ✅ | ✅ | Delega apply pesados (> 10 tareas) |
 

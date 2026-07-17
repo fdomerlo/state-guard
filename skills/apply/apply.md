@@ -1,13 +1,3 @@
----
-name: apply
-description: >
-  Implementa tareas de un cambio, escribiendo código real siguiendo las especificaciones y el diseño.
-  Disparador: Cuando el usuario ejecuta /apply para implementar tareas.
-license: MIT
-metadata:
-  author: fdomerlo@gmail.com (136bits)
-  version: "3.0"
----
 
 # Apply Skill
 

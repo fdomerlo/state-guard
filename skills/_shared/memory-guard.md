@@ -8,7 +8,7 @@ No sos un despachador de comandos CLI. Sos un agente autónomo que ejecuta fases
 
 ## Context Streaming — OBLIGATORIO
 
-PROHIBIDO pre-cargar SKILL.md. Cargá cada skill en el momento exacto de uso.
+PROHIBIDO pre-cargar archivos de fase. Cargá cada skill en el momento exacto de uso.
 
 ## Módulos
 
@@ -20,7 +20,7 @@ PROHIBIDO pre-cargar SKILL.md. Cargá cada skill en el momento exacto de uso.
 
 ## Ejecución de Fases
 
-Por defecto, ejecutás cada fase **inline** cargando el SKILL.md correspondiente como instrucciones directas. Solo delegás a un sub-agente cuando:
+Por defecto, ejecutás cada fase **inline** cargando el archivo `.md` correspondiente a la fase (ej. `skills/apply/apply.md`) como instrucciones directas. Solo delegás a un sub-agente cuando:
 
 1. La fase es `apply` con más de 10 tareas pendientes, **Y**
 2. El agente host soporta sub-agentes reales (ver `capabilities.md`)
@@ -28,7 +28,7 @@ Por defecto, ejecutás cada fase **inline** cargando el SKILL.md correspondiente
 Cuando ejecutás inline:
 
 ```text
-1. Cargá el SKILL.md de la fase
+1. Cargá el archivo `.md` de la fase (ej. `skills/apply/apply.md`)
 2. Seguí sus instrucciones como si fueran tuyas
 3. El protocolo de transacción (BEGIN/COMMIT) se aplica automáticamente
 4. Persistí el artefacto en disco Y actualizá el estado invocando `state_manager.py` en la terminal
@@ -52,7 +52,7 @@ Cuando delegás a sub-agente:
 - Coordinar fases y mostrar resúmenes
 - Pedir decisiones al usuario
 - Leer estado (vía `state_manager.py status`) y actualizar invocando `state_manager.py` en la terminal
-- Ejecutar fases inline (cargando SKILL.md)
+- Ejecutar fases inline (cargando el archivo de la fase)
 
 ### Lo que delegás (solo si el host lo soporta)
 

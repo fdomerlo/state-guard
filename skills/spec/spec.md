@@ -1,13 +1,3 @@
----
-name: spec
-description: >
-  Escribe especificaciones con requisitos y escenarios (especificaciones delta para cambios).
-  Disparador: Cuando el usuario ejecuta /spec para escribir o actualizar especificaciones de un cambio.
-license: MIT
-metadata:
-  author: fdomerlo@gmail.com (136bits)
-  version: "3.0"
----
 
 # Spec Skill
 

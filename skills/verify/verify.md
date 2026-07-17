@@ -1,13 +1,3 @@
----
-name: verify
-description: >
-  Valida que la implementación coincida con las especificaciones, el diseño y las tareas.
-  Disparador: Cuando el usuario ejecuta /verify para verificar un cambio completado.
-license: MIT
-metadata:
-  author: fdomerlo@gmail.com (136bits)
-  version: "3.0"
----
 
 # Verify Skill
 

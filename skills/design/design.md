@@ -1,13 +1,3 @@
----
-name: design
-description: >
-  Crea el documento de diseño técnico con decisiones de arquitectura y enfoque.
-  Disparador: Cuando el usuario ejecuta /design para escribir o actualizar el diseño técnico de un cambio.
-license: MIT
-metadata:
-  author: fdomerlo@gmail.com (136bits)
-  version: "3.0"
----
 
 # Design Skill
 
