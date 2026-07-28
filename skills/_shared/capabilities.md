@@ -26,7 +26,7 @@ Si no se puede detectar automáticamente, asumir capacidades máximas (ejecució
 ## Regla de Delegación Inteligente
 
 ```text
-SI la fase es `apply`
+SI la fase es `execute`
   Y hay más de 10 tareas pendientes
   Y el host soporta sub-agentes reales:
     → Delegar a sub-agente con las tareas como instrucciones

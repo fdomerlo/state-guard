@@ -41,7 +41,7 @@ El comando parsea `tasks.md` de forma determinista y devuelve `estado_tareas`, `
 ### Paso 3b: Extraer archivos_modificados
 
 ```text
-Fuente primaria:   Tabla "### Archivos Modificados" del último resumen de apply
+Fuente primaria:   Tabla "### Archivos Modificados" del último resumen de execute
 Fuente secundaria: Campo `archivos_modificados` del session_summary existente
 Fallback:          Lista vacía []
 ```

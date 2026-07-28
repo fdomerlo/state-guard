@@ -40,7 +40,7 @@ Busca todos los archivos `state.ini` en el directorio `.state-guard/changes/`:
 Para cada archivo encontrado, extrae los siguientes campos:
 
 - `change`: Nombre del cambio
-- `current_phase`: Fase actual (explore, propose, spec, design, tasks, apply, verify, archive)
+- `current_phase`: Fase actual (plan, execute, verify)
 - `status`: Estado actual (active, done, blocked)
 - `started_at`: Fecha de inicio en formato ISO 8601
 - `blocked_reason`: Razón del bloqueo (si aplica)
@@ -50,7 +50,7 @@ Para cada archivo encontrado, extrae los siguientes campos:
 Ignora los cambios que tengan:
 
 - `status: done`
-- `current_phase: archive`
+- Cambios completados (todas las fases en `completed_phases`)
 
 ### Paso 4: Calcular Tiempo Transcurrido
 
@@ -98,7 +98,7 @@ Devuelve la tabla Markdown con el estado de todos los cambios activos.
 
 ## Reglas
 
-- SIEMPRE filtrar cambios con status "done" o current_phase "archive"
+- SIEMPRE filtrar cambios completados (todas las fases en completed_phases)
 - Si no hay cambios activos, mostrar mensaje informativo
 - Manejar gracefully archivos malformados (continuar, no fallar)
 - El formato de fase debe ser legible (primera letra mayúscula)

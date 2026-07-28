@@ -17,5 +17,5 @@ Detectar test runner desde:
 
 Para usar este helper:
 
-- En `apply`: usar `rules.apply.test_command` como clave de configuración
+- En `execute`: usar `rules.execute.test_command` como clave de configuración
 - En `verify`: usar `rules.verify.test_command` como clave de configuración

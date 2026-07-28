@@ -1,52 +1,67 @@
 ---
 name: hotfix
 description: >
-  Inicia un flujo directo (Bypass / Fast-Track) saltando las fases de diseño. 
-  Ideal para cambios menores o hotfixes. El cambio comienza directamente en la fase apply.
+  Inicia un flujo directo (Bypass / Fast-Track) saltando la fase de plan.
+  Ideal para cambios menores o hotfixes. El cambio comienza directamente
+  en la fase execute, con bypass auditado del gate humano de plan.
   Disparador: Cuando el usuario ejecuta /hotfix para un cambio directo.
 license: MIT
 metadata:
   author: fdomerlo@gmail.com (136bits)
-  version: "2.0"
+  version: "2.1"
 ---
 
 # Hotfix Skill
 
 ## Propósito
 
-Esta skill proporciona un modo Bypass / Fast-Track para evitar la burocracia de las 8 fases en cambios menores o hotfixes. Inicializa un flujo directo `apply -> verify -> archive`, saltando la planificación y el diseño.
+Esta skill proporciona un modo Bypass / Fast-Track para cambios menores o
+hotfixes. Salta la fase de planificación (PLAN) e inicia directamente en
+EXECUTE, con un gate humano auditado en 2 pasos via `sg hotfix-init` y `sg hotfix-confirm`.
 
 ## Requisitos del Usuario
 
-**OBLIGATORIO**: El usuario DEBE proveer las instrucciones directas de código en su prompt. Como se saltan las fases de diseño y tareas, no existirán documentos previos como `design.md` o `tasks.md`.
+**OBLIGATORIO**: El usuario DEBE proveer las instrucciones directas de código
+en su prompt. Como se salta la fase PLAN, no existirá `plan.md`.
 
 ## Protocolo de Ejecución (ACID)
 
-### Paso 1: Inicialización del Estado (Bypass)
+### Paso 1: Inicialización del Estado (Bypass con gate humano en 2 pasos)
 
-1. Crea el directorio si es un ticket nuevo: `mkdir -p .state-guard/changes/{nombre-del-cambio}`
+El humano debe ejecutar desde su propia terminal (estos comandos NO pueden ser invocados
+por el agente — utilizan un token out-of-band):
 
-2. Usa `write_file` para crear un archivo base `.state-guard/changes/{nombre-del-cambio}/state.ini` con este contenido exacto:
-
-```ini
-[Transaction]
-txn_status = idle
-
-[Graph]
-current_phase = hotfix
-lock_phase = apply
-completed_phases = explore, propose, spec, design, tasks
-pending_phases = apply, verify, archive
+1. Preparar el token out-of-band:
+```bash
+sg hotfix-init --change {change-name} --reason "descripción breve del hotfix"
 ```
 
-3. Inicia la transacción obligatoria en la terminal:
-`python3 scripts/state_manager.py begin --change {nombre-del-cambio} --phase apply`
+2. Confirmar y consumir el token (en terminal humana):
+```bash
+sg hotfix-confirm --change {change-name} --token <CÓDIGO>
+```
 
-### Paso 2: Ejecución del Código (Apply)
+El comando `hotfix-confirm`:
+1. Consume y elimina el token seguro generado fuera del workspace en `~/.state-guard-gate/`.
+2. Crea el directorio `.state-guard/changes/{change-name}/` con `state.ini` v2.
+3. Registra el bypass con razón en `state.ini[Gate]` (audit trail completo).
+4. Avanza automáticamente el DAG: plan queda en `completed_phases`, `lock_phase=execute`.
 
-Aplica los cambios de código solicitados por el usuario directamente en los archivos fuente del proyecto.
+### Paso 2: Iniciar la transacción de ejecución
 
-### Paso 3: Commit y Avance
+```bash
+python3 scripts/sg.py begin --change {change-name} --phase execute
+```
 
-Una vez aplicados los cambios con éxito, avanza la transacción hacia la fase de verificación ejecutando:
-`python3 scripts/state_manager.py commit --change {nombre-del-cambio} --next-phase verify`
+### Paso 3: Ejecución del Código
+
+Aplica los cambios de código solicitados por el usuario directamente en los
+archivos fuente del proyecto.
+
+### Paso 4: Commit y Avance
+
+Una vez aplicados los cambios con éxito, avanza la transacción hacia verificación:
+
+```bash
+python3 scripts/sg.py commit --change {change-name} --next-phase verify
+```

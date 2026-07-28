@@ -1,59 +1,66 @@
 
-# Verify Skill
+# VERIFY Phase
 
 ## Propósito
 
-Skill responsable de la **VERIFICACIÓN**. Sos la puerta de calidad. Tu trabajo es demostrar —con evidencia de ejecución real— que la implementación está completa, es correcta y cumple conductualmente con las specs.
+La fase **VERIFY** es la puerta de calidad final. Demuestra —con evidencia de ejecución real— que la implementación está completa, es correcta y cumple conductualmente con las specs. El análisis estático por sí solo NO es suficiente. DEBÉS ejecutar el código.
 
-El análisis estático por sí solo NO es suficiente. DEBÉS ejecutar el código.
+Al final de VERIFY, si el veredicto es APROBADO, se ejecuta el **paso de archivado** como parte de esta fase.
 
 ## Qué Hacer
 
-### Paso 0: Leer el Contexto
+### Paso 1: Leer el Contexto
 
-Antes de verificar, leé las dependencias del cambio actual:
+Antes de verificar, leé las dependencias:
 
-1. **Specs delta del cambio** — leer todos los archivos en `.state-guard/changes/{nombre-del-cambio}/specs/`
-2. **Diseño** — leer `.state-guard/changes/{nombre-del-cambio}/design.md`
-3. **Tareas** — leer `.state-guard/changes/{nombre-del-cambio}/tasks.md`
+1. **Specs delta** — `.state-guard/changes/{change-name}/specs/`
+2. **Plan** — `.state-guard/changes/{change-name}/plan.md`
+3. **Tareas** — `.state-guard/changes/{change-name}/tasks.md`
 
-**REGLA CRÍTICA**: Queda PROHIBIDO cargar o leer `specs/` completo del proyecto. Solo specs delta del cambio activo.
-**REGLA CRÍTICA**: Queda PROHIBIDO buscar en todo el código base. Solo leer archivos específicos mencionados en las tareas del cambio.
+**REGLA CRÍTICA:** PROHIBIDO cargar `specs/` completo del proyecto. Solo specs delta del cambio activo.
+**REGLA CRÍTICA:** PROHIBIDO buscar en todo el código base. Solo archivos mencionados en las tareas del cambio.
 
-### Paso 1: Verificar Completitud
+### Paso 2: Verificar Completitud
 
 ```text
 Leer tasks.md
 ├── Contar total de tareas
 ├── Contar tareas completadas [x]
 ├── Listar tareas incompletas [ ]
-└── Marcar: CRITICAL si tareas centrales incompletas, WARNING si tareas de limpieza incompletas
+└── Marcar: CRITICAL si tareas centrales incompletas
+         WARNING si tareas de limpieza incompletas
 ```
 
-### Paso 2: Verificar Corrección (Coincidencia Estática con Specs)
+También invocar el middleware para conteo determinista:
+
+```bash
+python3 scripts/state_manager.py check-completion --change {change-name}
+```
+
+### Paso 3: Verificar Corrección (coincidencia con specs)
 
 ```text
 PARA CADA REQUISITO en specs/:
 ├── Buscar evidencia de implementación en el código base
-├── Para cada ESCENARIO:
-│   ├── ¿La precondición GIVEN está manejada en el código?
+├── PARA CADA ESCENARIO:
+│   ├── ¿La precondición GIVEN está manejada?
 │   ├── ¿La acción WHEN está implementada?
 │   ├── ¿El resultado THEN se produce?
 │   └── ¿Los casos límite están cubiertos?
-└── Marcar: CRITICAL si falta el requisito, WARNING si el escenario está cubierto parcialmente
+└── Marcar: CRITICAL si falta el requisito, WARNING si escenario parcialmente cubierto
 ```
 
-### Paso 3: Verificar Coherencia (Coincidencia con Diseño)
+### Paso 4: Verificar Coherencia (coincidencia con el plan)
 
 ```text
-PARA CADA DECISIÓN en design.md:
+PARA CADA DECISIÓN en plan.md:
 ├── ¿Se usó realmente el enfoque elegido?
 ├── ¿Se implementaron accidentalmente las alternativas rechazadas?
-├── ¿Los cambios de archivos coinciden con la tabla "Cambios de Archivos"?
+├── ¿Los cambios de archivos coinciden con la tabla del plan?
 └── Marcar: WARNING si se encontró una desviación
 ```
 
-### Paso 4: Verificar Testing (Estático)
+### Paso 5: Verificar Testing
 
 ```text
 Buscar archivos de test relacionados con el cambio
@@ -61,16 +68,17 @@ Buscar archivos de test relacionados con el cambio
 ├── ¿Los tests cubren caminos felices?
 ├── ¿Los tests cubren casos límite?
 ├── ¿Los tests cubren estados de error?
-└── Marcar: WARNING si hay escenarios sin tests, SUGGESTION si la cobertura puede mejorar
+└── Marcar: WARNING si hay escenarios sin tests
+         SUGGESTION si la cobertura puede mejorar
 ```
 
-### Paso 4b: Ejecutar Tests (Ejecución Real)
+### Paso 5b: Ejecutar Tests (ejecución real)
 
-CRÍTICO: Debes ejecutar usando una herramienta de terminal real. ESTÁ PROHIBIDO simular o inferir el resultado.
+CRÍTICO: Ejecutar usando terminal real. PROHIBIDO simular o inferir el resultado.
 
-Detectar el test runner consultando `phases/_shared/test-runner-detection.md` con parámetro `{fase}=verify`.
+Detectar el test runner consultando `phases/_shared/test-runner-detection.md`.
 
-### Paso 4c: Build y Verificación de Tipos (Ejecución Real)
+### Paso 5c: Build y verificación de tipos (ejecución real)
 
 ```text
 Detectar comando de build desde:
@@ -81,46 +89,45 @@ Detectar comando de build desde:
 └── Fallback: omitir y reportar como WARNING (no CRITICAL)
 ```
 
-### Paso 4d: Validación de Cobertura (si configurado)
+### Paso 5d: Validación de cobertura (si configurado)
 
 Solo ejecutar si `rules.verify.coverage_threshold` está definido en `.state-guard/config.yaml`.
 
-### Paso 5: Matriz de Cumplimiento de Specs (Validación Conductual)
-
-Este es el paso más importante. Cruzar CADA escenario de spec contra los resultados reales de la ejecución de tests:
+### Paso 6: Matriz de Cumplimiento de Specs
 
 ```text
 PARA CADA REQUISITO en specs/:
   PARA CADA ESCENARIO:
   ├── Encontrar tests que cubren este escenario
-  ├── Consultar el resultado de ese test desde la salida del Paso 4b
-  ├── Asignar estado de cumplimiento:
-  │   ├── ✅ CUMPLE     → el test existe Y pasó
-  │   ├── ❌ FALLANDO   → el test existe PERO falló (CRITICAL)
-  │   ├── ❌ SIN TEST   → no se encontró test para este escenario (CRITICAL)
-  │   └── ⚠️ PARCIAL   → el test existe, pasa, pero cubre solo parte del escenario (WARNING)
-  └── Registrar: requisito, escenario, archivo de test, nombre de test, resultado
+  ├── Consultar el resultado de ese test desde el Paso 5b
+  ├── Asignar estado:
+  │   ├── ✅ CUMPLE   → el test existe Y pasó
+  │   ├── ❌ FALLANDO → el test existe PERO falló (CRITICAL)
+  │   ├── ❌ SIN TEST → no existe test para este escenario (CRITICAL)
+  │   └── ⚠️ PARCIAL  → el test existe, pasa, pero cubre solo parte (WARNING)
+  └── Registrar: requisito, escenario, archivo de test, nombre, resultado
 ```
 
-### Paso 6: Persistir el Reporte de Verificación
+### Paso 7: Persistir el Reporte
 
-Escribir el reporte completo en `.state-guard/changes/{nombre-del-cambio}/verify-report.md`.
+```bash
+# Escribir en disco
+.state-guard/changes/{change-name}/verify-report.md
+```
 
-### Paso 7: Reportar
-
-Si hay issues CRITICAL → ejecutá ROLLBACK y reportá los problemas.
+Formato:
 
 ```markdown
 ## Reporte de Verificación
 
-**Cambio**: {nombre-del-cambio}
+**Cambio**: {change-name}
 
 ### Completitud
-| Métrica              | Valor |
-|----------------------|-------|
-| Tareas totales       | {N}   |
-| Tareas completas     | {N}   |
-| Tareas incompletas   | {N}   |
+| Métrica            | Valor |
+|--------------------|-------|
+| Tareas totales     | {N}   |
+| Tareas completas   | {N}   |
+| Tareas incompletas | {N}   |
 
 ### Ejecución de Build y Tests
 **Build**: ✅ Pasó / ❌ Falló
@@ -141,18 +148,94 @@ Si hay issues CRITICAL → ejecutá ROLLBACK y reportá los problemas.
 {APROBADO / APROBADO CON ADVERTENCIAS / RECHAZADO}
 ```
 
+### Paso 8: Decidir
+
+```text
+Si hay issues CRITICAL:
+  → Ejecutar ROLLBACK y reportar los problemas al usuario
+  → El cambio vuelve a EXECUTE para corrección
+
+Si veredicto es APROBADO o APROBADO CON ADVERTENCIAS:
+  → Ejecutar COMMIT (verify es la fase final del DAG)
+  → Ejecutar inmediatamente el Paso 9 (archivado, dentro de verify)
+```
+
+---
+
+### Paso 9: ARCHIVE — Archivado del cambio (paso final de VERIFY)
+
+Este paso se ejecuta automáticamente después de un veredicto APROBADO. También puede invocarse directamente con `/archive` si VERIFY ya fue ejecutado y aprobado en una sesión anterior.
+
+#### 9.1 Control de bloqueantes
+
+Verificar que `verify-report.md` no contenga issues **CRITICAL**. Si los contiene, ABORTAR.
+
+#### 9.2 Verificar estado git
+
+```bash
+git status --porcelain
+```
+
+- Salida vacía → repositorio limpio, continuar
+- Salida no vacía → BLOQUEAR el archivado y exigir commit al usuario
+
+#### 9.3 Sincronizar specs delta con specs principales
+
+Para cada spec en `.state-guard/changes/{change-name}/specs/`:
+
+**Si existe la spec principal** (`.state-guard/specs/{dominio}/spec.md`):
+- Requisitos AGREGADOS → agregar a la spec principal
+- Requisitos MODIFICADOS → reemplazar el requisito coincidente
+- Requisitos ELIMINADOS → eliminar el requisito coincidente
+- PRESERVAR todos los requisitos no mencionados en el delta
+
+**Si NO existe la spec principal:**
+- La spec delta es completa. Copiarla directamente a `.state-guard/specs/{dominio}/spec.md`.
+
+#### 9.4 Mover al archivo
+
+```
+.state-guard/changes/{change-name}/
+  → .state-guard/changes/archive/YYYY-MM-DD-{change-name}/
+```
+
+Usar la fecha de hoy en formato ISO.
+
+#### 9.5 Reportar archivado
+
+```markdown
+## Cambio Archivado
+
+**Cambio**: {change-name}
+**Archivado en**: .state-guard/changes/archive/{YYYY-MM-DD}-{change-name}/
+
+### Specs Sincronizadas
+| Dominio   | Acción             | Detalles                                       |
+|-----------|--------------------|------------------------------------------------|
+| {dominio} | Creado/Actualizado | {N agregados, M modificados, K eliminados}     |
+
+### Ciclo del Agente Completo
+El cambio ha sido planificado, implementado, verificado y archivado.
+Listo para el siguiente cambio.
+```
+
+---
+
 ## Reglas
 
 - SIEMPRE leer el código fuente real — no confiar en resúmenes
 - SIEMPRE ejecutar tests — el análisis estático solo no es verificación
 - Un escenario de spec solo es CUMPLIDO cuando un test que lo cubre ha PASADO
-- Comparar contra SPECS primero (corrección conductual), DISEÑO segundo (corrección estructural)
-- Ser objetivo — reportar lo que ES, no lo que debería ser
 - Los issues CRITICAL = deben resolverse antes de archivar
 - Los WARNING = deberían resolverse pero no bloquean
 - Las SUGGESTION = mejoras, no bloqueantes
-- NO corregir ningún problema — solo reportarlos
-- SIEMPRE guardar el reporte en `.state-guard/changes/{nombre-del-cambio}/verify-report.md`
-- Aplicar cualquier `rules.verify` de `.state-guard/config.yaml`
+- NO corregir ningún problema durante VERIFY — solo reportarlos
+- Sobre el archivado:
+  - NUNCA archivar si `verify-report.md` contiene issues CRITICAL
+  - SIEMPRE verificar git status antes de sincronizar specs
+  - Al fusionar, PRESERVAR los requisitos no mencionados en el delta
+  - El archivo es un rastro de auditoría — nunca eliminar ni modificar cambios archivados
+  - Si la fusión sería destructiva, ADVERTIR y pedir confirmación
+- Aplicar cualquier `rules.verify` y `rules.archive` de `.state-guard/config.yaml`
 
-> Transacción: BEGIN antes de este contenido, COMMIT al terminar. Ver `_shared/phase-common.md`.
+> Transacción: BEGIN antes de este contenido, COMMIT al terminar (Paso 8). Ver `_shared/phase-common.md`.

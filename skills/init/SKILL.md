@@ -71,14 +71,12 @@ rules:
     - Agrupar tareas por fase (infraestructura, implementación, testing)
     - Usar numeración jerárquica (1.1, 1.2, etc.)
     - Mantener tareas pequeñas, completables en una sesión
-  apply:
+  execute:
     - Seguir los patrones y convenciones de código existentes
     - "Código Defensivo y Pragmatismo: Aplica principios SOLID, DRY y Clean Code. Prefiere Early Returns (Guard Clauses). NUNCA sobre-ingeniar."
   verify:
-    - Ejecutar tests si existe infraestructura de testing
     - Comparar la implementación contra cada escenario de spec
-  archive:
-    - Advertir antes de fusionar deltas destructivos (eliminaciones grandes)
+    - Advertir antes de fusionar deltas destructivos (eliminaciones grandes en archivado)
 
 # Glosario de términos del dominio (opcional)
 # glossary:
@@ -108,7 +106,7 @@ Devuelve un resumen estructurado del estado resultante:
 - .state-guard/changes/    ← Listo para propuestas de cambio
 
 ### Próximos Pasos
-Listo para /explore {tema} o /new {nombre-del-cambio}.
+Listo para /new {nombre-del-cambio}.
 ```
 
 ## Reglas

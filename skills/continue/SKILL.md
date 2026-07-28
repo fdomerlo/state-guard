@@ -48,15 +48,12 @@ lock_state == FREE
 
 Usar `lock_phase` (devuelto por `status`) para determinar qué skill invocar:
 
-| lock_phase  | Skill a ejecutar |
-|-------------|-------------------|
-| `explore`   | explore       |
-| `propose`   | propose        |
-| `spec`      | spec           |
-| `design`    | design         |
-| `tasks`     | tasks          |
-| `apply`     | apply          |
-| `verify`    | verify         |
-| `archive`   | archive        |
+| lock_phase  | Skill a ejecutar | Descripción |
+|-------------|------------------|-------------|
+| `plan`      | `phases/plan.md`     | Genera draft, espera gate humano, emite lock |
+| `execute`   | `phases/execute.md`  | Desglosa tareas e implementa |
+| `verify`    | `phases/verify.md`   | Verifica + archiva (Paso 9) |
+
+> **Migración v1:** Si el state.ini todavía tiene fases v1 (`explore`, `propose`, `spec`, `design`, `tasks`, `apply`, `archive`), ejecutar primero `sg migrate --change {nombre}` para migrar al esquema v2. La migración es automática al ejecutar cualquier `begin`.
 
 La transacción (BEGIN/COMMIT/ROLLBACK) la maneja la propia skill invocada, según `transaction-protocol.md`. `continue` no toma el lock de fase directamente — delega esa responsabilidad a la skill de la fase correspondiente.

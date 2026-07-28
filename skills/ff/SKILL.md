@@ -1,7 +1,7 @@
 ---
 name: ff
 description: >
-  Ejecuta propose, spec, design y tasks en secuencia
+  Ejecuta plan y execute en secuencia
   Disparador: Cuando el usuario ejecuta /ff.
 license: MIT
 metadata:
@@ -13,25 +13,23 @@ metadata:
 
 ## Propósito
 
-Meta-skill responsable del avance rápido (Fast-Forward) de un cambio transaccional. Ejecuta secuencialmente hasta 4 fases de planificación, cada una como una transacción independiente para preservar la integridad del State Guard.
+Meta-skill responsable del avance rápido (Fast-Forward) de un cambio transaccional. Ejecuta secuencialmente las fases PLAN y EXECUTE como transacciones independientes para preservar la integridad del State Guard.
+
+> **Nota:** FF ejecuta PLAN en modo "draft automático" sin gate interactivo. Si querés revisión humana obligatoria antes de ejecutar, usá `/plan` directamente.
 
 ## Qué Hacer
 
 ### Secuencia de Fases
 
-Ejecuta en orden estricto, saltando las fases que ya estén registradas en `completed_phases` dentro de `state.ini`:
+Ejecuta en orden estricto, saltando las fases que ya estén en `completed_phases`:
 
-1. propose
-2. spec
-3. design
-4. tasks
+1. `plan`
+2. `execute`
 
 ### Guard de Lock Semántico (OBLIGATORIO — antes de CADA fase)
 
-Antes de iniciar cada fase de la secuencia, debes evaluar el estado actual del proyecto:
-
 ```text
-PARA CADA fase en la secuencia (propose → spec → design → tasks):
+PARA CADA fase en la secuencia (plan → execute):
   SI fase_solicitada NO ES IGUAL A state.lock_phase:
     IMPRIMIR:
     │   ERROR: Transición inválida de lock semántico.
@@ -43,21 +41,16 @@ PARA CADA fase en la secuencia (propose → spec → design → tasks):
 
 ### Ejecución por Fase
 
-Para cada fase que pase el guard semántico exitosamente:
+Para cada fase que pase el guard semántico:
 
-1. **Cargar:** Leé el archivo `.md` correspondiente a la fase (ej. `phases/spec.md`).
-2. **Transaccionar:** Ejecutá inline respetando ESTRICTAMENTE el ciclo del Framework de Memoria Transaccional:
-* **BEGIN**: Reclamar y setear el estado en `state.ini` como `in_progress`.
-* **TRABAJO**: Generar los artefactos Markdown.
-* **COMMIT**: Guardar el estado exitoso, actualizando `completed_phases` y el nuevo `lock_phase`.
+1. **Cargar:** Leé el archivo `.md` correspondiente (`phases/plan.md`, `phases/execute.md`).
+2. **Transaccionar:** Ejecutá inline respetando el ciclo BEGIN → TRABAJO → COMMIT.
+3. **Verificar:** Validá que el COMMIT fue exitoso (lock avanzó) antes de continuar.
 
-
-3. **Verificar:** Validá que el COMMIT fue exitoso (el lock avanzó) antes de iniciar la iteración de la siguiente fase en la secuencia.
+**Atención sobre PLAN:** En modo FF, el gate de revisión humana de PLAN se ejecuta igual — FF NO lo omite. Tras generar el draft, FF presenta el gate al usuario y espera su aprobación. Si el usuario cancela, FF se detiene en PLAN.
 
 ### Resultado
 
-Al finalizar la secuencia de Fast-Forward (o detenerse de forma segura):
-
-1. Reportá al usuario un resumen de las fases que se completaron con éxito.
-2. Imprimí el estado transaccional resultante (ejecutando `/status` o leyendo `state.ini`).
-3. Indicá cuál es el próximo paso habilitado. Si la secuencia finalizó hasta el paso 4 (`tasks`), sugiere al usuario ejecutar `/apply` para iniciar el desarrollo.
+1. Reportá las fases completadas con éxito
+2. Mostrá el estado transaccional actual (`sg status --change {nombre}`)
+3. Indicá el próximo paso. Si finalizó hasta `execute`, sugerí `/verify`

@@ -14,13 +14,12 @@
         ├── state.ini        ← Estado del DAG + sesión (manejado por el middleware Python)
         ├── .lock            ← Lock de fase (manejado por el middleware, no tocar a mano)
         ├── .write-lock      ← Mutex de escritura de archivo, vida corta (idem)
-        ├── exploration.md   ← (opcional) de explore
-        ├── proposal.md      ← de propose
-        ├── specs/           ← de spec (specs delta)
+        ├── plan.md          ← de plan (planificación consolidada)
+        ├── specs/           ← de plan (specs delta)
         │   └── {dominio}/
         │       └── spec.md
-        ├── design.md        ← de design
-        ├── tasks.md         ← de tasks (actualizado por apply)
+        ├── design.md        ← de plan (diseño técnico)
+        ├── tasks.md         ← de execute (creado y actualizado)
         └── verify-report.md ← de verify
 
 ```
@@ -34,26 +33,24 @@
 | orquestador | Lee | `.state-guard/changes/{change-name}/state.ini` |
 | hotfix | Crea | `.state-guard/changes/{change-name}/state.ini` (Inicialización Bypass) |
 | init | Crea | directorios base y `config.yaml` |
-| explore | Crea (opcional) | `.state-guard/changes/{change-name}/exploration.md` |
-| propose | Crea | `.state-guard/changes/{change-name}/proposal.md` |
-| spec | Crea | `.state-guard/changes/{change-name}/specs/{dominio}/spec.md` |
-| design | Crea | `.state-guard/changes/{change-name}/design.md` |
-| tasks | Crea | `.state-guard/changes/{change-name}/tasks.md` |
-| apply | Actualiza | `.state-guard/changes/{change-name}/tasks.md` (marca `[x]`) |
+| plan | Crea | `.state-guard/changes/{change-name}/plan.md` y `specs/{dominio}/spec.md` |
+| execute | Crea | `.state-guard/changes/{change-name}/tasks.md` |
+| execute | Actualiza | `.state-guard/changes/{change-name}/tasks.md` (marca `[x]`) |
 | verify | Crea | `.state-guard/changes/{change-name}/verify-report.md` |
-| checkpoint | Actualiza | `.state-guard/changes/{change-name}/state.ini` → sección `[Session]` (vía middleware, ver más abajo) |
-| continue | Lee | `.state-guard/changes/{change-name}/state.ini` (vía `state_manager.py status`, nunca directo) |
-| archive | Mueve | `.state-guard/changes/{change-name}/` → `archive/YYYY-MM-DD-{change-name}/` |
+| verify (Paso 9) | Mueve | `.state-guard/changes/{change-name}/` → `archive/YYYY-MM-DD-{change-name}/` |
+| checkpoint | Actualiza | `.state-guard/changes/{change-name}/state.ini` → sección `[Session]` (vía middleware) |
+| continue | Lee | `.state-guard/changes/{change-name}/state.ini` (vía `sg status`, nunca directo) |
 
 ## Schema de `state.ini` (Motor ACID)
 
-El **Memory Guard** interactúa con este archivo EXCLUSIVAMENTE a través del script `scripts/state_manager.py`. **Nunca se debe editar manualmente con herramientas de texto — incluida la sección `[Session]`.**
+El **Memory Guard** interactúa con este archivo EXCLUSIVAMENTE a través del script `scripts/sg.py` (wrapper) o `scripts/state_manager.py`. **Nunca se debe editar manualmente — incluida la sección `[Session]`.**
 
 El archivo rastrea el estado del Grafo Acíclico Dirigido (DAG) y, opcionalmente, un snapshot de sesión no-DAG.
 
 ```ini
 [Metadata]
 last_updated = 2026-07-02T10:30:00.000000
+schema_version = 2          ; 1 = esquema 8 fases (legacy), 2 = esquema 3 fases
 
 [Transaction]
 txn_status = idle          ; idle | in_progress
@@ -61,10 +58,10 @@ txn_phase = None           ; fase actual si in_progress, sino None
 txn_started_at = None
 
 [Graph]
-current_phase = propose    ; Descriptivo: última fase completada
-lock_phase = spec          ; Prescriptivo: única fase autorizada a ejecutarse AHORA
-completed_phases = explore, propose
-pending_phases = spec, design, tasks, apply, verify, archive
+current_phase = plan       ; Descriptivo: última fase completada
+lock_phase = execute       ; Prescriptivo: única fase autorizada a ejecutarse AHORA
+completed_phases = plan
+pending_phases = execute, verify
 
 [Session]
 session_summary = ...      ; opcional — bloque generado por checkpoint, ≤500 tokens
@@ -80,25 +77,22 @@ session_summary = ...      ; opcional — bloque generado por checkpoint, ≤500
 | `current_phase` | Descriptivo — última fase completada | Al ejecutar COMMIT transaccional |
 | `lock_phase` | Prescriptivo — única fase ejecutable | Al ejecutar COMMIT (avanza el DAG) |
 
-**Tabla de transiciones de `lock_phase` (DAG estricto, validada en código por `TRANSITIONS` en `state_manager.py`, no solo por convención):**
+**Tabla de transiciones de `lock_phase` (DAG v2, 3 fases — validada en código por `TRANSITIONS` en `state_manager.py`):**
 
 | Fase completada | `lock_phase` resultante |
 | --- | --- |
-| `explore` | `propose` |
-| `propose` | `spec` |
-| `spec` | `design` |
-| `design` | `tasks` |
-| `tasks` | `apply` |
-| `hotfix` | `apply` |
-| `apply` | `verify` |
-| `verify` | `archive` |
+| `plan`    | `execute` |
+| `hotfix`  | `execute` |
+| `execute` | `verify` |
+
+> **Migración v1:** Si el state.ini tiene `schema_version = 1` (o el campo ausente), `sg migrate --change {nombre}` lo convierte al esquema v2. La migración también ocurre automáticamente al ejecutar cualquier `begin`. El historial de transiciones anterior se preserva en `[Session].migrated_from_schema = v1`.
 
 ## Lectura de Artefactos
 
 Cada skill lee sus dependencias desde el filesystem:
 
 ```text
-Propuesta:      .state-guard/changes/{change-name}/proposal.md
+Plan:           .state-guard/changes/{change-name}/plan.md
 Specs delta:    .state-guard/changes/{change-name}/specs/
 Diseño:         .state-guard/changes/{change-name}/design.md
 Tareas:         .state-guard/changes/{change-name}/tasks.md

@@ -14,7 +14,7 @@ Actualiza el estado invocando `state_manager.py` en la terminal:
 
 ```yaml
 txn_status: in_progress
-txn_phase: {nombre-de-la-fase}   # ej: "spec", "design", "apply"
+txn_phase: {nombre-de-la-fase}   # ej: "plan", "execute", "verify"
 txn_started_at: "{timestamp ISO 8601}"
 ```
 

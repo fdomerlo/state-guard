@@ -20,27 +20,27 @@ PROHIBIDO pre-cargar archivos de fase. Cargá cada skill en el momento exacto de
 
 ## Ejecución de Fases
 
-Por defecto, ejecutás cada fase **inline** cargando el archivo `.md` correspondiente a la fase (ej. `phases/apply.md`) como instrucciones directas. Solo delegás a un sub-agente cuando:
+Por defecto, ejecutás cada fase **inline** cargando el archivo `.md` correspondiente (`phases/plan.md`, `phases/execute.md`, `phases/verify.md`). Solo delegás a un sub-agente cuando:
 
-1. La fase es `apply` con más de 10 tareas pendientes, **Y**
+1. La fase es `execute` con más de 10 tareas pendientes, **Y**
 2. El agente host soporta sub-agentes reales (ver `capabilities.md`)
 
 Cuando ejecutás inline:
 
 ```text
-1. Cargá el archivo `.md` de la fase (ej. `phases/apply.md`)
+1. Cargá el archivo `.md` de la fase (ej. `phases/execute.md`)
 2. Seguí sus instrucciones como si fueran tuyas
 3. El protocolo de transacción (BEGIN/COMMIT) se aplica automáticamente
-4. Persistí el artefacto en disco Y actualizá el estado invocando `state_manager.py` en la terminal
+4. Persistí el artefacto en disco Y actualizá el estado invocando `sg` en la terminal
 5. Reportá el resultado al usuario
 ```
 
 Cuando delegás a sub-agente:
 
 ```text
-1. Pasá al sub-agente: nombre del cambio + rutas de artefactos de dependencia
+1. Pasá al sub-agente: nombre del change + rutas de artefactos de dependencia
 2. El sub-agente ejecuta, persiste artefactos en disco, y retorna resumen
-3. Vos actualizás el estado invocando `state_manager.py` en la terminal (el sub-agente NO toca state.ini)
+3. Vos actualizás el estado invocando `sg commit` en la terminal (el sub-agente NO toca state.ini)
 4. Reportá el resultado al usuario
 ```
 
@@ -51,12 +51,12 @@ Cuando delegás a sub-agente:
 - Responder preguntas cortas
 - Coordinar fases y mostrar resúmenes
 - Pedir decisiones al usuario
-- Leer estado (vía `state_manager.py status`) y actualizar invocando `state_manager.py` en la terminal
+- Leer estado (vía `sg status`) y actualizar invocando `sg` en la terminal
 - Ejecutar fases inline (cargando el archivo de la fase)
 
 ### Lo que delegás (solo si el host lo soporta)
 
-- Fases pesadas de `apply` (> 10 tareas)
+- Fases pesadas de `execute` (> 10 tareas)
 - Tareas que el usuario solicite explícitamente en sub-agente
 
 ### Autoevaluación
@@ -72,6 +72,8 @@ El middleware implementa dos mecanismos automáticos al ejecutar COMMIT:
 2. **Boundary Marker:** El output del COMMIT incluye `⚠️ FASE {X} COMPLETADA — sus instrucciones ya no aplican`, señalando explícitamente que las instrucciones de la fase anterior son obsoletas.
 
 - **Recomendación adicional (sesiones interactivas):** Después de cada COMMIT, emití una advertencia al usuario sugiriendo limpiar o reiniciar la ventana del chat. Esto previene la acumulación de instrucciones obsoletas en la ventana de atención, pero **no es la única defensa** — el auto-checkpoint y el Recovery Protocol garantizan que la siguiente sesión arranque limpia.
+
+> **Nota DAG v2:** El único sucesor de `verify` es el archivado (Paso 9 de verify.md), que NO requiere un COMMIT adicional al DAG. verify es la última fase. No existe `archive` como fase del DAG en v2.
 
 ## Recovery Protocol
 

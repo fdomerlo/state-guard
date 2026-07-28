@@ -6,19 +6,14 @@ Cada fase del agente tiene reglas de lectura y escritura. Cuando ejecutás una f
 
 | Fase | Lee dependencias de (OpenSpec) | Escribe artefacto |
 | --- | --- | --- |
-| `explore` | Nada | Opcional (`exploration.md`) |
-| `propose` | Exploración (si existe) | Sí (`proposal.md`) |
-| `spec` | Propuesta (requerido) | Sí (`specs/`) |
-| `design` | Propuesta (requerido) | Sí (`design.md`) |
-| `tasks` | Spec + Design (requeridos) | Sí (`tasks.md`) |
-| `apply` | Tasks + Spec + Design | Actualiza `tasks.md` |
-| `verify` | Spec + Tasks | Sí (`verify-report.md`) |
-| `archive` | Todos los artefactos | Archiva la carpeta |
+| `plan` | Nada (o specs existentes) | `plan.md`, `specs/` delta, `design.md` |
+| `execute` | plan.md, specs, design.md | `tasks.md` (creado y actualizado) |
+| `verify` | specs, tasks.md | `verify-report.md` |
 
 ## Secuencia de Ejecución por Fase
 
 ```text
-Inline:   Cargá el archivo de fase (ej. `phases/explore.md`) → Leé dependencias del disco → Ejecutá → Persistí artefacto → COMMIT vía `state_manager.py` → Reportá al usuario
+Inline:   Cargá el archivo de fase (ej. `phases/plan.md`) → Leé dependencias del disco → Ejecutá → Persistí artefacto → COMMIT vía `state_manager.py` → Reportá al usuario
 Delegada: Pasá rutas → Sub-agente ejecuta y persiste artefacto → Recibís resumen → COMMIT vía `state_manager.py` → Reportá al usuario
 ```
 

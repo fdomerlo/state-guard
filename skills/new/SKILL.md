@@ -1,35 +1,43 @@
 ---
 name: new
 description: >
-  Inicia un nuevo cambio transaccional (explore -> propose)
+  Inicia un nuevo cambio transaccional ejecutando la fase PLAN completa
+  (exploración → propuesta → spec → diseño → gate humano → lock)
   Disparador: Cuando el usuario ejecuta /new para iniciar un cambio.
 license: MIT
 metadata:
   author: fdomerlo@gmail.com (136bits)
-  version: "3.0"
+  version: "4.0"
 ---
 
 # New Skill
 
 ## Propósito
 
-Meta-skill responsable de inicializar un nuevo cambio transaccional. Ejecuta secuencialmente las fases explore y propose, cada una como una transacción independiente.
+Meta-skill responsable de inicializar un nuevo cambio transaccional. Crea la estructura del change e invoca la fase PLAN completa (que incluye draft + gate humano + lock).
 
 ## Qué Hacer
 
+### Paso 1: Inicializar el change
 
-### Paso 2: Ejecutar explore (Transacción 1)
+```bash
+python3 scripts/sg.py init-change --change {nombre-del-cambio}
+```
 
-Cargá `phases/explore.md` y ejecutá inline:
+### Paso 2: Ejecutar PLAN (Transacción única)
 
-1. Ejecutar la exploración
+Cargá `phases/plan.md` y ejecutá inline, siguiendo los sub-pasos:
 
-### Paso 3: Ejecutar propose (Transacción 2)
+1. **Sub-paso 1 (DRAFT):** Exploración + propuesta + spec + diseño
+2. **Sub-paso 2 (GATE):** Presentar al humano, esperar aprobación
+3. **Sub-paso 3 (LOCK):** Solo tras aprobación, COMMIT → lock_phase = execute
 
-Cargá `phases/propose.md` y ejecutá inline:
+### Paso 3: Reportar al Usuario
 
-1. Ejecutar la propuesta
+Mostrá un resumen del plan aprobado y el próximo comando:
 
-### Paso 4: Reportar al Usuario
-
-Mostrá un resumen combinado de la exploración y la propuesta creada.
+```
+✅ PLAN aprobado y bloqueado.
+   Próximo paso: /execute {nombre-del-cambio}
+   o directamente: python3 scripts/sg.py begin --change {nombre-del-cambio} --phase execute
+```

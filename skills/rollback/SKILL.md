@@ -91,4 +91,4 @@ Devolvé el resultado en el formato:
 - Si no hay cambio activo, mostrar error
 - El mensaje de confirmación debe ser claro y advertir sobre la destrucción
 - Verificar que git restore tenga éxito
-- Este skill no debe usarse para cambios finalizados (phase: archive o done)
+- Este skill no debe usarse para cambios finalizados (todas las fases completadas, o cambio ya archivado)
