@@ -367,7 +367,7 @@ git tag phase-2-mcp-complete
 
 ## Fase 3 — Documentación y distribución
 
-### [ ] 3.1 — Arreglar `scripts/install.sh` (bug real de distribución)
+### [x] 3.1 — Arreglar `scripts/install.sh` (bug real de distribución)
 
 **Hallazgo de la auditoría:** `install.sh` copia `state_manager.py` y `_lock_utils.py` a `~/.agents/skills/state-guard/bin/`, y el texto de bootstrap inyectado en `GEMINI.md`/`opencode.jsonc` le dice al agente que llame **directo** a `state_manager.py begin|commit|rollback|checkpoint|status`. **`sg.py` nunca se copia ni se menciona.** Esto significa que, tal como está hoy, un agente recién instalado va a pegar contra `EXIT_GATE_REQUIRED` al intentar comitear la fase `plan` (porque `cmd_commit` exige un gate humano) sin que el bootstrap le explique que existe `sg plan-approve` / `sg plan-confirm`. El gate humano y el hotfix bypass, hoy, están desconectados del flujo real de instalación.
 
@@ -396,7 +396,7 @@ grep -q "sg.py" scripts/install.sh && echo OK
 
 ---
 
-### [ ] 3.2 — `MANUAL.md`: sección nueva "Capa `sg.py` — CLI, Gate Humano y Hotfix"
+### [x] 3.2 — `MANUAL.md`: sección nueva "Capa `sg.py` — CLI, Gate Humano y Hotfix"
 
 Hoy `MANUAL.md` no menciona `sg.py`, `plan-approve`, `hotfix-init` ni `install-hooks` en absoluto (verificado: cero coincidencias). Agregar sección nueva después de "### Migración v1 → v2" (línea ~169) con:
 - Qué es `sg.py` y por qué existe (JSON puro, wrapper sobre `state_manager.py`, único punto de entrada válido para mutar el manifiesto).
@@ -409,7 +409,7 @@ Hoy `MANUAL.md` no menciona `sg.py`, `plan-approve`, `hotfix-init` ni `install-h
 
 ---
 
-### [ ] 3.3 — `MANUAL.md`: sección nueva "Servidor MCP"
+### [x] 3.3 — `MANUAL.md`: sección nueva "Servidor MCP"
 
 Agregar sección documentando:
 - Los 3 tools expuestos y su contrato de I/O (copiar la tabla de `phases/FASE_C_MCP_PENDIENTE.md`, ya que ahora está implementada).
@@ -420,7 +420,7 @@ Agregar sección documentando:
 
 ---
 
-### [ ] 3.4 — `README.md`: instrucciones de instalación MCP
+### [x] 3.4 — `README.md`: instrucciones de instalación MCP
 
 Agregar al `README.md` de `state-guard` una sección "Instalación (MCP)" con el mismo formato de bloques JSON que tiene `context-guard/README.md` (Opción A `uvx`, Opción B instalación local), adaptada al nuevo `pyproject.toml` del paso 2.2 y al entry point `state-guard-mcp`.
 
@@ -428,7 +428,7 @@ Agregar al `README.md` de `state-guard` una sección "Instalación (MCP)" con el
 
 ---
 
-### [ ] 3.5 — `CHANGELOG.md`
+### [x] 3.5 — `CHANGELOG.md`
 
 Agregar entrada nueva siguiendo el formato ya usado (ver entradas `[1.1.0]`/`[1.0.0]` de `context-guard` como referencia de tono, adaptado a las convenciones ya usadas en el `CHANGELOG.md` de `state-guard`):
 
@@ -456,7 +456,7 @@ Agregar entrada nueva siguiendo el formato ya usado (ver entradas `[1.1.0]`/`[1.
 
 ---
 
-### [ ] 3.6 — Deprecar `context-guard` y limpiar `.ref/`
+### [x] 3.6 — Deprecar `context-guard` y limpiar `.ref/`
 
 1. En el repo `context-guard` (el otro repo, no este): agregar al tope de su `README.md`:
    ```markdown
@@ -476,7 +476,7 @@ Agregar entrada nueva siguiendo el formato ya usado (ver entradas `[1.1.0]`/`[1.
 
 ---
 
-### [ ] 3.7 — Cierre de Fase 3 y release
+### [x] 3.7 — Cierre de Fase 3 y release
 
 ```bash
 python3 -m pytest tests/unit -q
@@ -515,13 +515,13 @@ Fase 2 — Mejora (MCP)
   [x] 2.6 tag phase-2-mcp-complete
 
 Fase 3 — Documentación
-  [ ] 3.1 fix install.sh (bootstrap real de sg.py)
-  [ ] 3.2 MANUAL.md — sección sg.py / gate / hotfix
-  [ ] 3.3 MANUAL.md — sección MCP
-  [ ] 3.4 README.md — instalación MCP
-  [ ] 3.5 CHANGELOG.md
-  [ ] 3.6 deprecar context-guard + borrar .ref/
-  [ ] 3.7 tag v2.1.0 (cierre)
+  [x] 3.1 fix install.sh (bootstrap real de sg.py)
+  [x] 3.2 MANUAL.md — sección sg.py / gate / hotfix
+  [x] 3.3 MANUAL.md — sección MCP
+  [x] 3.4 README.md — instalación MCP
+  [x] 3.5 CHANGELOG.md
+  [x] 3.6 deprecar context-guard + borrar .ref/
+  [x] 3.7 tag v2.5.0 (cierre)
 ```
 
 ---
