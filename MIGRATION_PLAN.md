@@ -92,7 +92,7 @@ git tag pre-migration-baseline
 
 Objetivo: dos mejoras aisladas y de bajo riesgo, sin tocar contratos públicos.
 
-### [ ] 1.1 — Detección de write-lock huérfano (fix de deadlock real)
+### [x] 1.1 — Detección de write-lock huérfano (fix de deadlock real)
 
 **Problema que resuelve:** `scripts/_lock_utils.py::with_write_lock` hoy reintenta 40×50ms y si no consigue el lock tira `RuntimeError`. Si un proceso muere sosteniendo `.write-lock`, el change queda bloqueado para siempre — no hay recuperación automática. `context-guard` sí la tiene (`scripts/guard/locking.py::_is_write_lock_stale`).
 
@@ -501,7 +501,7 @@ Fase 0 — Preparación
   [x] 0.4 tag pre-migration-baseline
 
 Fase 1 — Integración
-  [ ] 1.1 stale write-lock detection
+  [x] 1.1 stale write-lock detection
   [ ] 1.2 suite pytest granular
   [ ] 1.3 fix harness TTY de concurrency_test.py
   [ ] 1.4 tag phase-1-integration-complete

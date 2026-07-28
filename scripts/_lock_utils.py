@@ -3,6 +3,9 @@ import time
 from datetime import datetime
 
 
+WRITE_LOCK_MAX_AGE = 30  # seconds before a write lock is considered stale
+
+
 def try_acquire_lockfile(lock_path):
     """Atomic OS-level test-and-set. Returns True if acquired."""
     d = os.path.dirname(lock_path)
@@ -10,6 +13,7 @@ def try_acquire_lockfile(lock_path):
         os.makedirs(d, exist_ok=True)
     try:
         fd = os.open(lock_path, os.O_CREAT | os.O_EXCL | os.O_WRONLY)
+        os.write(fd, f"{os.getpid()}\n{time.time()}\n".encode())
         os.close(fd)
         return True
     except FileExistsError:
@@ -19,6 +23,30 @@ def try_acquire_lockfile(lock_path):
 def release_lockfile(lock_path):
     if os.path.exists(lock_path):
         os.remove(lock_path)
+
+
+def _is_write_lock_stale(lock_path, max_age_seconds=WRITE_LOCK_MAX_AGE):
+    """Detecta si un .write-lock es huérfano (proceso muerto o demasiado viejo).
+
+    Returns:
+        True si el lock es stale y puede ser removido de forma segura.
+    """
+    try:
+        with open(lock_path, "r") as f:
+            lines = f.readlines()
+        if len(lines) >= 1:
+            pid = int(lines[0].strip())
+            try:
+                os.kill(pid, 0)
+            except OSError:
+                return True  # proceso muerto, lock huérfano
+        if len(lines) >= 2:
+            created = float(lines[1].strip())
+            if time.time() - created > max_age_seconds:
+                return True  # demasiado viejo
+    except (ValueError, OSError):
+        return True  # no se puede leer, asumir stale
+    return False
 
 
 def is_stale(started_at_iso, ttl_seconds):
@@ -48,7 +76,14 @@ def with_write_lock(write_lock_path, fn, retries=40, delay=0.05):
                 return fn()
             finally:
                 release_lockfile(write_lock_path)
+        if _is_write_lock_stale(write_lock_path):
+            try:
+                os.remove(write_lock_path)
+                continue
+            except FileNotFoundError:
+                pass
         time.sleep(delay)
     raise RuntimeError(
         "No se pudo adquirir el write-lock de state.ini tras reintentos."
     )
+
