@@ -127,7 +127,7 @@ python3 tests/concurrency_test.py   # TEST 2 (commit+checkpoint concurrentes) de
 
 ---
 
-### [ ] 1.2 — Suite de tests unitarios granular (pytest)
+### [x] 1.2 — Suite de tests unitarios granular (pytest)
 
 **Problema que resuelve:** `state-guard` solo tiene `concurrency_test.py` (un script de asserts manuales) e `install_test.sh`. No hay tests unitarios aislados de `state_manager.py`. `context-guard` tiene 111 tests pytest, uno por módulo/comando.
 
@@ -502,7 +502,7 @@ Fase 0 — Preparación
 
 Fase 1 — Integración
   [x] 1.1 stale write-lock detection
-  [ ] 1.2 suite pytest granular
+  [x] 1.2 suite pytest granular
   [ ] 1.3 fix harness TTY de concurrency_test.py
   [ ] 1.4 tag phase-1-integration-complete
 
