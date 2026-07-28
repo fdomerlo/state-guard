@@ -504,6 +504,66 @@ Actúas como un desarrollador y diseñador de componentes Vue/React/HTML...
 
 ---
 
+## Servidor MCP
+
+State Guard expone un servidor MCP nativo sobre `stdio` (`scripts/mcp_server.py`), permitiendo a clientes compatibles (ej. Claude Desktop, Cursor, OpenCode) interactuar con herramientas auxiliares y de verificación de estado.
+
+### Herramientas Expuestas (Tools)
+
+| Tool | Argumentos | Descripción | Salida |
+|------|------------|-------------|--------|
+| `get_next_task` | `change: str` | Retorna la próxima tarea pendiente de `tasks.md` para el change especificado. | JSON con el objeto tarea o `null` si no hay pendientes. |
+| `verify_phase_gate` | `change: str, phase: str` | Verifica si la fase solicitada está autorizada por el DAG antes de ejecutarla. | JSON con `{"authorized": true/false}`. |
+| `mark_task_completed` | `change: str, task_id: str` | Marca una tarea como completada por ID en `tasks.md` (idempotente). | JSON con el resultado de la actualización. |
+
+### Decisiones de Diseño
+
+- **Comandos Transaccionales**: `begin`, `commit`, `rollback`, `checkpoint` **NO** se exponen como herramientas MCP. Se mantienen como invocaciones CLI (`sg begin`, `sg commit`, etc.) para preservar la separación explícita entre el canal MCP de utilidades y la capa de control transaccional estricta.
+- **Gates Humanos**: `plan-approve`, `plan-confirm`, `hotfix-init`, `hotfix-confirm` tampoco se exponen por MCP; son comandos exclusivos de terminal interactiva para garantizar interacción humana out-of-band.
+
+### Configuración en Clientes MCP
+
+#### Opción A: Vía `uvx` (Recomendada para zero-install)
+
+Agrega el siguiente bloque a tu archivo de configuración de cliente MCP (`claude_desktop_config.json` o equivalente):
+
+```json
+{
+  "mcpServers": {
+    "state-guard": {
+      "command": "uvx",
+      "args": [
+        "git+https://github.com/fdomerlo/state-guard.git"
+      ]
+    }
+  }
+}
+```
+
+#### Opción B: Instalación Local Aislada
+
+Clona e instala en modo editable con `uv` o `pip`:
+
+```bash
+git clone https://github.com/fdomerlo/state-guard.git ~/.local/share/mcp-servers/state-guard
+cd ~/.local/share/mcp-servers/state-guard
+uv venv && uv pip install -e .
+```
+
+Configuración en el cliente MCP:
+
+```json
+{
+  "mcpServers": {
+    "state-guard": {
+      "command": "/ruta/a/tu/home/.local/share/mcp-servers/state-guard/.venv/bin/state-guard-mcp"
+    }
+  }
+}
+```
+
+---
+
 ## Resolución de Problemas
 
 ### El estado no avanza
