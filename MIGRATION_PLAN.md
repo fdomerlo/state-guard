@@ -313,7 +313,7 @@ python3 scripts/mcp_server.py &  # o probar el handshake como en el paso 2.4
 
 ---
 
-### [ ] 2.4 — Verificación de protocolo real (no confiar solo en tests unitarios)
+### [x] 2.4 — Verificación de protocolo real (no confiar solo en tests unitarios)
 
 Igual que se hizo en la auditoría previa: probar el handshake MCP real por stdio, no solo invocar las funciones Python directamente.
 
@@ -343,7 +343,7 @@ EOF
 
 ---
 
-### [ ] 2.5 — Test de integración del servidor MCP
+### [x] 2.5 — Test de integración del servidor MCP
 
 Crear `tests/unit/test_mcp_server.py` (invocando las funciones Python directas, como hace `context-guard`) **más** un test que reproduzca el handshake del paso 2.4 dentro de pytest (no solo a mano).
 
@@ -353,7 +353,7 @@ Crear `tests/unit/test_mcp_server.py` (invocando las funciones Python directas, 
 
 ---
 
-### [ ] 2.6 — Cierre de Fase 2
+### [x] 2.6 — Cierre de Fase 2
 
 ```bash
 python3 -m pytest tests/unit -q
@@ -510,9 +510,9 @@ Fase 2 — Mejora (MCP)
   [x] 2.1 precondiciones de Fase C confirmadas
   [x] 2.2 pyproject.toml
   [x] 2.3 scripts/mcp_server.py (3 tools)
-  [ ] 2.4 verificación de handshake real
-  [ ] 2.5 tests del servidor MCP
-  [ ] 2.6 tag phase-2-mcp-complete
+  [x] 2.4 verificación de handshake real
+  [x] 2.5 tests del servidor MCP
+  [x] 2.6 tag phase-2-mcp-complete
 
 Fase 3 — Documentación
   [ ] 3.1 fix install.sh (bootstrap real de sg.py)
