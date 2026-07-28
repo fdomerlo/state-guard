@@ -172,6 +172,51 @@ El Memory Guard detecta cambios concurrentes mediante:
 
 ---
 
+## Capa `sg.py` — CLI, Gate Humano y Hotfix
+
+`sg.py` es el único punto de entrada CLI de alto nivel recomendado para la interacción con State Guard. Actúa como un wrapper seguro que encapsula las llamadas a `state_manager.py`, formateando la salida en JSON estándar y administrando los mecanismos de autorización humana fuera de banda.
+
+### Arquitectura de `sg.py`
+
+- **Wrapper JSON**: Todas las operaciones para agentes devuelven respuestas JSON estructuradas y respetan los códigos de salida numéricos.
+- **Acceso Exclusivo**: Mutar el manifiesto `state.ini` debe realizarse a través de `sg.py` para asegurar que las validaciones de esquema, bloqueos transaccionales y autorizaciones de gate se apliquen de forma consistente.
+
+### Mecanismo de Gate Humano Out-of-Band
+
+El Gate Humano asegura que los agentes no puedan avanzar de la fase de `plan` a `execute` sin la confirmación explícita de un usuario en una terminal real.
+
+1. **Aprobación fuera de banda**: El comando `sg plan-approve --change <nombre>` genera un token aleatorio que es impreso **únicamente** en la terminal de control (`/dev/tty`). El token nunca viaja por `stdout` ni se almacena en plano.
+2. **Almacenamiento seguro**: Solo se guarda el hash SHA-256 del token en la sección `[Gate]` del manifiesto `state.ini`.
+3. **Confirmación en 2 pasos**: El humano debe ejecutar en la terminal interactiva `sg plan-confirm --change <nombre> --token <CODIGO>`. Si el hash coincide, el gate queda marcado como autorizado y se permite que el comando `commit` del agente promueva la fase.
+
+### Flujo de Hotfix Bypass
+
+En situaciones de emergencia donde un error debe ser corregido sin pasar por la fase completa de planificación:
+
+1. El humano inicia un hotfix ejecutando `sg hotfix-init --change <nombre> --reason "..."`.
+2. Al igual que el gate de plan, este comando imprime un token en `/dev/tty`.
+3. El humano confirma con `sg hotfix-confirm --change <nombre> --token <CODIGO>`.
+4. Esto registra la autorización del hotfix en `[Gate]` indicando la razón, permitiendo a `begin` saltar directamente a `execute`.
+
+### Integración de Hooks de Git (`sg install-hooks`)
+
+El comando `sg install-hooks` instala un hook `post-commit` en el repositorio Git.
+- **Función**: Ejecuta automáticamente `sg status` después de cada commit de git para mostrar el estado actual del manifiesto.
+- **Comportamiento**: Es estrictamente **informativo** y no bloquea las operaciones de git, a diferencia del gate de `commit` que sí es bloqueante.
+
+### Tabla de Códigos de Salida (Exit Codes)
+
+| Código | Constante | Descripción |
+|--------|-----------|-------------|
+| `0` | `EXIT_OK` | Operación exitosa. |
+| `1` | `EXIT_GENERIC` | Error genérico o `state.ini` no encontrado. |
+| `2` | `EXIT_LOCK_CONFLICT` | Conflicto de lock activo por otra sesión (reintentable). |
+| `3` | `EXIT_BAD_TRANSITION` | Transición inválida en el DAG de fases (no reintentar). |
+| `4` | `EXIT_VALIDATION` | Datos de entrada inválidos (ej. summary excede límite). |
+| `5` | `EXIT_GATE_REQUIRED` | Gate humano no cumplido; requiere intervención en terminal. |
+
+---
+
 ## Configuración con config.yaml
 
 ### Ubicación
