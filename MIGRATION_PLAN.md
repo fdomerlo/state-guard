@@ -211,7 +211,7 @@ Si alguno de estos no está realmente verde en este punto, **parar y volver a Fa
 
 ---
 
-### [ ] 2.2 — Agregar `pyproject.toml` (state-guard hoy no tiene empaquetado Python)
+### [x] 2.2 — Agregar `pyproject.toml` (state-guard hoy no tiene empaquetado Python)
 
 **Hallazgo relevante:** `state-guard` no tiene `pyproject.toml`/`setup.py`. Se distribuye copiando archivos vía `scripts/install.sh`. Para exponer un servidor MCP instalable vía `uvx` (como ya funciona en `context-guard`), hace falta empaquetarlo.
 
@@ -508,7 +508,7 @@ Fase 1 — Integración
 
 Fase 2 — Mejora (MCP)
   [x] 2.1 precondiciones de Fase C confirmadas
-  [ ] 2.2 pyproject.toml
+  [x] 2.2 pyproject.toml
   [ ] 2.3 scripts/mcp_server.py (3 tools)
   [ ] 2.4 verificación de handshake real
   [ ] 2.5 tests del servidor MCP
