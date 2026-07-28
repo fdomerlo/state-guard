@@ -56,7 +56,7 @@ rm -rf .ref/context-guard/**/__pycache__
 
 ---
 
-### [ ] 0.2 — Baseline: estado actual documentado
+### [x] 0.2 — Baseline: estado actual documentado
 
 Correr y **guardar la salida tal cual** en un comentario del commit (no hace falta archivo aparte):
 
@@ -71,14 +71,14 @@ bash tests/install_test.sh
 
 ---
 
-### [ ] 0.3 — Commitear este plan
+### [x] 0.3 — Commitear este plan
 
 ```bash
 git add MIGRATION_PLAN.md .ref/
 git commit -m "docs: add MIGRATION_PLAN.md, snapshot context-guard reference"
 ```
 
-### [ ] 0.4 — Tag de baseline
+### [x] 0.4 — Tag de baseline
 
 ```bash
 git tag pre-migration-baseline
@@ -496,9 +496,9 @@ git tag v2.1.0
 ```
 Fase 0 — Preparación
   [x] 0.1 .ref/context-guard/
-  [ ] 0.2 baseline documentado
-  [ ] 0.3 plan commiteado
-  [ ] 0.4 tag pre-migration-baseline
+  [x] 0.2 baseline documentado
+  [x] 0.3 plan commiteado
+  [x] 0.4 tag pre-migration-baseline
 
 Fase 1 — Integración
   [ ] 1.1 stale write-lock detection
