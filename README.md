@@ -21,6 +21,47 @@ bash scripts/install.sh
 
 El instalador universal inyecta el bootstrap de State Guard en OpenCode y Antigravity CLI sin depender de targets heredados.
 
+### Instalación Servidor MCP (Model Context Protocol)
+
+State Guard también se distribuye como servidor MCP instalable para clientes compatibles (Claude Desktop, Cursor, etc.).
+
+#### Opción A: Zero-Install con `uvx` (Recomendada)
+
+Agrega lo siguiente a la configuración de servidores MCP (`claude_desktop_config.json` o equivalente):
+
+```json
+{
+  "mcpServers": {
+    "state-guard": {
+      "command": "uvx",
+      "args": [
+        "git+https://github.com/fdomerlo/state-guard.git"
+      ]
+    }
+  }
+}
+```
+
+#### Opción B: Instalación Local Aislada
+
+```bash
+git clone https://github.com/fdomerlo/state-guard.git ~/.local/share/mcp-servers/state-guard
+cd ~/.local/share/mcp-servers/state-guard
+uv venv && uv pip install -e .
+```
+
+Configuración en el cliente MCP:
+
+```json
+{
+  "mcpServers": {
+    "state-guard": {
+      "command": "/ruta/a/tu/home/.local/share/mcp-servers/state-guard/.venv/bin/state-guard-mcp"
+    }
+  }
+}
+```
+
 ---
 
 ## Comandos
