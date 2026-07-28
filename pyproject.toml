@@ -8,7 +8,7 @@ version = "2.0.0"
 description = "Framework de memoria transaccional para agentes LLM (MCP)"
 readme = "README.md"
 requires-python = ">=3.9"
-dependencies = ["mcp>=1.0.0"]
+dependencies = ["mcp>=1.0.0,<2.0.0"]
 
 [project.scripts]
 state-guard-mcp = "scripts.mcp_server:main"

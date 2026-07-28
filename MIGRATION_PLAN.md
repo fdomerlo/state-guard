@@ -245,7 +245,7 @@ Nota: dejamos `packages = ["scripts"]` por consistencia con el layout actual del
 
 ---
 
-### [ ] 2.3 — Implementar `scripts/mcp_server.py`
+### [x] 2.3 — Implementar `scripts/mcp_server.py`
 
 Implementar **exactamente** los 3 tools especificados en `phases/FASE_C_MCP_PENDIENTE.md`, ni más ni menos:
 
@@ -509,7 +509,7 @@ Fase 1 — Integración
 Fase 2 — Mejora (MCP)
   [x] 2.1 precondiciones de Fase C confirmadas
   [x] 2.2 pyproject.toml
-  [ ] 2.3 scripts/mcp_server.py (3 tools)
+  [x] 2.3 scripts/mcp_server.py (3 tools)
   [ ] 2.4 verificación de handshake real
   [ ] 2.5 tests del servidor MCP
   [ ] 2.6 tag phase-2-mcp-complete
