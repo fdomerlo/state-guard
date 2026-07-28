@@ -1,5 +1,21 @@
 # Changelog
 
+## [2.5.0] - 2026-07-28
+
+### Integración (Fase 1)
+- Detección de write-lock huérfano (PID + antigüedad), portada desde `context-guard`.
+- Suite de tests unitarios granular en `tests/unit/` (34 tests).
+- Corrección de harness de `concurrency_test.py` usando `pty.fork()` para independizarlo del estado TTY del desarrollador.
+
+### Servidor MCP (Fase 2)
+- Servidor MCP nativo (`scripts/mcp_server.py`) con 3 herramientas (`get_next_task`, `verify_phase_gate`, `mark_task_completed`).
+- `pyproject.toml` para empaquetado e instalación vía `uvx` / `pip`.
+
+### Documentación y distribución (Fase 3)
+- `scripts/install.sh` incluye `sg.py` en el bootstrap en lugar de invocar `state_manager.py` directamente.
+- `MANUAL.md`: nuevas secciones para la capa `sg.py`, Gate Humano out-of-band, Hotfix bypass y Servidor MCP.
+- `context-guard` deprecado; sus funcionalidades clave han sido consolidadas en este repositorio.
+
 ## [2.4.0] - 2026-07-17
 
 ### Changed
