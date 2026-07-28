@@ -161,7 +161,7 @@ python3 -m pytest tests/unit -q
 
 ---
 
-### [ ] 1.3 — Arreglar el harness de `concurrency_test.py` (bug de TTY, no de lógica)
+### [x] 1.3 — Arreglar el harness de `concurrency_test.py` (bug de TTY, no de lógica)
 
 **Problema que resuelve:** el TEST que ejercita `sg plan-approve`/`hotfix-init` falla en `concurrency_test.py` porque usa `subprocess.run` con pipes, sin terminal de control. **Ya está verificado que el código de producción funciona bien** — el problema es 100% del harness de test. Esto es además un bloqueador explícito documentado en `phases/FASE_C_MCP_PENDIENTE.md` ("Fase A está mergeada y los tests de concurrencia pasan en CI").
 
@@ -503,7 +503,7 @@ Fase 0 — Preparación
 Fase 1 — Integración
   [x] 1.1 stale write-lock detection
   [x] 1.2 suite pytest granular
-  [ ] 1.3 fix harness TTY de concurrency_test.py
+  [x] 1.3 fix harness TTY de concurrency_test.py
   [ ] 1.4 tag phase-1-integration-complete
 
 Fase 2 — Mejora (MCP)

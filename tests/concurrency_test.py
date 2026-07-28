@@ -2,6 +2,8 @@ import json
 import subprocess
 import sys
 import os
+import time
+import pty
 import configparser
 from concurrent.futures import ThreadPoolExecutor
 
@@ -12,6 +14,9 @@ SG_SCRIPT = os.path.join(REPO_ROOT, "scripts", "sg.py")
 STATE_PATH = os.path.join(REPO_ROOT, f".state-guard/changes/{CHANGE}/state.ini")
 
 
+import pty
+
+
 def run(args):
     result = subprocess.run(
         [sys.executable, SCRIPT] + args,
@@ -20,6 +25,27 @@ def run(args):
         text=True,
     )
     return result.returncode, result.stdout.strip(), result.stderr.strip()
+
+
+def run_with_pty(argv, timeout=2.0):
+    """Ejecuta argv con una terminal de control real (pty.fork)."""
+    pid, fd = pty.fork()
+    if pid == 0:
+        os.execvp(argv[0], argv)
+    else:
+        output = b""
+        start = time.time()
+        while time.time() - start < timeout:
+            try:
+                chunk = os.read(fd, 8192)
+                if not chunk:
+                    break
+                output += chunk
+            except OSError:
+                break
+        _, status = os.waitpid(pid, 0)
+        rc = os.waitstatus_to_exitcode(status) if hasattr(os, "waitstatus_to_exitcode") else (status >> 8)
+        return subprocess.CompletedProcess(argv, rc, stdout=output.decode(errors="replace"), stderr="")
 
 
 def inject_gate_token():
@@ -154,11 +180,8 @@ print("=" * 60)
 reset_state()
 
 # Paso 1: plan-approve (prepara token fuera del workspace, muestra en /dev/tty)
-res_approve = subprocess.run(
+res_approve = run_with_pty(
     [sys.executable, SG_SCRIPT, "plan-approve", "--change", CHANGE],
-    cwd=REPO_ROOT,
-    capture_output=True,
-    text=True,
 )
 print(f"  plan-approve rc={res_approve.returncode}")
 assert res_approve.returncode == 0, f"FALLO: esperado exit 0, got {res_approve.returncode}: {res_approve.stderr}"
@@ -236,11 +259,8 @@ if os.path.exists(hotfix_dir):
     shutil.rmtree(hotfix_dir)
 
 # Paso 1: hotfix-init (prepara token fuera del workspace)
-res_hinit = subprocess.run(
+res_hinit = run_with_pty(
     [sys.executable, SG_SCRIPT, "hotfix-init", "--change", hotfix_change, "--reason", "test bypass"],
-    cwd=REPO_ROOT,
-    capture_output=True,
-    text=True,
 )
 print(f"  hotfix-init rc={res_hinit.returncode}")
 assert res_hinit.returncode == 0, f"FALLO: esperado exit 0, got {res_hinit.returncode}: {res_hinit.stderr}"
