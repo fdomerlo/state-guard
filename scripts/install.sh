@@ -55,8 +55,8 @@ for skill_dir in "$SOURCE_SKILLS_DIR"/*/; do
     fi
 done
 
-cp "$SCRIPT_DIR/state_manager.py" "$SCRIPT_DIR/_lock_utils.py" "$TARGET_DIR/bin/"
-chmod +x "$TARGET_DIR/bin/state_manager.py"
+cp "$SCRIPT_DIR/sg.py" "$SCRIPT_DIR/state_manager.py" "$SCRIPT_DIR/_lock_utils.py" "$TARGET_DIR/bin/"
+chmod +x "$TARGET_DIR/bin/state_manager.py" "$TARGET_DIR/bin/sg.py"
 
 echo "  ✓ $count skills instaladas en $TARGET_DIR"
 
@@ -66,8 +66,14 @@ BOOTSTRAP_TEXT=$(cat <<EOF
 MANDATORY BOOTSTRAP — execute before responding to anything:
 1. Call read_file on $TARGET_DIR/_shared/memory-guard.md.
 2. Follow every instruction in that file as your absolute state contract.
-3. State manager binary: $TARGET_DIR/bin/state_manager.py
-   Subcomandos: begin | commit | rollback | checkpoint | status
+3. State manager binary: $TARGET_DIR/bin/sg.py
+   Subcomandos operativos (agente): begin | commit | rollback | checkpoint | status
+                                     | next-task | verify-gate | mark-task
+   Subcomandos EXCLUSIVOS DE HUMANO (el agente nunca los ejecuta):
+                                     plan-approve | plan-confirm | hotfix-init | hotfix-confirm
+   Si 'commit' devuelve EXIT_GATE_REQUIRED (5): DETENÉ el ciclo y pedile
+   al usuario que corra 'sg plan-approve --change <nombre>' en su propia
+   terminal, y luego 'sg plan-confirm --change <nombre> --token <CODIGO>'.
 4. Check for an active change at .state-guard/changes/*/state.ini
    and act accordingly (Cold Boot, Resume via 'status', or Recovery).
 EOF
@@ -189,5 +195,7 @@ EOF
     cmd_count=$((cmd_count + 1))
 done
 echo "  ✓ $cmd_count slash commands generados al vuelo."
+
+echo "→ Tip: Podés ejecutar '$TARGET_DIR/bin/sg.py install-hooks' en tu repositorio para activar hooks de git (ej. post-commit)."
 
 echo -e "\nDone!"
