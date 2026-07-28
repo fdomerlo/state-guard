@@ -181,7 +181,7 @@ setsid python3 tests/concurrency_test.py < /dev/null
 
 ---
 
-### [ ] 1.4 — Cierre de Fase 1
+### [x] 1.4 — Cierre de Fase 1
 
 ```bash
 python3 -m pytest tests/unit -q
@@ -504,7 +504,7 @@ Fase 1 — Integración
   [x] 1.1 stale write-lock detection
   [x] 1.2 suite pytest granular
   [x] 1.3 fix harness TTY de concurrency_test.py
-  [ ] 1.4 tag phase-1-integration-complete
+  [x] 1.4 tag phase-1-integration-complete
 
 Fase 2 — Mejora (MCP)
   [ ] 2.1 precondiciones de Fase C confirmadas
