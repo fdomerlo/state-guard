@@ -200,12 +200,12 @@ git tag phase-1-integration-complete
 
 Esta fase implementa exactamente lo que ya está especificado en `phases/FASE_C_MCP_PENDIENTE.md` — no hay que rediseñar nada, hay que ejecutar ese documento. Usar `.ref/context-guard/scripts/mcp_server.py` como plantilla **estructural** (patrón `FastMCP`, `@mcp.tool()`, docstrings como schema, wrapper `_format_result`), pero la lógica de negocio sale de `sg.py`, nunca de `state_manager.py` directo.
 
-### [ ] 2.1 — Confirmar precondiciones de Fase C
+### [x] 2.1 — Confirmar precondiciones de Fase C
 
 Antes de escribir código, verificar contra `phases/FASE_C_MCP_PENDIENTE.md` → sección "Criterios de aceptación para Fase C":
 - [x] Fase A (tests de concurrencia) pasa — cerrado en 1.3/1.4.
 - [x] Fase B (`sg.py` funciona con todos los comandos JSON) — ya existe, no requiere trabajo nuevo.
-- [ ] `next-task`, `verify-gate`, `mark-task` tienen tests de integración — cubierto en 1.2 (`test_next_task.py`, `test_verify_gate.py`, `test_mark_task.py`).
+- [x] `next-task`, `verify-gate`, `mark-task` tienen tests de integración — cubierto en 1.2 (`test_next_task.py`, `test_verify_gate.py`, `test_mark_task.py`).
 
 Si alguno de estos no está realmente verde en este punto, **parar y volver a Fase 1** — no seguir a 2.2.
 
@@ -507,7 +507,7 @@ Fase 1 — Integración
   [x] 1.4 tag phase-1-integration-complete
 
 Fase 2 — Mejora (MCP)
-  [ ] 2.1 precondiciones de Fase C confirmadas
+  [x] 2.1 precondiciones de Fase C confirmadas
   [ ] 2.2 pyproject.toml
   [ ] 2.3 scripts/mcp_server.py (3 tools)
   [ ] 2.4 verificación de handshake real
