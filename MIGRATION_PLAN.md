@@ -901,7 +901,7 @@ Ya cubierto por `_log()` en 4.8 (`hooks.log.jsonl`). Confirmar en este paso:
 
 ---
 
-### [ ] 4.11 — Wiring en `sg.py`
+### [x] 4.11 — Wiring en `sg.py`
 
 Agregar subcomandos delgados (delegan al daemon, no reimplementan nada):
 
@@ -1036,7 +1036,7 @@ Fase 4B — Agent Hooks
   [x] 4.8 scripts/hook_daemon.py
   [x] 4.9 .state-guard/hooks.yaml.example
   [x] 4.10 verificación de logging
-  [ ] 4.11 sg hooks-start/stop/status
+  [x] 4.11 sg hooks-start/stop/status
   [ ] 4.12 tests de hook_daemon (dry-run)
   [ ] 4.13 documentación
   [ ] 4.14 tag v2.6.0 (cierre)

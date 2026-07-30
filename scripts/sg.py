@@ -216,6 +216,48 @@ def cmd_list_changes(args):
     _emit({"ok": True, "changes": changes})
 
 
+# ─── Agent Hooks ─────────────────────────────────────────────────────────────
+
+def cmd_hooks_start(args):
+    import subprocess as sp
+    daemon = SCRIPT_DIR / "hook_daemon.py"
+    proc = sp.Popen([sys.executable, str(daemon)], cwd=str(REPO_ROOT))
+    SG_DIR.mkdir(parents=True, exist_ok=True)
+    (SG_DIR / "hooks.pid").write_text(str(proc.pid))
+    _emit({"ok": True, "pid": proc.pid, "message": "Agent Hooks daemon iniciado en background."})
+
+
+def cmd_hooks_stop(args):
+    import signal
+    pid_file = SG_DIR / "hooks.pid"
+    if not pid_file.exists():
+        _emit({"ok": False, "message": "No hay daemon corriendo (no se encontró hooks.pid)."}, 1)
+        return
+    pid = int(pid_file.read_text())
+    try:
+        os.kill(pid, signal.SIGTERM)
+    except ProcessLookupError:
+        pass
+    if pid_file.exists():
+        pid_file.unlink()
+    _emit({"ok": True, "message": f"Daemon (pid {pid}) detenido."})
+
+
+def cmd_hooks_status(args):
+    pid_file = SG_DIR / "hooks.pid"
+    if not pid_file.exists():
+        _emit({"ok": True, "running": False})
+        return
+    pid = int(pid_file.read_text())
+    try:
+        os.kill(pid, 0)
+        _emit({"ok": True, "running": True, "pid": pid})
+    except ProcessLookupError:
+        if pid_file.exists():
+            pid_file.unlink()
+        _emit({"ok": True, "running": False, "stale_pid_removed": True})
+
+
 # ─── Instalación de git hooks ─────────────────────────────────────────────────
 
 HOOK_TEMPLATE = """\
@@ -635,6 +677,11 @@ def build_parser():
     p.add_argument("--force", action="store_true",
                    help="Sobreescribir hooks existentes")
 
+    # hooks-start, hooks-stop, hooks-status
+    sub.add_parser("hooks-start", help="Inicia el daemon de Agent Hooks en background")
+    sub.add_parser("hooks-stop", help="Detiene el daemon de Agent Hooks")
+    sub.add_parser("hooks-status", help="Muestra el estado del daemon de Agent Hooks")
+
     # plan-approve (paso 1: prepara token out-of-band)
     p = sub.add_parser(
         "plan-approve",
@@ -689,6 +736,9 @@ def main():
         "init-change": cmd_init_change,
         "list-changes": cmd_list_changes,
         "install-hooks": cmd_install_hooks,
+        "hooks-start": cmd_hooks_start,
+        "hooks-stop": cmd_hooks_stop,
+        "hooks-status": cmd_hooks_status,
         "plan-approve": cmd_plan_approve,
         "plan-confirm": cmd_plan_confirm,
         "hotfix-init": cmd_hotfix_init,
