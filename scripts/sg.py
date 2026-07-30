@@ -151,6 +151,11 @@ def cmd_verify_gate(args):
     _emit({"ok": rc == 0, **obj}, rc)
 
 
+def cmd_validate_spec(args):
+    rc, obj, _ = _call_sm(["validate-spec", "--change", args.change], check_json=True)
+    _emit({"ok": rc == 0, **obj}, rc)
+
+
 def cmd_migrate(args):
     rc, obj, _ = _call_sm(["migrate", "--change", args.change], check_json=True)
     _emit({"ok": rc == 0, **obj}, rc)
@@ -621,6 +626,10 @@ def build_parser():
     # list-changes
     sub.add_parser("list-changes", help="Lista todos los changes activos")
 
+    # validate-spec
+    p = sub.add_parser("validate-spec", help="Valida la estructura de objective.md y design.md")
+    p.add_argument("--change", required=True)
+
     # install-hooks
     p = sub.add_parser("install-hooks", help="Instala git hooks de State Guard")
     p.add_argument("--force", action="store_true",
@@ -676,6 +685,7 @@ def main():
         "next-task": cmd_next_task,
         "verify-gate": cmd_verify_gate,
         "migrate": cmd_migrate,
+        "validate-spec": cmd_validate_spec,
         "init-change": cmd_init_change,
         "list-changes": cmd_list_changes,
         "install-hooks": cmd_install_hooks,

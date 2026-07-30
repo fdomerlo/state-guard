@@ -601,7 +601,7 @@ Cambios concretos:
 
 ---
 
-### [ ] 4.3 — Validación de contenido real en código (`validate-spec`)
+### [x] 4.3 — Validación de contenido real en código (`validate-spec`)
 
 **Esto es lo que hoy NO existe.** El único gate real de `plan` es el token humano (`cmd_commit`, líneas ~224-242 de `state_manager.py`) — cero validación de contenido de los artefactos.
 
@@ -1026,7 +1026,7 @@ Fase 3 — Documentación
 Fase 4A — Spec-Driven Coding
   [x] 4.1 split objective.md/design.md definido
   [x] 4.2 phases/plan.md reescrito
-  [ ] 4.3 sg validate-spec implementado
+  [x] 4.3 sg validate-spec implementado
   [ ] 4.4 referencias obsoletas actualizadas
   [ ] 4.5 tests de validate-spec
   [ ] 4.6 tag phase-4a-spec-driven-complete

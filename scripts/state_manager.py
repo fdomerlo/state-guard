@@ -20,6 +20,7 @@ import os
 import re
 import sys
 from datetime import datetime
+from pathlib import Path
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from _lock_utils import (
@@ -568,6 +569,42 @@ def cmd_next_task(args):
     print(json.dumps({"status": "ALL_COMPLETE", "task": None}))
 
 
+# ─── Validación de spec (objective.md + design.md) ─────────────────────────
+
+def cmd_validate_spec(args):
+    """Valida objective.md y design.md antes de habilitar el gate humano.
+    No muta estado — solo lee y reporta. Exit 0 siempre (el resultado va en JSON)."""
+    change_dir = Path(f".state-guard/changes/{args.change}")
+    objective_path = change_dir / "objective.md"
+    design_path = change_dir / "design.md"
+
+    issues = []
+
+    for label, path, required_sections in [
+        ("objective.md", objective_path, ["## Intención", "## Alcance", "## Criterios de Éxito"]),
+        ("design.md", design_path, ["## Decisiones de Arquitectura", "## Flujo de Datos", "## Archivos Afectados"]),
+    ]:
+        if not path.exists():
+            issues.append({"file": label, "issue": "MISSING_FILE"})
+            continue
+        content = path.read_text(encoding="utf-8")
+        if "[!]" in content:
+            issues.append({"file": label, "issue": "BLOCKING_OPEN_QUESTION",
+                            "detail": "Hay preguntas abiertas marcadas [!] sin resolver."})
+        for section in required_sections:
+            if section not in content:
+                issues.append({"file": label, "issue": "MISSING_SECTION", "detail": section})
+        # placeholders de plantilla sin completar, ej. "{Qué problema resuelve y por qué}"
+        unresolved = re.findall(r"\{[A-ZÁÉÍÓÚa-záéíóú][^}]{3,80}\}", content)
+        if unresolved:
+            issues.append({"file": label, "issue": "UNRESOLVED_PLACEHOLDER",
+                            "detail": unresolved[:5]})
+
+    result = {"ok": len(issues) == 0, "change": args.change, "issues": issues}
+    print(json.dumps(result, ensure_ascii=False))
+    sys.exit(EXIT_OK if not issues else EXIT_VALIDATION)
+
+
 # ─── CLI ─────────────────────────────────────────────────────────────────────
 
 if __name__ == "__main__":
@@ -632,6 +669,11 @@ if __name__ == "__main__":
                                       help="Migra state.ini v1 (8 fases) a v2 (3 fases)")
     p_migrate.add_argument("--change", required=True)
 
+    # validate-spec — validación de objective.md/design.md
+    p_valspec = subparsers.add_parser("validate-spec",
+                                      help="Valida estructura de objective.md y design.md")
+    p_valspec.add_argument("--change", required=True)
+
     # plan-approve — registra token de aprobación humana (llamado desde sg.py plan-confirm / hotfix-confirm)
     # No invocar directamente: sg.py verifica y consume el archivo out-of-band antes de llamar a este comando.
     p_approve = subparsers.add_parser(
@@ -665,5 +707,7 @@ if __name__ == "__main__":
         cmd_verify_gate(args)
     elif args.command == "migrate":
         cmd_migrate(args)
+    elif args.command == "validate-spec":
+        cmd_validate_spec(args)
     elif args.command == "plan-approve":
         cmd_plan_approve(args)
