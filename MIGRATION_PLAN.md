@@ -715,7 +715,7 @@ git tag phase-4a-spec-driven-complete
 
 ## Fase 4B — Agent Hooks
 
-### [ ] 4.7 — Modelo de confianza (fijado por decisión tuya, no rediscutir)
+### [x] 4.7 — Modelo de confianza (fijado por decisión tuya, no rediscutir)
 
 Regla explícita, documentada acá para que ningún agente la reinterprete:
 
@@ -1032,7 +1032,7 @@ Fase 4A — Spec-Driven Coding
   [x] 4.6 tag phase-4a-spec-driven-complete
 
 Fase 4B — Agent Hooks
-  [ ] 4.7 modelo de confianza documentado (tabla arquitectura vs derivados)
+  [x] 4.7 modelo de confianza documentado (tabla arquitectura vs derivados)
   [ ] 4.8 scripts/hook_daemon.py
   [ ] 4.9 .state-guard/hooks.yaml.example
   [ ] 4.10 verificación de logging
