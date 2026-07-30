@@ -850,7 +850,7 @@ if __name__ == "__main__":
 
 ---
 
-### [ ] 4.9 — `.state-guard/hooks.yaml` — reglas declarativas
+### [x] 4.9 — `.state-guard/hooks.yaml` — reglas declarativas
 
 Crear `.state-guard/hooks.yaml.example` (versionado, se copia a `hooks.yaml` real en la instalación — `hooks.yaml` sin `.example` va a `.gitignore` porque puede tener paths locales):
 
@@ -888,7 +888,7 @@ Agregar `.state-guard/hooks.yaml` a `.gitignore` (el `.example` sí se commitea)
 
 ---
 
-### [ ] 4.10 — Auditoría: todo lo que hace un hook queda logueado
+### [x] 4.10 — Auditoría: todo lo que hace un hook queda logueado
 
 Ya cubierto por `_log()` en 4.8 (`hooks.log.jsonl`). Confirmar en este paso:
 - Cada disparo queda registrado con `rule`, `path`, `status` (`triggered`/`done`/`error`) y timestamp.
@@ -1034,8 +1034,8 @@ Fase 4A — Spec-Driven Coding
 Fase 4B — Agent Hooks
   [x] 4.7 modelo de confianza documentado (tabla arquitectura vs derivados)
   [x] 4.8 scripts/hook_daemon.py
-  [ ] 4.9 .state-guard/hooks.yaml.example
-  [ ] 4.10 verificación de logging
+  [x] 4.9 .state-guard/hooks.yaml.example
+  [x] 4.10 verificación de logging
   [ ] 4.11 sg hooks-start/stop/status
   [ ] 4.12 tests de hook_daemon (dry-run)
   [ ] 4.13 documentación

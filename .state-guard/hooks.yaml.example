@@ -1,0 +1,21 @@
+hooks:
+  - name: sync-tests-on-save
+    pattern: "**/scripts/**/*.py"
+    events: ["on_save"]
+    prompt: >
+      Se modificó {path}. Revisá si los tests unitarios correspondientes en
+      tests/unit/ siguen reflejando el comportamiento actual. Si hace falta
+      actualizar un assert o agregar un caso, hacelo. No toques la lógica de
+      producción, solo tests.
+    agent_command: ["claude", "-p", "--dangerously-skip-permissions"]
+    timeout: 180
+
+  - name: sync-docs-on-save
+    pattern: "phases/*.md"
+    events: ["on_save"]
+    prompt: >
+      Se modificó la fase {path}. Revisá si MANUAL.md tiene una sección
+      desactualizada respecto a este archivo y sincronizala. No modifiques
+      la fase en sí.
+    agent_command: ["claude", "-p", "--dangerously-skip-permissions"]
+    timeout: 120

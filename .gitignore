@@ -1,4 +1,5 @@
 __pycache__/
 *.pyc
 .pytest_cache/
-.state-guard/
+.state-guard/*
+!.state-guard/hooks.yaml.example
