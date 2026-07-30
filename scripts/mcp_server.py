@@ -10,6 +10,7 @@ Exposed tools:
   - get_next_task(change: str) -> dict
   - verify_phase_gate(change: str, phase: str) -> dict
   - mark_task_completed(change: str, task_id: str) -> dict
+  - validate_spec(change: str) -> dict
 """
 import json
 import os
@@ -50,6 +51,14 @@ def verify_phase_gate(change: str, phase: str) -> dict:
 def mark_task_completed(change: str, task_id: str) -> dict:
     """Marca una tarea como completada por ID. Idempotente."""
     result, _ = _sg("mark-task", "--change", change, "--task-id", task_id)
+    return result
+
+
+@mcp.tool()
+def validate_spec(change: str) -> dict:
+    """Valida estructuralmente objective.md y design.md antes del gate humano.
+    Detecta secciones faltantes, placeholders sin completar y preguntas bloqueantes [!]."""
+    result, _ = _sg("validate-spec", "--change", change)
     return result
 
 

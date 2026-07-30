@@ -1200,7 +1200,7 @@ Si en algún momento SÍ querés un `/archive` manual (por ejemplo, para re-arch
 
 ---
 
-### [ ] 5.5 — (Opcional, bajo riesgo) Exponer `validate-spec` como 4ta tool MCP
+### [x] 5.5 — (Opcional, bajo riesgo) Exponer `validate-spec` como 4ta tool MCP
 
 Es de solo lectura igual que las otras 3 tools ya expuestas — no hay razón de diseño para dejarlo fuera, fue simplemente no incluido en la Fase 4.
 
@@ -1219,7 +1219,7 @@ def validate_spec(change: str) -> dict:
 
 ---
 
-### [ ] 5.6 — (Opcional, hardening menor) Lockout de intentos en `plan-confirm`/`hotfix-confirm`
+### [x] 5.6 — (Opcional, hardening menor) Lockout de intentos en `plan-confirm`/`hotfix-confirm`
 
 Hoy `cmd_plan_confirm`/`cmd_hotfix_confirm` no limitan intentos con token incorrecto — no es explotable de forma remota (todo es local, un solo usuario), pero es una mejora barata: agregar un contador de intentos fallidos por `token_file` con backoff o borrado del token tras N intentos. **Evaluar si realmente lo necesitás antes de implementarlo** — es hardening para un modelo de amenaza que hoy no tenés (no hay multiusuario ni exposición de red), así que priorizalo bajo si el tiempo apremia.
 
@@ -1293,8 +1293,8 @@ Fase 5 — Fix de producción y documentación
   [x] 5.2 README.md reemplazado
   [x] 5.3 MANUAL.md — sección Arquitectura corregida
   [x] 5.4 referencia colgante a /archive resuelta
-  [ ] 5.5 (opcional) validate_spec como 4ta tool MCP
-  [ ] 5.6 (opcional) lockout de intentos en confirm
+  [x] 5.5 (opcional) validate_spec como 4ta tool MCP
+  [x] 5.6 (opcional) lockout de intentos en confirm
   [ ] 5.7 tag v2.6.1 (cierre)
 ```
 
