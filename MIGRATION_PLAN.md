@@ -487,7 +487,507 @@ git commit -m "chore: close Phase 3 (Documentación) — v2.1.0"
 git tag v2.1.0
 ```
 
-**Esto cierra el plan completo.** A partir de acá, `context-guard` queda archivado y `state-guard` es el único proyecto activo.
+## Fase 4 — Spec-Driven Coding parity + Agent Hooks (paridad con Kiro Code)
+
+**Contexto y alcance de esta fase:** dos features de Kiro Code, tratadas como dos sub-fases independientes porque tienen perfiles de riesgo distintos.
+
+- **4A (Spec-Driven Coding)**: extiende artefactos y agrega validación de contenido real en código. Riesgo bajo, no toca locking ni concurrencia.
+- **4B (Agent Hooks)**: componente nuevo (daemon de filesystem + executor de agentes headless). Riesgo medio — es la primera vez que algo en este repo dispara un agente sin que un humano lo pida en el momento.
+
+### Nota de decisión — por qué se reversa la regla de `plan.md` único
+
+`phases/plan.md` (línea 193 en la versión actual) dice explícitamente: *"El único archivo de propuesta es `plan.md`; NO crear `proposal.md`, `design.md` separados bajo el nuevo esquema"*. Esa regla fue correcta cuando el objetivo era colapsar 8 fases en 3 y reducir ceremonia. Fase 4A la revierte **parcialmente y a propósito**: separa `plan.md` en `objective.md` + `design.md` porque es precisamente lo que hace falta para paridad con Kiro (documento de diseño y flujo de datos como artefactos de primera clase, no secciones enterradas en un archivo consolidado). No es un rebote hacia el esquema v1 de 8 fases — siguen siendo 3 fases, solo que la fase `plan` ahora produce 2 artefactos en vez de 1.
+
+**Regla dura de esta fase:** no tocar el DAG de 3 fases, no tocar el schema `state.ini`, no agregar una fase nueva. Todo pasa dentro de lo que ya produce/consume la fase `plan`.
+
+---
+
+## Fase 4A — Spec-Driven Coding
+
+### [x] 4.1 — Definir el split de contenido entre `objective.md` y `design.md`
+
+No es ambigüedad de implementación, es una decisión de contenido que hay que fijar antes de tocar código:
+
+**`objective.md`** (el qué y el por qué — lo que hoy son las secciones 1.3 de `phases/plan.md`):
+```markdown
+# Objective: {Título del Cambio}
+
+## Intención
+{Qué problema resuelve y por qué}
+
+## Alcance
+### Dentro del Alcance
+- {entregable}
+### Fuera del Alcance
+- {diferido}
+
+## Criterios de Éxito
+- [ ] {resultado medible 1}
+
+## Preguntas Abiertas
+- [ ] {pregunta no resuelta — si bloquea, marcá con [!]}
+```
+
+**`design.md`** (el cómo y el impacto — hoy secciones 1.5 de `phases/plan.md`):
+```markdown
+# Design: {Título del Cambio}
+
+## Enfoque Técnico
+{Estrategia general}
+
+## Áreas Afectadas
+| Área | Impacto | Descripción |
+|------|---------|-------------|
+
+## Decisiones de Arquitectura
+### Decisión: {Título}
+**Elección**: {qué elegimos}
+**Alternativas**: {qué descartamos}
+**Justificación**: {por qué}
+
+## Flujo de Datos
+{diagrama ASCII o Mermaid}
+
+## Archivos Afectados
+| Archivo | Acción | Descripción |
+|---------|--------|-------------|
+
+## Estrategia de Testing
+| Capa | Qué testear | Enfoque |
+|------|-------------|---------|
+
+## Riesgos
+| Riesgo | Probabilidad | Mitigación |
+|--------|-------------|-----------|
+
+## Plan de Rollback
+{Cómo revertir si algo sale mal}
+```
+
+`tasks.md` no cambia — sigue siendo artefacto de la fase `execute`, sin modificaciones.
+
+**Verificación:** ninguna (paso de definición, no de código). Sirve de contrato para 4.2-4.4.
+
+---
+
+### [ ] 4.2 — Reescribir `phases/plan.md` para producir los dos artefactos
+
+Cambios concretos:
+1. Sub-paso 1.6 ("Persistir el DRAFT") pasa a crear `objective.md` **y** `design.md`, no `plan.md`.
+2. Eliminar la línea 193 completa ("El único archivo de propuesta es `plan.md`...") y reemplazarla por:
+   ```
+   - Los artefactos de propuesta son `objective.md` y `design.md`, cada uno con su
+     propósito específico (ver plantillas). NO fusionarlos en un solo archivo.
+   ```
+3. Sub-paso 2 (GATE), punto 1: "Presentar el `plan.md`" → "Presentar `objective.md` y `design.md`".
+4. Sub-paso 2, punto 3: **antes** de ejecutar `plan-approve`, agregar una validación previa (ver 4.3):
+   ```bash
+   python3 scripts/sg.py validate-spec --change {change-name}
+   ```
+   Si esto devuelve `ok: false`, el modelo NO ejecuta `plan-approve` — corrige el/los artefacto(s) señalados y reintenta. Esto es intencional: la validación estructural se resuelve sola, sin interrumpir al humano; el gate humano se reserva para cuando el spec ya está completo.
+5. Actualizar el árbol de archivos de la sección 1.6:
+   ```
+   .state-guard/changes/{change-name}/
+   ├── objective.md         ← qué y por qué
+   ├── design.md             ← cómo, arquitectura, flujo de datos
+   └── specs/
+       └── {dominio}/
+           └── spec.md
+   ```
+
+**Verificación:** `grep -c "plan.md" phases/plan.md` debe dar `0` (todas las referencias migradas a `objective.md`/`design.md`), salvo comentarios históricos que decidas dejar explícitamente marcados como tal.
+
+**Commit:** `feat: split plan.md into objective.md + design.md in PLAN phase`
+
+---
+
+### [ ] 4.3 — Validación de contenido real en código (`validate-spec`)
+
+**Esto es lo que hoy NO existe.** El único gate real de `plan` es el token humano (`cmd_commit`, líneas ~224-242 de `state_manager.py`) — cero validación de contenido de los artefactos.
+
+**Agregar a `scripts/state_manager.py`:**
+
+```python
+def cmd_validate_spec(args):
+    """Valida objective.md y design.md antes de habilitar el gate humano.
+    No muta estado — solo lee y reporta. Exit 0 siempre (el resultado va en JSON)."""
+    change_dir = Path(f".state-guard/changes/{args.change}")
+    objective_path = change_dir / "objective.md"
+    design_path = change_dir / "design.md"
+
+    issues = []
+
+    for label, path, required_sections in [
+        ("objective.md", objective_path, ["## Intención", "## Alcance", "## Criterios de Éxito"]),
+        ("design.md", design_path, ["## Decisiones de Arquitectura", "## Flujo de Datos", "## Archivos Afectados"]),
+    ]:
+        if not path.exists():
+            issues.append({"file": label, "issue": "MISSING_FILE"})
+            continue
+        content = path.read_text(encoding="utf-8")
+        if "[!]" in content:
+            issues.append({"file": label, "issue": "BLOCKING_OPEN_QUESTION",
+                            "detail": "Hay preguntas abiertas marcadas [!] sin resolver."})
+        for section in required_sections:
+            if section not in content:
+                issues.append({"file": label, "issue": "MISSING_SECTION", "detail": section})
+        # placeholders de plantilla sin completar, ej. "{Qué problema resuelve y por qué}"
+        import re
+        unresolved = re.findall(r"\{[A-ZÁÉÍÓÚa-záéíóú][^}]{3,80}\}", content)
+        if unresolved:
+            issues.append({"file": label, "issue": "UNRESOLVED_PLACEHOLDER",
+                            "detail": unresolved[:5]})
+
+    result = {"ok": len(issues) == 0, "change": args.change, "issues": issues}
+    print(json.dumps(result, ensure_ascii=False))
+    sys.exit(EXIT_OK if not issues else EXIT_VALIDATION)
+```
+
+Registrar el subcomando `validate-spec --change` en el parser de `state_manager.py`, y agregar el wrapper correspondiente en `sg.py` (`cmd_validate_spec`, delegando igual que los demás — no duplicar lógica, tal como indica el docstring de `sg.py`).
+
+**Decisión de diseño explícita:** `validate-spec` es de solo lectura, no requiere lock de escritura (no llama `with_write_lock`) porque no muta `state.ini`. Es seguro llamarlo cuantas veces haga falta mientras se itera el draft.
+
+**No conectarlo dentro de `cmd_plan_approve` como bloqueo forzado todavía** — dejalo como paso explícito que el propio `phases/plan.md` instruye ejecutar antes de `plan-approve` (ya lo agregaste en 4.2, punto 4). Forzarlo dentro de `plan-approve` es un endurecimiento razonable a futuro, pero acoplaría el gate humano a la validación estructural de una forma que hoy no necesitás — mantenelo como dos pasos separados y auditables por separado.
+
+**Verificación:**
+```bash
+# Caso negativo: crear un change con objective.md incompleto (sin ## Criterios de Éxito)
+# y confirmar que validate-spec reporta MISSING_SECTION.
+python3 scripts/sg.py validate-spec --change <change-de-prueba>
+```
+
+**Commit:** `feat: add sg validate-spec — structural validation of objective.md/design.md`
+
+---
+
+### [ ] 4.4 — Actualizar referencias obsoletas a `plan.md` en el resto del repo
+
+Hallazgo de la auditoría: estos archivos ya referencian `design.md` como si existiera (estaban adelantados a esta fase) o referencian `plan.md` como archivo único (quedan obsoletos). Alinear todos a `objective.md` + `design.md`:
+
+- `phases/execute.md` (líneas 16, 29)
+- `phases/verify.md` (líneas 17, 56)
+- `phases/_shared/context-injection.md` (líneas 9-10 — la tabla de dependencias por fase)
+- `skills/_shared/convention.md` (líneas 17, 21, 36, 95, 97)
+- `skills/review/SKILL.md` (línea 44 — ya decía `design.md`, ahora es consistente)
+- `skills/checkpoint/SKILL.md` (líneas 51, 53 — ya asumía `design.md` existente; verificar que la extracción de "Decisiones de Arquitectura" siga apuntando a la sección correcta ahora que vive en `design.md` en vez de en `plan.md`)
+- `skills/continue/SKILL.md` (línea 53)
+- `skills/ff/SKILL.md` (línea 46)
+- `skills/new/SKILL.md` (línea 29)
+- `skills/hotfix/SKILL.md` (línea 25 — el hotfix salta PLAN, así que dice "no existirá `plan.md`"; actualizar a "no existirán `objective.md` ni `design.md`")
+
+**Verificación:**
+```bash
+grep -rn "plan\.md" phases/ skills/ --include="*.md" | grep -v "objective.md\|design.md"
+# Debe devolver 0 líneas, o solo líneas donde "plan.md" sea intencional
+# (ninguna debería serlo tras este paso).
+```
+
+**Commit:** `docs: update all plan.md references to objective.md/design.md across phases/ and skills/`
+
+---
+
+### [ ] 4.5 — Tests
+
+Crear `tests/unit/test_validate_spec.py`:
+- `objective.md` y `design.md` completos → `ok: true`, `issues: []`
+- Falta `design.md` → `MISSING_FILE`
+- `objective.md` con `[!]` → `BLOCKING_OPEN_QUESTION`
+- `design.md` sin sección `## Flujo de Datos` → `MISSING_SECTION`
+- Placeholder de plantilla sin completar (ej. `{Qué problema resuelve...}` textual) → `UNRESOLVED_PLACEHOLDER`
+
+**Verificación:** `python3 -m pytest tests/unit/test_validate_spec.py -q`
+
+**Commit:** `test: add validate-spec unit tests`
+
+---
+
+### [ ] 4.6 — Cierre de Fase 4A
+
+```bash
+python3 -m pytest tests/unit -q
+python3 tests/concurrency_test.py
+git add -A
+git commit -m "chore: close Phase 4A (Spec-Driven Coding parity)"
+git tag phase-4a-spec-driven-complete
+```
+
+---
+
+## Fase 4B — Agent Hooks
+
+### [ ] 4.7 — Modelo de confianza (fijado por decisión tuya, no rediscutir)
+
+Regla explícita, documentada acá para que ningún agente la reinterprete:
+
+| Acción | Quién la dispara | Gate humano |
+|---|---|---|
+| `plan-approve` / `plan-confirm` (aprobar objective.md/design.md) | Solo humano, siempre | Sí — sin cambios |
+| `hotfix-init` / `hotfix-confirm` | Solo humano, siempre | Sí — sin cambios |
+| Actualizar tests derivados de un cambio | Hook automático permitido | **No** |
+| Sincronizar documentación (README/MANUAL secciones autogeneradas) | Hook automático permitido | **No** |
+| `mark_task_completed` en `tasks.md` | Hook automático permitido | **No** |
+| Cualquier escritura dentro de `.state-guard/changes/*/objective.md` o `design.md` | **Prohibido para hooks** | N/A — un hook nunca toca estos dos archivos, ni para "arreglarlos" |
+
+La distinción no es "riesgo alto vs bajo" en abstracto — es específicamente **arquitectura vs derivados**. Un hook puede regenerar tests o sincronizar docs porque son consecuencia mecánica de un `tasks.md` ya aprobado; un hook nunca decide ni ajusta intención o diseño, eso quedó reservado para el humano en 4A.
+
+**Verificación:** ninguna (es una tabla de política, se aplica en 4.9-4.10).
+
+---
+
+### [ ] 4.8 — `scripts/hook_daemon.py`: watcher de filesystem
+
+Agregar dependencia opcional en `pyproject.toml`:
+```toml
+[project.optional-dependencies]
+hooks = ["watchdog>=4.0,<5.0"]
+```
+
+Crear `scripts/hook_daemon.py`:
+
+```python
+#!/usr/bin/env python3
+"""Agent Hooks daemon — observa el filesystem y dispara acciones declaradas
+en .state-guard/hooks.yaml. Solo ejecuta acciones de la categoría "derivada"
+(ver Fase 4B, paso 4.7) — nunca toca objective.md/design.md ni el gate humano."""
+import json
+import subprocess
+import sys
+import time
+from pathlib import Path
+
+from watchdog.observers import Observer
+from watchdog.events import FileSystemEventHandler
+import yaml
+
+REPO_ROOT = Path.cwd()
+RULES_FILE = REPO_ROOT / ".state-guard" / "hooks.yaml"
+LOG_FILE = REPO_ROOT / ".state-guard" / "hooks.log.jsonl"
+EXCLUDED_PREFIXES = (".state-guard/", ".git/")  # nunca reaccionar a sus propios efectos
+FORBIDDEN_PATTERNS = ("objective.md", "design.md")  # nunca disparar sobre estos, pase lo que pase
+
+
+def _log(entry: dict):
+    entry["ts"] = time.time()
+    with open(LOG_FILE, "a", encoding="utf-8") as f:
+        f.write(json.dumps(entry, ensure_ascii=False) + "\n")
+
+
+def _load_rules():
+    if not RULES_FILE.exists():
+        return []
+    with open(RULES_FILE, encoding="utf-8") as f:
+        return yaml.safe_load(f).get("hooks", [])
+
+
+class HookHandler(FileSystemEventHandler):
+    def __init__(self, rules):
+        self.rules = rules
+        self._debounce = {}  # path -> last_trigger_ts
+
+    def _should_skip(self, path: str) -> bool:
+        rel = str(Path(path).relative_to(REPO_ROOT))
+        if any(rel.startswith(p) for p in EXCLUDED_PREFIXES):
+            return True
+        if any(f in rel for f in FORBIDDEN_PATTERNS):
+            return True
+        now = time.time()
+        last = self._debounce.get(rel, 0)
+        if now - last < 2.0:  # debounce de 2s por archivo
+            return True
+        self._debounce[rel] = now
+        return False
+
+    def on_modified(self, event):
+        if event.is_directory or self._should_skip(event.src_path):
+            return
+        rel = str(Path(event.src_path).relative_to(REPO_ROOT))
+        for rule in self.rules:
+            if Path(rel).match(rule["pattern"]) and "on_save" in rule["events"]:
+                self._fire(rule, rel)
+
+    def _fire(self, rule, path):
+        prompt = rule["prompt"].format(path=path)
+        _log({"rule": rule["name"], "path": path, "status": "triggered"})
+        try:
+            result = subprocess.run(
+                rule["agent_command"] + [prompt],
+                cwd=str(REPO_ROOT), capture_output=True, text=True, timeout=rule.get("timeout", 120),
+            )
+            _log({"rule": rule["name"], "path": path, "status": "done",
+                  "returncode": result.returncode})
+        except Exception as e:
+            _log({"rule": rule["name"], "path": path, "status": "error", "error": str(e)})
+
+
+def main():
+    rules = _load_rules()
+    if not rules:
+        print("No hay reglas en .state-guard/hooks.yaml. Nada que observar.")
+        return
+    observer = Observer()
+    observer.schedule(HookHandler(rules), str(REPO_ROOT), recursive=True)
+    observer.start()
+    print(f"Agent Hooks daemon activo. {len(rules)} reglas cargadas. Log: {LOG_FILE}")
+    try:
+        while True:
+            time.sleep(1)
+    except KeyboardInterrupt:
+        observer.stop()
+    observer.join()
+
+
+if __name__ == "__main__":
+    main()
+```
+
+**Decisiones de diseño no negociables acá:**
+- `FORBIDDEN_PATTERNS` está hardcodeado en el daemon, no en `hooks.yaml` — que la lista de "archivos que un hook nunca puede tocar" viva en el YAML significa que alguien podría editarla sin darse cuenta de la implicancia. Vive en código a propósito.
+- El daemon **nunca** llama `sg plan-approve`, `sg plan-confirm`, `sg hotfix-init` ni `sg hotfix-confirm` — ni directa ni indirectamente vía el `agent_command` que ejecuta (eso lo controla `hooks.yaml`, ver 4.9, pero la restricción de fondo es de diseño, no de config).
+
+**Verificación:** `pip install -e ".[hooks]" --break-system-packages` instala sin error.
+
+**Commit:** `feat: add scripts/hook_daemon.py (filesystem watcher, no dependency on state_manager.py)`
+
+---
+
+### [ ] 4.9 — `.state-guard/hooks.yaml` — reglas declarativas
+
+Crear `.state-guard/hooks.yaml.example` (versionado, se copia a `hooks.yaml` real en la instalación — `hooks.yaml` sin `.example` va a `.gitignore` porque puede tener paths locales):
+
+```yaml
+hooks:
+  - name: sync-tests-on-save
+    pattern: "**/scripts/**/*.py"
+    events: ["on_save"]
+    prompt: >
+      Se modificó {path}. Revisá si los tests unitarios correspondientes en
+      tests/unit/ siguen reflejando el comportamiento actual. Si hace falta
+      actualizar un assert o agregar un caso, hacelo. No toques la lógica de
+      producción, solo tests.
+    agent_command: ["claude", "-p", "--dangerously-skip-permissions"]
+    timeout: 180
+
+  - name: sync-docs-on-save
+    pattern: "phases/*.md"
+    events: ["on_save"]
+    prompt: >
+      Se modificó la fase {path}. Revisá si MANUAL.md tiene una sección
+      desactualizada respecto a este archivo y sincronizala. No modifiques
+      la fase en sí.
+    agent_command: ["claude", "-p", "--dangerously-skip-permissions"]
+    timeout: 120
+```
+
+Agregar `.state-guard/hooks.yaml` a `.gitignore` (el `.example` sí se commitea).
+
+**Nota importante para vos:** `agent_command` es configurable por regla — podés apuntar a `claude -p`, a un comando de OpenCode en modo no interactivo, o a un script propio. El flag exacto de "sin confirmación interactiva" depende de qué CLI uses y de su versión — confirmalo contra la ayuda de tu CLI (`--help`) antes de dejarlo así en producción, no asumas que el flag de arriba es válido en tu versión instalada.
+
+**Verificación:** `python3 -c "import yaml; yaml.safe_load(open('.state-guard/hooks.yaml.example'))"` no tira error.
+
+**Commit:** `feat: add .state-guard/hooks.yaml.example with declarative rule schema`
+
+---
+
+### [ ] 4.10 — Auditoría: todo lo que hace un hook queda logueado
+
+Ya cubierto por `_log()` en 4.8 (`hooks.log.jsonl`). Confirmar en este paso:
+- Cada disparo queda registrado con `rule`, `path`, `status` (`triggered`/`done`/`error`) y timestamp.
+- El log es append-only, nunca se sobreescribe.
+- Agregar a `MANUAL.md` (paso 4.14) que este log es la fuente para auditar qué hizo un agente en background sin supervisión en el momento — es el mecanismo de trazabilidad que reemplaza al gate humano en estas acciones derivadas.
+
+**Verificación:** disparar un hook manualmente (tocar un archivo que matchee un `pattern`) y confirmar una línea nueva en `.state-guard/hooks.log.jsonl`.
+
+**Commit:** ninguno (ya cubierto en 4.8, este paso es solo de verificación).
+
+---
+
+### [ ] 4.11 — Wiring en `sg.py`
+
+Agregar subcomandos delgados (delegan al daemon, no reimplementan nada):
+
+```python
+def cmd_hooks_start(args):
+    import subprocess as sp
+    daemon = SCRIPT_DIR / "hook_daemon.py"
+    proc = sp.Popen([sys.executable, str(daemon)], cwd=str(REPO_ROOT))
+    (SG_DIR / "hooks.pid").write_text(str(proc.pid))
+    _emit({"ok": True, "pid": proc.pid, "message": "Agent Hooks daemon iniciado en background."})
+
+def cmd_hooks_stop(args):
+    import signal
+    pid_file = SG_DIR / "hooks.pid"
+    if not pid_file.exists():
+        _emit({"ok": False, "message": "No hay daemon corriendo (no se encontró hooks.pid)."}, 1)
+    pid = int(pid_file.read_text())
+    try:
+        os.kill(pid, signal.SIGTERM)
+    except ProcessLookupError:
+        pass
+    pid_file.unlink()
+    _emit({"ok": True, "message": f"Daemon (pid {pid}) detenido."})
+
+def cmd_hooks_status(args):
+    pid_file = SG_DIR / "hooks.pid"
+    if not pid_file.exists():
+        _emit({"ok": True, "running": False})
+    pid = int(pid_file.read_text())
+    try:
+        os.kill(pid, 0)
+        _emit({"ok": True, "running": True, "pid": pid})
+    except ProcessLookupError:
+        pid_file.unlink()
+        _emit({"ok": True, "running": False, "stale_pid_removed": True})
+```
+
+Registrar `hooks-start`, `hooks-stop`, `hooks-status` en el parser y en el `dispatch` de `main()`.
+
+**Verificación:**
+```bash
+sg hooks-start   # -> {"ok": true, "pid": ...}
+sg hooks-status  # -> {"ok": true, "running": true, "pid": ...}
+sg hooks-stop    # -> {"ok": true, ...}
+sg hooks-status  # -> {"ok": true, "running": false}
+```
+
+**Commit:** `feat: wire hooks-start/stop/status into sg.py`
+
+---
+
+### [ ] 4.12 — Tests (modo dry-run, sin invocar un agente real)
+
+Crear `tests/unit/test_hook_daemon.py`:
+- `_should_skip` devuelve `True` para paths bajo `.state-guard/` y `.git/`.
+- `_should_skip` devuelve `True` para cualquier path que contenga `objective.md` o `design.md`, sin excepción.
+- Debounce: dos eventos sobre el mismo archivo en menos de 2s → solo el primero dispara.
+- `_load_rules` con un `hooks.yaml` malformado no crashea el proceso (devuelve lista vacía o error controlado).
+- Mockear `subprocess.run` en `_fire` para no depender de tener un agente real instalado en el entorno de test.
+
+**Verificación:** `python3 -m pytest tests/unit/test_hook_daemon.py -q`
+
+**Commit:** `test: add hook_daemon unit tests (dry-run, no real agent invocation)`
+
+---
+
+### [ ] 4.13 — Documentación
+
+- `MANUAL.md`: sección nueva "Agent Hooks" — modelo de confianza (tabla del paso 4.7), cómo se arma `hooks.yaml`, dónde queda el log, cómo levantar/bajar el daemon.
+- `MANUAL.md`: actualizar la sección de `sg.py` (agregada en la Fase 3 de la migración anterior) con `validate-spec`, `hooks-start`, `hooks-stop`, `hooks-status`.
+- `README.md`: mención breve de "instalación opcional: `pip install -e '.[hooks]'`" para quien quiera Agent Hooks.
+- `CHANGELOG.md`: entrada nueva `[2.6.0]` resumiendo 4A y 4B.
+
+**Commit:** `docs: document Spec-Driven Coding split and Agent Hooks in MANUAL.md/README.md/CHANGELOG.md`
+
+---
+
+### [ ] 4.14 — Cierre de Fase 4B y release
+
+```bash
+python3 -m pytest tests/unit -q
+python3 tests/concurrency_test.py
+git add -A
+git commit -m "chore: close Phase 4B (Agent Hooks) — v2.6.0"
+git tag v2.6.0
+```
 
 ---
 
@@ -522,6 +1022,24 @@ Fase 3 — Documentación
   [x] 3.5 CHANGELOG.md
   [x] 3.6 deprecar context-guard + borrar .ref/
   [x] 3.7 tag v2.5.0 (cierre)
+  
+Fase 4A — Spec-Driven Coding
+  [x] 4.1 split objective.md/design.md definido
+  [ ] 4.2 phases/plan.md reescrito
+  [ ] 4.3 sg validate-spec implementado
+  [ ] 4.4 referencias obsoletas actualizadas
+  [ ] 4.5 tests de validate-spec
+  [ ] 4.6 tag phase-4a-spec-driven-complete
+
+Fase 4B — Agent Hooks
+  [ ] 4.7 modelo de confianza documentado (tabla arquitectura vs derivados)
+  [ ] 4.8 scripts/hook_daemon.py
+  [ ] 4.9 .state-guard/hooks.yaml.example
+  [ ] 4.10 verificación de logging
+  [ ] 4.11 sg hooks-start/stop/status
+  [ ] 4.12 tests de hook_daemon (dry-run)
+  [ ] 4.13 documentación
+  [ ] 4.14 tag v2.6.0 (cierre)
 ```
 
 ---
@@ -564,3 +1082,8 @@ assert "GATE PREPARADO" in output
 - El servidor MCP expone solo 3 tools de solo lectura/utilidad (`get_next_task`, `verify_phase_gate`, `mark_task_completed`). El control transaccional (`begin/commit/rollback`) y los gates humanos siguen siendo exclusivamente CLI/terminal — esto es intencional, no un recorte de alcance.
 - El nombre de paquete Python es `state_guard`/`scripts` (mismo layout que ya existe), no se renombra el árbol de directorios del repo.
 - Redacción: Gemini 3.6 Flash. Revisión de 1.1 y 2.3/2.4: obligatoria, con modelo distinto al que redactó.
+- `objective.md`/`design.md` reemplazan a `plan.md`. Esto reversa deliberadamente la regla previa de "un solo archivo de propuesta" — no es un error, está documentado en la nota de decisión al inicio de esta fase.
+- `validate-spec` es de solo lectura, no bloquea por código dentro de `plan-approve` — es un paso separado que `phases/plan.md` instruye ejecutar antes.
+- Agent Hooks nunca tocan `objective.md` ni `design.md`, sin excepción, sin importar la regla que se agregue a `hooks.yaml` — la restricción vive hardcodeada en `hook_daemon.py`, no en configuración editable.
+- El gate humano (`plan-approve`/`plan-confirm`, `hotfix-init`/`hotfix-confirm`) no se toca en esta fase. Se mantiene tal como quedó cerrado en la migración anterior.
+
