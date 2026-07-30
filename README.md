@@ -62,6 +62,14 @@ Configuración en el cliente MCP:
 }
 ```
 
+#### Opción C: Instalación con Agent Hooks
+
+Para utilizar el daemon de automatización en background (`hook_daemon.py`), instala el paquete con las dependencias opcionales de hooks:
+
+```bash
+pip install -e '.[hooks]'
+```
+
 ---
 
 ## Comandos

@@ -968,7 +968,7 @@ Crear `tests/unit/test_hook_daemon.py`:
 
 ---
 
-### [ ] 4.13 — Documentación
+### [x] 4.13 — Documentación
 
 - `MANUAL.md`: sección nueva "Agent Hooks" — modelo de confianza (tabla del paso 4.7), cómo se arma `hooks.yaml`, dónde queda el log, cómo levantar/bajar el daemon.
 - `MANUAL.md`: actualizar la sección de `sg.py` (agregada en la Fase 3 de la migración anterior) con `validate-spec`, `hooks-start`, `hooks-stop`, `hooks-status`.
@@ -1038,7 +1038,7 @@ Fase 4B — Agent Hooks
   [x] 4.10 verificación de logging
   [x] 4.11 sg hooks-start/stop/status
   [x] 4.12 tests de hook_daemon (dry-run)
-  [ ] 4.13 documentación
+  [x] 4.13 documentación
   [ ] 4.14 tag v2.6.0 (cierre)
 ```
 

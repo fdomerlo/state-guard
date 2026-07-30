@@ -1,5 +1,19 @@
 # Changelog
 
+## [2.6.0] - 2026-07-30
+
+### Spec-Driven Coding (Fase 4A)
+- División de `plan.md` en los artefactos `objective.md` y `design.md`.
+- Nuevo comando `sg validate-spec --change <nombre>` para validación estructural previa al gate humano.
+- Actualización de todas las referencias de especificación en `phases/` y `skills/`.
+
+### Agent Hooks (Fase 4B)
+- Daemon de observabilidad de filesystem (`scripts/hook_daemon.py`) basado en `watchdog`.
+- Esquema declarativo de reglas en `.state-guard/hooks.yaml.example`.
+- Subcomandos de gestión `sg hooks-start`, `sg hooks-stop` y `sg hooks-status`.
+- Log de auditoría append-only en `.state-guard/hooks.log.jsonl`.
+- Modelo de confianza estricto que prohíbe la modificación automática de artefactos de arquitectura (`objective.md`, `design.md`) o gates humanos.
+
 ## [2.5.0] - 2026-07-28
 
 ### Integración (Fase 1)

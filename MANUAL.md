@@ -204,6 +204,11 @@ El comando `sg install-hooks` instala un hook `post-commit` en el repositorio Gi
 - **Función**: Ejecuta automáticamente `sg status` después de cada commit de git para mostrar el estado actual del manifiesto.
 - **Comportamiento**: Es estrictamente **informativo** y no bloquea las operaciones de git, a diferencia del gate de `commit` que sí es bloqueante.
 
+### Subcomandos Principales de `sg.py`
+
+- **Validación de Especificaciones**: `sg validate-spec --change <nombre>` valida estructuralmente `objective.md` y `design.md` comprobando que no contengan preguntas abiertas bloqueantes (`[!]`), placeholders ni secciones faltantes antes de habilitar el gate humano.
+- **Gestión de Agent Hooks**: `sg hooks-start`, `sg hooks-stop` y `sg hooks-status` permiten iniciar, detener y verificar el estado del daemon de observabilidad de filesystem.
+
 ### Tabla de Códigos de Salida (Exit Codes)
 
 | Código | Constante | Descripción |
@@ -212,7 +217,7 @@ El comando `sg install-hooks` instala un hook `post-commit` en el repositorio Gi
 | `1` | `EXIT_GENERIC` | Error genérico o `state.ini` no encontrado. |
 | `2` | `EXIT_LOCK_CONFLICT` | Conflicto de lock activo por otra sesión (reintentable). |
 | `3` | `EXIT_BAD_TRANSITION` | Transición inválida en el DAG de fases (no reintentar). |
-| `4` | `EXIT_VALIDATION` | Datos de entrada inválidos (ej. summary excede límite). |
+| `4` | `EXIT_VALIDATION` | Datos de entrada inválidos (ej. summary excede límite, spec incompleto). |
 | `5` | `EXIT_GATE_REQUIRED` | Gate humano no cumplido; requiere intervención en terminal. |
 
 ---
@@ -561,6 +566,51 @@ Configuración en el cliente MCP:
   }
 }
 ```
+
+---
+
+## Agent Hooks
+
+Agent Hooks permite a agentes headless observar el sistema de archivos del proyecto y reaccionar automáticamente ante eventos de guardado (`on_save`).
+
+### Modelo de Confianza (Arquitectura vs. Derivados)
+
+Para evitar la alteración no supervisada de la arquitectura o la evasión de controles, las acciones automáticas se dividen estrictamente entre artefactos de arquitectura y artefactos derivados:
+
+| Acción | Quién la dispara | Gate humano |
+|--------|------------------|-------------|
+| `plan-approve` / `plan-confirm` (aprobar `objective.md`/`design.md`) | Solo humano, siempre | Sí — sin cambios |
+| `hotfix-init` / `hotfix-confirm` | Solo humano, siempre | Sí — sin cambios |
+| Actualizar tests derivados de un cambio | Hook automático permitido | **No** |
+| Sincronizar documentación (README/MANUAL secciones autogeneradas) | Hook automático permitido | **No** |
+| `mark_task_completed` en `tasks.md` | Hook automático permitido | **No** |
+| Cualquier escritura dentro de `.state-guard/changes/*/objective.md` o `design.md` | **Prohibido para hooks** | N/A — un hook nunca toca estos dos archivos |
+
+### Configuración (`.state-guard/hooks.yaml`)
+
+Las reglas declarativas se definen en `.state-guard/hooks.yaml` (copiado desde `.state-guard/hooks.yaml.example`):
+
+```yaml
+hooks:
+  - name: sync-tests-on-save
+    pattern: "**/scripts/**/*.py"
+    events: ["on_save"]
+    prompt: >
+      Se modificó {path}. Revisá si los tests unitarios correspondientes en
+      tests/unit/ siguen reflejando el comportamiento actual.
+    agent_command: ["claude", "-p", "--dangerously-skip-permissions"]
+    timeout: 180
+```
+
+### Registro de Auditoría (`hooks.log.jsonl`)
+
+Toda acción ejecutada por un hook queda registrada de forma append-only en `.state-guard/hooks.log.jsonl` con el timestamp, nombre de la regla, archivo modificado, estado (`triggered`, `done`, `error`) y código de salida. Este log proporciona la fuente principal para auditar qué hizo un agente en background sin supervisión en el momento, reemplazando al gate humano en acciones derivadas.
+
+### Gestión del Daemon (`sg hooks-*`)
+
+- **Iniciar**: `sg hooks-start` (lanza `scripts/hook_daemon.py` en background y registra el PID en `.state-guard/hooks.pid`).
+- **Estado**: `sg hooks-status` (informa si el daemon está activo).
+- **Detener**: `sg hooks-stop` (detiene el proceso de forma limpia vía `SIGTERM`).
 
 ---
 
