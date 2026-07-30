@@ -686,7 +686,7 @@ grep -rn "plan\.md" phases/ skills/ --include="*.md" | grep -v "objective.md\|de
 
 ---
 
-### [ ] 4.5 — Tests
+### [x] 4.5 — Tests
 
 Crear `tests/unit/test_validate_spec.py`:
 - `objective.md` y `design.md` completos → `ok: true`, `issues: []`
@@ -1028,7 +1028,7 @@ Fase 4A — Spec-Driven Coding
   [x] 4.2 phases/plan.md reescrito
   [x] 4.3 sg validate-spec implementado
   [x] 4.4 referencias obsoletas actualizadas
-  [ ] 4.5 tests de validate-spec
+  [x] 4.5 tests de validate-spec
   [ ] 4.6 tag phase-4a-spec-driven-complete
 
 Fase 4B — Agent Hooks
