@@ -979,7 +979,7 @@ Crear `tests/unit/test_hook_daemon.py`:
 
 ---
 
-### [ ] 4.14 — Cierre de Fase 4B y release
+### [x] 4.14 — Cierre de Fase 4B y release
 
 ```bash
 python3 -m pytest tests/unit -q
@@ -1039,7 +1039,7 @@ Fase 4B — Agent Hooks
   [x] 4.11 sg hooks-start/stop/status
   [x] 4.12 tests de hook_daemon (dry-run)
   [x] 4.13 documentación
-  [ ] 4.14 tag v2.6.0 (cierre)
+  [x] 4.14 tag v2.6.0 (cierre)
 ```
 
 ---
