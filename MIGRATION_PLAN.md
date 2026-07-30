@@ -953,7 +953,7 @@ sg hooks-status  # -> {"ok": true, "running": false}
 
 ---
 
-### [ ] 4.12 — Tests (modo dry-run, sin invocar un agente real)
+### [x] 4.12 — Tests (modo dry-run, sin invocar un agente real)
 
 Crear `tests/unit/test_hook_daemon.py`:
 - `_should_skip` devuelve `True` para paths bajo `.state-guard/` y `.git/`.
@@ -1037,7 +1037,7 @@ Fase 4B — Agent Hooks
   [x] 4.9 .state-guard/hooks.yaml.example
   [x] 4.10 verificación de logging
   [x] 4.11 sg hooks-start/stop/status
-  [ ] 4.12 tests de hook_daemon (dry-run)
+  [x] 4.12 tests de hook_daemon (dry-run)
   [ ] 4.13 documentación
   [ ] 4.14 tag v2.6.0 (cierre)
 ```

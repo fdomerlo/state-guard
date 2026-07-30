@@ -34,9 +34,13 @@ def _log(entry: dict):
 def _load_rules():
     if not RULES_FILE.exists():
         return []
-    with open(RULES_FILE, encoding="utf-8") as f:
-        data = yaml.safe_load(f)
-        return data.get("hooks", []) if data else []
+    try:
+        with open(RULES_FILE, encoding="utf-8") as f:
+            data = yaml.safe_load(f)
+            return data.get("hooks", []) if isinstance(data, dict) else []
+    except yaml.YAMLError as e:
+        print(f"Advertencia: .state-guard/hooks.yaml malformado ({e}). Ignorando reglas.", file=sys.stderr)
+        return []
 
 
 class HookHandler(FileSystemEventHandler):
