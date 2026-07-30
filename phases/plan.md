@@ -3,7 +3,7 @@
 
 ## Propósito
 
-La fase **PLAN** absorbe el trabajo de exploración, propuesta, especificación y diseño técnico en un único bloque de planificación. Produce un `plan.md` consolidado y lo somete a un **gate de revisión humana obligatorio** antes de emitir el lock que habilita EXECUTE.
+La fase **PLAN** absorbe el trabajo de exploración, propuesta, especificación y diseño técnico en un único bloque de planificación. Produce los artefactos `objective.md` y `design.md` y los somete a un **gate de revisión humana obligatorio** antes de emitir el lock que habilita EXECUTE.
 
 **Sub-flujo interno (no salteable):**
 
@@ -39,10 +39,8 @@ Lee los manifiestos encontrados para identificar stack, framework y herramientas
 
 - Intención clara: qué problema resuelve y por qué
 - Alcance: dentro/fuera
-- Enfoque técnico de alto nivel
-- Áreas afectadas (tabla con rutas)
-- Riesgos y plan de rollback
 - Criterios de éxito (checkboxes medibles)
+- Preguntas abiertas (bloqueantes marcadas con `[!]`)
 
 #### 1.4 Especificación (si el cambio lo requiere)
 
@@ -59,12 +57,14 @@ Si no existen specs del dominio, escribe una spec completa (no delta).
 
 Lee el código real afectado antes de diseñar. Documenta:
 
+- Enfoque técnico de alto nivel
+- Áreas afectadas (tabla con rutas)
 - Decisiones de arquitectura con justificación (la tabla Elección/Alternativas/Justificación)
 - Flujo de datos (ASCII o Mermaid)
 - Tabla de archivos: Archivo | Acción | Descripción
 - Interfaces / contratos
 - Estrategia de testing
-- Preguntas abiertas (bloqueantes marcadas con `[!]`)
+- Riesgos y plan de rollback
 
 #### 1.6 Persistir el DRAFT
 
@@ -72,16 +72,17 @@ Crea los artefactos en disco **antes** de pasar al gate:
 
 ```
 .state-guard/changes/{change-name}/
-├── plan.md              ← propuesta + diseño consolidados
+├── objective.md         ← qué y por qué
+├── design.md            ← cómo, arquitectura, flujo de datos
 └── specs/
     └── {dominio}/
         └── spec.md      ← specs delta o completas
 ```
 
-El formato de `plan.md`:
+Formato de `objective.md`:
 
 ```markdown
-# Plan: {Título del Cambio}
+# Objective: {Título del Cambio}
 
 ## Intención
 {Qué problema resuelve y por qué}
@@ -92,13 +93,24 @@ El formato de `plan.md`:
 ### Fuera del Alcance
 - {diferido}
 
+## Criterios de Éxito
+- [ ] {resultado medible 1}
+
+## Preguntas Abiertas
+- [ ] {pregunta no resuelta — si bloquea, marcá con [!]}
+```
+
+Formato de `design.md`:
+
+```markdown
+# Design: {Título del Cambio}
+
 ## Enfoque Técnico
-{Estrategia general, referencia al análisis de exploración}
+{Estrategia general}
 
 ## Áreas Afectadas
 | Área | Impacto | Descripción |
 |------|---------|-------------|
-| `ruta/` | Nuevo/Modificado/Eliminado | {qué cambia} |
 
 ## Decisiones de Arquitectura
 ### Decisión: {Título}
@@ -123,13 +135,6 @@ El formato de `plan.md`:
 
 ## Plan de Rollback
 {Cómo revertir si algo sale mal}
-
-## Criterios de Éxito
-- [ ] {resultado medible 1}
-- [ ] {resultado medible 2}
-
-## Preguntas Abiertas
-- [ ] {pregunta no resuelta — si bloquea, marcá con [!]}
 ```
 
 ---
@@ -140,20 +145,25 @@ El formato de `plan.md`:
 
 Una vez generado el draft, el modelo DEBE:
 
-1. Presentar el `plan.md` al usuario con un resumen ejecutivo
+1. Presentar `objective.md` y `design.md` al usuario con un resumen ejecutivo
 2. Listar explícitamente las decisiones de arquitectura y las preguntas abiertas
-3. Ejecutar el comando de preparación del gate out-of-band:
+3. Antes de solicitar la aprobación del gate, validar la estructura del spec ejecutando:
+   ```bash
+   python3 scripts/sg.py validate-spec --change {change-name}
+   ```
+   Si devuelve `ok: false`, el modelo NO ejecuta `plan-approve` — corrige los problemas indicados en los artefactos y reintenta la validación.
+4. Ejecutar el comando de preparación del gate out-of-band:
    ```bash
    python3 scripts/sg.py plan-approve --change {change-name}
    ```
-4. Emitir el siguiente bloque textual y esperar a que el humano confirme en su propia terminal:
+5. Emitir el siguiente bloque textual y esperar a que el humano confirme en su propia terminal:
 
 ```
 ═══════════════════════════════════════════════════════════
  GATE DE REVISIÓN — PLAN listo para tu aprobación
 ═══════════════════════════════════════════════════════════
 
-Revisá el plan.md. El código de confirmación fue mostrado
+Revisá objective.md y design.md. El código de confirmación fue mostrado
 en tu terminal (/dev/tty) y su hash guardado en ~/.state-guard-gate/{change-name}.token
 
 Para APROBAR y proceder a EXECUTE, ejecutá en tu propia terminal:
@@ -187,10 +197,10 @@ El COMMIT:
 ## Reglas
 
 - El LLM NUNCA puede emitir el lock sin respuesta aprobatoria explícita del humano
-- Si el humano pide revisiones, re-generar únicamente las secciones indicadas, no el plan completo
+- Si el humano pide revisiones, re-generar únicamente las secciones indicadas, no los artefactos completos
 - Las preguntas abiertas bloqueantes (`[!]`) DEBEN resolverse antes de pasar al gate
 - SIEMPRE leer el código real — nunca asumir sobre el código base
-- El único archivo de propuesta es `plan.md`; NO crear `proposal.md`, `design.md` separados bajo el nuevo esquema
+- Los artefactos de propuesta son `objective.md` y `design.md`, cada uno con su propósito específico (ver plantillas). NO fusionarlos en un solo archivo.
 - Aplicar cualquier `rules.plan` de `.state-guard/config.yaml`
 
 > Transacción: BEGIN antes de Sub-paso 1, COMMIT en Sub-paso 3 (solo tras aprobación humana). Ver `_shared/phase-common.md`.

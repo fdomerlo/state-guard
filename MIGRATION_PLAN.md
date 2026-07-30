@@ -570,7 +570,7 @@ No es ambigüedad de implementación, es una decisión de contenido que hay que 
 
 ---
 
-### [ ] 4.2 — Reescribir `phases/plan.md` para producir los dos artefactos
+### [x] 4.2 — Reescribir `phases/plan.md` para producir los dos artefactos
 
 Cambios concretos:
 1. Sub-paso 1.6 ("Persistir el DRAFT") pasa a crear `objective.md` **y** `design.md`, no `plan.md`.
@@ -1025,7 +1025,7 @@ Fase 3 — Documentación
   
 Fase 4A — Spec-Driven Coding
   [x] 4.1 split objective.md/design.md definido
-  [ ] 4.2 phases/plan.md reescrito
+  [x] 4.2 phases/plan.md reescrito
   [ ] 4.3 sg validate-spec implementado
   [ ] 4.4 referencias obsoletas actualizadas
   [ ] 4.5 tests de validate-spec
