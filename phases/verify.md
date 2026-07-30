@@ -164,7 +164,7 @@ Si veredicto es APROBADO o APROBADO CON ADVERTENCIAS:
 
 ### Paso 9: ARCHIVE — Archivado del cambio (paso final de VERIFY)
 
-Este paso se ejecuta automáticamente después de un veredicto APROBADO. También puede invocarse directamente con `/archive` si VERIFY ya fue ejecutado y aprobado en una sesión anterior.
+Este paso se ejecuta automáticamente después de un veredicto APROBADO, como parte de la misma invocación de `/continue` que corrió VERIFY. No existe un comando separado para archivar manualmente.
 
 #### 9.1 Control de bloqueantes
 

@@ -1181,7 +1181,7 @@ grep -n "explore\|propose\|design\.\|tasks\.\|archive$" MANUAL.md | grep -v "obj
 
 ---
 
-### [ ] 5.4 — Resolver la referencia colgante a `/archive` en `phases/verify.md`
+### [x] 5.4 — Resolver la referencia colgante a `/archive` en `phases/verify.md`
 
 `phases/verify.md` línea 167 dice que el archivado *"también puede invocarse directamente con `/archive`"* — pero no existe ningún `skills/archive/SKILL.md` ni `phases/archive.md` que respalde ese slash command. Es una referencia a algo que no está construido.
 
@@ -1292,7 +1292,7 @@ Fase 5 — Fix de producción y documentación
   [x] 5.1 fix hooks-start (detach + log) — BUG BLOQUEANTE, prioridad máxima
   [x] 5.2 README.md reemplazado
   [x] 5.3 MANUAL.md — sección Arquitectura corregida
-  [ ] 5.4 referencia colgante a /archive resuelta
+  [x] 5.4 referencia colgante a /archive resuelta
   [ ] 5.5 (opcional) validate_spec como 4ta tool MCP
   [ ] 5.6 (opcional) lockout de intentos en confirm
   [ ] 5.7 tag v2.6.1 (cierre)

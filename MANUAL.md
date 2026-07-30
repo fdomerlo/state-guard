@@ -325,17 +325,16 @@ El checkpoint es **agnóstico al DAG**: puede ejecutarse en cualquier momento si
 /checkpoint
 ```
 
-### /archive — Cierre de Cambios
+### Archive (Paso 9 de VERIFY — no es un comando separado)
 
-El comando `/archive` cierra un cambio: fusiona las specs delta en las specs principales y mueve el cambio al archivo.
+El archivado de un cambio ocurre automáticamente como **Paso 9** dentro de la fase `verify`, una vez que el veredicto es APROBADO. No existe un slash command `/archive` independiente — invocar `/continue` cuando `lock_phase=verify` ejecuta todo el flujo de verificación y archivado en una sola operación.
 
-**Flujo Obligatorio:**
+**Requisito previo para que el archivado no falle:**
 
-1. Ejecutar `/verify` y asegurar que todo es correcto.
-2. Realizar un `git commit` de todos los cambios de código y especificaciones.
-3. Ejecutar `/archive`.
+1. Ejecutar la fase `verify` (`/continue` con `lock_phase=verify`).
+2. Antes de que `verify` pueda archivar, el árbol de trabajo git debe estar limpio — todos los cambios de código commiteados (`git add . && git commit -m "..."`).
 
-El comando realizará el **Paso 0** inhibitorio evaluando reportes previos, abortando en seco la operación si detecta resoluciones `CRITICAL`. Verificará el árbol de trabajo git e interrumpirá si detecta diferencias con cambios sin commitear.
+El Paso 9 fusiona las specs delta (`changes/{nombre}/specs/`) en las specs principales (`.state-guard/specs/`) y mueve el directorio del cambio a `.state-guard/changes/archive/YYYY-MM-DD-{nombre}/`.
 
 ### /review — Auditoría Estática
 
