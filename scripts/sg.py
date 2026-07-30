@@ -221,10 +221,26 @@ def cmd_list_changes(args):
 def cmd_hooks_start(args):
     import subprocess as sp
     daemon = SCRIPT_DIR / "hook_daemon.py"
-    proc = sp.Popen([sys.executable, str(daemon)], cwd=str(REPO_ROOT))
     SG_DIR.mkdir(parents=True, exist_ok=True)
+    log_path = SG_DIR / "hooks.daemon.log"
+    log_fh = open(log_path, "a", buffering=1)
+    proc = sp.Popen(
+        [sys.executable, str(daemon)],
+        cwd=str(REPO_ROOT),
+        stdout=log_fh,
+        stderr=log_fh,
+        stdin=sp.DEVNULL,
+        start_new_session=True,  # desacopla del grupo de procesos del padre
+                                  # evita que el pipe heredado de stdout cuelgue
+                                  # al caller que captura salida con capture_output=True
+    )
     (SG_DIR / "hooks.pid").write_text(str(proc.pid))
-    _emit({"ok": True, "pid": proc.pid, "message": "Agent Hooks daemon iniciado en background."})
+    _emit({
+        "ok": True,
+        "pid": proc.pid,
+        "log_file": str(log_path),
+        "message": "Agent Hooks daemon iniciado en background (detached). Logs en el archivo indicado.",
+    })
 
 
 def cmd_hooks_stop(args):
