@@ -1096,7 +1096,7 @@ grep -n "/apply\|/archive\|/explore\|/propose\|/spec\b\|/design\b\|/tasks\b" REA
 
 ---
 
-### [ ] 5.3 — Corregir la sección "Arquitectura Memory Guard" de `MANUAL.md`
+### [x] 5.3 — Corregir la sección "Arquitectura Memory Guard" de `MANUAL.md`
 
 Mismo problema que el README, en `MANUAL.md` líneas 7-74 (sección `## Arquitectura Memory Guard` completa, incluyendo el diagrama ASCII de 8 fases en líneas 12-23 y la mención de "delega apply pesados" en línea 45).
 
@@ -1291,7 +1291,7 @@ Fase 4B — Agent Hooks
 Fase 5 — Fix de producción y documentación
   [x] 5.1 fix hooks-start (detach + log) — BUG BLOQUEANTE, prioridad máxima
   [x] 5.2 README.md reemplazado
-  [ ] 5.3 MANUAL.md — sección Arquitectura corregida
+  [x] 5.3 MANUAL.md — sección Arquitectura corregida
   [ ] 5.4 referencia colgante a /archive resuelta
   [ ] 5.5 (opcional) validate_spec como 4ta tool MCP
   [ ] 5.6 (opcional) lockout de intentos en confirm

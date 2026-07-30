@@ -2,13 +2,11 @@
 
 Este manual cubre la arquitectura técnica, configuración y flujos avanzados del sistema State Guard.
 
----
-
-## Arquitectura Memory Guard
+-## Arquitectura Memory Guard
 
 ### Contrato Unificado
 
-El Memory Guard es el contrato central que el agente carga al iniciar una sesión del agente. En lugar de un orquestador que despacha comandos CLI a sub-agentes, el agente ejecuta fases directamente (inline) protegido por un protocolo de persistencia transaccional.
+El Memory Guard es el contrato central que el agente carga al iniciar una sesión. En lugar de un orquestador que despacha comandos CLI a sub-agentes, el agente ejecuta fases directamente (inline) protegido por un protocolo de persistencia transaccional.
 
 ```
 Memory Guard (memory-guard.md)
@@ -16,16 +14,11 @@ Memory Guard (memory-guard.md)
     ├── Carga transaction-protocol.md → Protocolo BEGIN/COMMIT/ROLLBACK
     ├── Carga capabilities.md         → Detecta capacidades del host
     ├── Carga persistence-contract.md → Resuelve el modo de persistencia
-    ├── Carga convention.md  → Prepara rutas y schema
+    ├── Carga convention.md           → Prepara rutas y schema
     │
-    ├── Ejecuta inline → explore   (carga el archivo de fase como instrucciones)
-    ├── Ejecuta inline → propose
-    ├── Ejecuta inline → spec
-    ├── Ejecuta inline → design
-    ├── Ejecuta inline → tasks
-    ├── Ejecuta inline → apply     (delega si > 10 tareas y host soporta)
-    ├── Ejecuta inline → verify
-    └── Ejecuta inline → archive
+    ├── Ejecuta inline → plan     (draft → gate humano obligatorio → lock)
+    ├── Ejecuta inline → execute  (tasks.md + implementación; delega si > 10 tareas y host soporta)
+    └── Ejecuta inline → verify   (tests + archive como Paso 9)
 ```
 
 ### Módulos del Memory Guard
@@ -52,11 +45,11 @@ Los contratos compartidos se distribuyen en dos directorios:
 
 ### Autodetección y Delegación Inteligente
 
-El agente determina su comportamiento en tiempo de ejecución analizando las reglas de `capabilities.md`. A través del sistema de archivos, el agente detecta dinámicamente el host en runtime (por ejemplo, verificando la presencia de `.gemini` o `.config/opencode/`) y activa o desactiva capacidades según la plataforma.
+El agente determina su comportamiento en tiempo de ejecución analizando las reglas de `capabilities.md`. Detecta dinámicamente el host (por ejemplo, verificando la presencia de `.gemini` o `.config/opencode/`) y activa o desactiva capacidades según la plataforma.
 
-El Memory Guard ejecuta fases **inline por defecto**: carga el archivo `.md` correspondiente a la fase (ej. `phases/apply.md`) y sigue sus instrucciones como propias. Sin embargo, para aislar el contexto y preservar la memoria de la sesión principal, delega el trabajo pesado a un sub-agente real bajo estas estrictas condiciones:
+El Memory Guard ejecuta fases **inline por defecto**: carga el archivo `.md` correspondiente a la fase (ej. `phases/execute.md`) y sigue sus instrucciones como propias. Delega el trabajo pesado a un sub-agente real bajo estas condiciones:
 
-1. La fase es `apply` con más de 10 tareas pendientes, **Y**
+1. La fase es `execute` con más de 10 tareas pendientes en `tasks.md`, **Y**
 2. El agente host detectado soporta sub-agentes reales (OpenCode o Antigravity CLI).
 
 En la ejecución delegada, el sub-agente ejecuta las tareas e interactúa con el disco, pero **nunca** escribe en `state.ini`. El Memory Guard asume exclusivamente la responsabilidad del COMMIT transaccional al finalizar la delegación.
@@ -69,7 +62,7 @@ El sistema incluye un **registry dinámico de skills** que permite el descubrimi
 - Índice generado en `.state-guard/skill-registry.md`
 - El Memory Guard lee este índice al iniciar para conocer las herramientas disponibles
 
-El registry escanea los directorios global (`$HOME/.skills-custom`) y local (`./skills-custom`), extrayendo nombre, descripción, trigger y ubicación de cada SKILL.md.
+El registry escanea los directorios global (`$HOME/.skills-custom`) y local (`./skills-custom`), extrayendo nombre, descripción, trigger y ubicación de cada `SKILL.md`.
 
 ---
 
@@ -106,10 +99,10 @@ txn_phase = None           ; fase actual si in_progress, sino None
 txn_started_at = None
 
 [Graph]
-current_phase = propose    ; Descriptivo: última fase completada
-lock_phase = spec          ; Prescriptivo: única fase autorizada a ejecutarse AHORA
-completed_phases = explore, propose
-pending_phases = spec, design, tasks, apply, verify, archive
+current_phase = plan       ; Descriptivo: última fase completada
+lock_phase = execute       ; Prescriptivo: única fase autorizada a ejecutarse AHORA
+completed_phases = plan
+pending_phases = execute, verify
 
 [Session]
 session_summary = ...      ; opcional — bloque generado por checkpoint, ≤500 tokens (enforced en código: máx 2000 chars)
@@ -297,7 +290,7 @@ El comando `/split` analiza una proposal monolítica y la divide en sub-cambios 
 
 ### /ff — Avance Rápido (Fast-Forward)
 
-El comando `/ff` permite ejecutar secuencialmente las fases de planificación (`propose`, `spec`, `design`, `tasks`).
+El comando `/ff` permite ejecutar secuencialmente las fases de planificación y ejecución (`plan`, `execute`) sin pausas intermedias (el gate humano de `plan` sigue siendo obligatorio).
 
 **Cuándo usarlo:**
 
