@@ -734,7 +734,7 @@ La distinción no es "riesgo alto vs bajo" en abstracto — es específicamente 
 
 ---
 
-### [ ] 4.8 — `scripts/hook_daemon.py`: watcher de filesystem
+### [x] 4.8 — `scripts/hook_daemon.py`: watcher de filesystem
 
 Agregar dependencia opcional en `pyproject.toml`:
 ```toml
@@ -1033,7 +1033,7 @@ Fase 4A — Spec-Driven Coding
 
 Fase 4B — Agent Hooks
   [x] 4.7 modelo de confianza documentado (tabla arquitectura vs derivados)
-  [ ] 4.8 scripts/hook_daemon.py
+  [x] 4.8 scripts/hook_daemon.py
   [ ] 4.9 .state-guard/hooks.yaml.example
   [ ] 4.10 verificación de logging
   [ ] 4.11 sg hooks-start/stop/status

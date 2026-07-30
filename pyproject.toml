@@ -10,6 +10,9 @@ readme = "README.md"
 requires-python = ">=3.9"
 dependencies = ["mcp>=1.0.0,<2.0.0"]
 
+[project.optional-dependencies]
+hooks = ["watchdog>=4.0,<5.0", "pyyaml"]
+
 [project.scripts]
 state-guard-mcp = "scripts.mcp_server:main"
 
