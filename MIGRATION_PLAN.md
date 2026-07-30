@@ -1225,7 +1225,7 @@ Hoy `cmd_plan_confirm`/`cmd_hotfix_confirm` no limitan intentos con token incorr
 
 ---
 
-### [ ] 5.7 — Cierre de Fase 5
+### [x] 5.7 — Cierre de Fase 5
 
 ```bash
 python3 -m pytest tests/unit -q
@@ -1295,7 +1295,7 @@ Fase 5 — Fix de producción y documentación
   [x] 5.4 referencia colgante a /archive resuelta
   [x] 5.5 (opcional) validate_spec como 4ta tool MCP
   [x] 5.6 (opcional) lockout de intentos en confirm
-  [ ] 5.7 tag v2.6.1 (cierre)
+  [x] 5.7 tag v2.6.1 (cierre)
 ```
 
 ---

@@ -69,10 +69,10 @@ def test_mcp_server_handshake():
         
         assert resp_tools['id'] == 2
         tools = resp_tools['result']['tools']
-        assert len(tools) == 3
+        assert len(tools) == 4
         
         tool_names = {t['name'] for t in tools}
-        assert tool_names == {'get_next_task', 'verify_phase_gate', 'mark_task_completed'}
+        assert tool_names == {'get_next_task', 'verify_phase_gate', 'mark_task_completed', 'validate_spec'}
         
     finally:
         proc.terminate()
