@@ -1074,7 +1074,7 @@ sg hooks-stop
 
 ---
 
-### [ ] 5.2 — Reemplazar `README.md`
+### [x] 5.2 — Reemplazar `README.md`
 
 El `README.md` actual describe la arquitectura v1 de 8 fases (`explore→propose→spec→design→tasks→apply→verify→archive`), con un Quick Start que instruye correr `/apply` y `/archive` — ninguno de los dos existe como skill en este repo (`skills/` no tiene `apply/` ni `archive/`; el archivado es el Paso 9 dentro de `verify`, no un comando separado). Reemplazar el archivo completo por la versión ya redactada:
 
@@ -1290,7 +1290,7 @@ Fase 4B — Agent Hooks
   
 Fase 5 — Fix de producción y documentación
   [x] 5.1 fix hooks-start (detach + log) — BUG BLOQUEANTE, prioridad máxima
-  [ ] 5.2 README.md reemplazado
+  [x] 5.2 README.md reemplazado
   [ ] 5.3 MANUAL.md — sección Arquitectura corregida
   [ ] 5.4 referencia colgante a /archive resuelta
   [ ] 5.5 (opcional) validate_spec como 4ta tool MCP
