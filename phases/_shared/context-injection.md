@@ -6,8 +6,8 @@ Cada fase del agente tiene reglas de lectura y escritura. Cuando ejecutás una f
 
 | Fase | Lee dependencias de (OpenSpec) | Escribe artefacto |
 | --- | --- | --- |
-| `plan` | Nada (o specs existentes) | `plan.md`, `specs/` delta, `design.md` |
-| `execute` | plan.md, specs, design.md | `tasks.md` (creado y actualizado) |
+| `plan` | Nada (o specs existentes) | `objective.md`, `design.md`, `specs/` delta |
+| `execute` | objective.md, design.md, specs | `tasks.md` (creado y actualizado) |
 | `verify` | specs, tasks.md | `verify-report.md` |
 
 ## Secuencia de Ejecución por Fase

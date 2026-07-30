@@ -14,7 +14,7 @@ Al final de VERIFY, si el veredicto es APROBADO, se ejecuta el **paso de archiva
 Antes de verificar, leé las dependencias:
 
 1. **Specs delta** — `.state-guard/changes/{change-name}/specs/`
-2. **Plan** — `.state-guard/changes/{change-name}/plan.md`
+2. **Plan** — `.state-guard/changes/{change-name}/objective.md` y `design.md`
 3. **Tareas** — `.state-guard/changes/{change-name}/tasks.md`
 
 **REGLA CRÍTICA:** PROHIBIDO cargar `specs/` completo del proyecto. Solo specs delta del cambio activo.
@@ -53,7 +53,7 @@ PARA CADA REQUISITO en specs/:
 ### Paso 4: Verificar Coherencia (coincidencia con el plan)
 
 ```text
-PARA CADA DECISIÓN en plan.md:
+PARA CADA DECISIÓN en design.md:
 ├── ¿Se usó realmente el enfoque elegido?
 ├── ¿Se implementaron accidentalmente las alternativas rechazadas?
 ├── ¿Los cambios de archivos coinciden con la tabla del plan?

@@ -660,7 +660,7 @@ python3 scripts/sg.py validate-spec --change <change-de-prueba>
 
 ---
 
-### [ ] 4.4 — Actualizar referencias obsoletas a `plan.md` en el resto del repo
+### [x] 4.4 — Actualizar referencias obsoletas a `plan.md` en el resto del repo
 
 Hallazgo de la auditoría: estos archivos ya referencian `design.md` como si existiera (estaban adelantados a esta fase) o referencian `plan.md` como archivo único (quedan obsoletos). Alinear todos a `objective.md` + `design.md`:
 
@@ -1027,7 +1027,7 @@ Fase 4A — Spec-Driven Coding
   [x] 4.1 split objective.md/design.md definido
   [x] 4.2 phases/plan.md reescrito
   [x] 4.3 sg validate-spec implementado
-  [ ] 4.4 referencias obsoletas actualizadas
+  [x] 4.4 referencias obsoletas actualizadas
   [ ] 4.5 tests de validate-spec
   [ ] 4.6 tag phase-4a-spec-driven-complete
 

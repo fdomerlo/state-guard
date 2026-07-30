@@ -22,7 +22,7 @@ EXECUTE, con un gate humano auditado en 2 pasos via `sg hotfix-init` y `sg hotfi
 ## Requisitos del Usuario
 
 **OBLIGATORIO**: El usuario DEBE proveer las instrucciones directas de código
-en su prompt. Como se salta la fase PLAN, no existirá `plan.md`.
+en su prompt. Como se salta la fase PLAN, no existirán `objective.md` ni `design.md`.
 
 ## Protocolo de Ejecución (ACID)
 

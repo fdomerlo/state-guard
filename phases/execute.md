@@ -13,7 +13,7 @@ La fase **EXECUTE** absorbe el trabajo de desglose en tareas (`tasks`) e impleme
 
 Antes de escribir CUALQUIER código:
 
-1. **Plan** — leer `.state-guard/changes/{change-name}/plan.md`
+1. **Plan** — leer `.state-guard/changes/{change-name}/objective.md` y `design.md`
 2. **Specs delta** — leer todos los archivos en `.state-guard/changes/{change-name}/specs/`
 3. **Código existente** — leer los archivos afectados según la tabla de archivos del plan
 4. **Convenciones** — leer `config.yaml` si existe
@@ -26,7 +26,8 @@ A partir del plan, produce el desglose de tareas atómicas:
 
 ```
 .state-guard/changes/{change-name}/
-├── plan.md              ← (ya existe)
+├── objective.md         ← (ya existe)
+├── design.md            ← (ya existe)
 ├── specs/               ← (ya existe)
 └── tasks.md             ← Lo creas vos
 ```

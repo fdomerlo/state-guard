@@ -14,7 +14,7 @@
         ├── state.ini        ← Estado del DAG + sesión (manejado por el middleware Python)
         ├── .lock            ← Lock de fase (manejado por el middleware, no tocar a mano)
         ├── .write-lock      ← Mutex de escritura de archivo, vida corta (idem)
-        ├── plan.md          ← de plan (planificación consolidada)
+        ├── objective.md     ← de plan (propósito y alcance)
         ├── specs/           ← de plan (specs delta)
         │   └── {dominio}/
         │       └── spec.md
@@ -33,7 +33,7 @@
 | orquestador | Lee | `.state-guard/changes/{change-name}/state.ini` |
 | hotfix | Crea | `.state-guard/changes/{change-name}/state.ini` (Inicialización Bypass) |
 | init | Crea | directorios base y `config.yaml` |
-| plan | Crea | `.state-guard/changes/{change-name}/plan.md` y `specs/{dominio}/spec.md` |
+| plan | Crea | `.state-guard/changes/{change-name}/objective.md`, `design.md` y `specs/{dominio}/spec.md` |
 | execute | Crea | `.state-guard/changes/{change-name}/tasks.md` |
 | execute | Actualiza | `.state-guard/changes/{change-name}/tasks.md` (marca `[x]`) |
 | verify | Crea | `.state-guard/changes/{change-name}/verify-report.md` |
@@ -92,7 +92,7 @@ session_summary = ...      ; opcional — bloque generado por checkpoint, ≤500
 Cada skill lee sus dependencias desde el filesystem:
 
 ```text
-Plan:           .state-guard/changes/{change-name}/plan.md
+Objective:      .state-guard/changes/{change-name}/objective.md
 Specs delta:    .state-guard/changes/{change-name}/specs/
 Diseño:         .state-guard/changes/{change-name}/design.md
 Tareas:         .state-guard/changes/{change-name}/tasks.md
