@@ -701,7 +701,7 @@ Crear `tests/unit/test_validate_spec.py`:
 
 ---
 
-### [ ] 4.6 — Cierre de Fase 4A
+### [x] 4.6 — Cierre de Fase 4A
 
 ```bash
 python3 -m pytest tests/unit -q
@@ -1029,7 +1029,7 @@ Fase 4A — Spec-Driven Coding
   [x] 4.3 sg validate-spec implementado
   [x] 4.4 referencias obsoletas actualizadas
   [x] 4.5 tests de validate-spec
-  [ ] 4.6 tag phase-4a-spec-driven-complete
+  [x] 4.6 tag phase-4a-spec-driven-complete
 
 Fase 4B — Agent Hooks
   [ ] 4.7 modelo de confianza documentado (tabla arquitectura vs derivados)
